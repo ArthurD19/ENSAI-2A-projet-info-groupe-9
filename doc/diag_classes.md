@@ -17,51 +17,71 @@ Pour afficher ce diagramme dans VScode :
 ```mermaid
 classDiagram
     class Joueur {
-        +id_joueur: int
+        +id: int
         +pseudo: string
-        +mdp: string
-        +age: int
-        +mail: string
-        +fan_pokemon: bool
-    }
-    
-    class JoueurDao {
-        +creer(Joueur): bool
-        +trouver_par_id(int): Joueur
-        +lister_tous(): list[Joueur]
-        +supprimer(Joueur): bool
-        +se_connecter(str,str): Joueur
-    }
-    
-    class JoueurService {
-        +creer(str...): Joueur
-        +trouver_par_id(int): Joueur
-        +lister_tous(): list[Joueur]
-        +afficher_tous(): str
-        +supprimer(Joueur): bool
-        +se_connecter(str,str): Joueur
+        +password: string
+        +solde: float
+        +stats: JoueurStats
+        +rejoindre_table(Table)
+        +quitter_table()
+        +jouer_action(str)
     }
 
-    class AccueilVue {
-    }
-    
-    class ConnexionVue {
-    }
-
-    class MenuJoueurVue {
-    }
-
-    class VueAbstraite{
-      +afficher()
-      +choisir_menu()
+    class Table {
+        +id: int
+        +joueurs: list[Joueur]
+        +max_joueurs: int
+        +pot: float
+        +parties: list[Partie]
+        +ajouter_joueur(Joueur)
+        +retirer_joueur(Joueur)
+        +commencer_partie()
     }
 
-    VueAbstraite <|-- AccueilVue
-    VueAbstraite <|-- ConnexionVue
-    VueAbstraite <|-- MenuJoueurVue
-    MenuJoueurVue ..> JoueurService : appelle
-    ConnexionVue ..> JoueurService : appelle
-    JoueurService ..> JoueurDao : appelle
-    Joueur <.. JoueurService: utilise
-    Joueur <.. JoueurDao: utilise
+    class Partie {
+        +id: int
+        +deck: Deck
+        +cartes_table: list[Carte]
+        +mains: dict[Joueur, list[Carte]]
+        +pot: float
+        +tour_actuel: Joueur
+        +status: string
+        +distribuer_cartes()
+        +jouer_tour(Joueur, str)
+        +calculer_gagnant()
+        +cloturer_partie()
+    }
+
+    class Deck {
+        +cartes: list[Carte]
+        +melanger()
+        +tirer(n:int): list[Carte]
+    }
+
+    class Carte {
+        +couleur: string
+        +valeur: string
+    }
+
+    class Admin {
+        +pseudo: string
+        +crediter_joueur(Joueur, float)
+        +reset_table(Table)
+    }
+
+    class PartieResult {
+        +joueur: Joueur
+        +gain: float
+        +resultat: string
+    }
+
+    %% Relations
+    Joueur --> Table : "rejoint"
+    Table --> Partie : "contient"
+    Partie --> Deck
+    Partie --> Carte : "utilise"
+    Partie --> Joueur : "implique"
+    Admin --> Joueur : "gère"
+    PartieResult --> Joueur
+
 ```
