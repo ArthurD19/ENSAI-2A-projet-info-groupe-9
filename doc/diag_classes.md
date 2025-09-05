@@ -15,16 +15,19 @@ Pour afficher ce diagramme dans VScode :
   * faire **CTRL + K**, puis **V**
 
 ```mermaid
+
 classDiagram
-    class Joueur {
-        +id: int
+    class JoueurAPI {
+        +pseudo: string
+        +solde: float
+        +stats: JoueurStats
+        +jouer_action(str)
+    }
+
+    class JoueurBDD {
         +pseudo: string
         +password: string
         +solde: float
-        +stats: JoueurStats
-        +rejoindre_table(Table)
-        +quitter_table()
-        +jouer_action(str)
     }
 
     class Table {
