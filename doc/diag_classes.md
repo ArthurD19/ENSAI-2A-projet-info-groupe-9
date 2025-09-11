@@ -129,7 +129,7 @@ classDiagram
 
 ```mermaid
 gantt
-    title Planning global – Poker Texas Hold’em
+    title WIP Test Planning global – Poker Texas Hold’em
     dateFormat  YYYY-MM-DD
     section Étude préalable
       Analyse des besoins       :a1, 2025-09-15, 10d
