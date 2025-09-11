@@ -15,76 +15,114 @@ Pour afficher ce diagramme dans VScode :
   * faire **CTRL + K**, puis **V**
 
 ```mermaid
-
 classDiagram
-    class JoueurAPI {
-        +pseudo: string
-        +solde: float
-        +stats: JoueurStats
-        +jouer_action(str)
+    class Couleur {
+        PIQUE
+        TREFLE
+        CARREAU
+        COEUR
     }
 
-    class JoueurBDD {
-        +pseudo: string
-        +password: string
-        +solde: float
+    class Valeur {
+        DEUX
+        TROIS
+        QUATRE
+        CINQ
+        SIX
+        SEPT
+        HUIT
+        NEUF
+        DIX
+        VALET
+        DAME
+        ROI
+        AS
     }
 
-    class Table {
-        +id: int
-        +joueurs: list[Joueur]
-        +max_joueurs: int
-        +pot: float
-        +parties: list[Partie]
-        +ajouter_joueur(Joueur)
-        +retirer_joueur(Joueur)
-        +commencer_partie()
-    }
-
-    class Partie {
-        +id: int
-        +deck: Deck
-        +cartes_table: list[Carte]
-        +mains: dict[Joueur, list[Carte]]
-        +pot: float
-        +tour_actuel: Joueur
-        +status: string
-        +distribuer_cartes()
-        +jouer_tour(Joueur, str)
-        +calculer_gagnant()
-        +cloturer_partie()
-    }
-
-    class Deck {
-        +cartes: list[Carte]
-        +melanger()
-        +tirer(n:int): list[Carte]
+    class RangMain {
+        HAUTE_CARTE
+        PAIRE
+        DEUX_PAIRES
+        BRELANT
+        SUITE
+        COULEUR
+        FULL
+        CARRE
+        SUITE_COULEUR
+        QUINTE_ROYALE
     }
 
     class Carte {
-        +couleur: string
-        +valeur: string
+        +valeur : Valeur
+        +couleur : Couleur
+        +__repr__() : str
+        +__lt__(autre : Carte) : bool
+        +__eq__(autre : Carte) : bool
     }
 
-    class Admin {
-        +pseudo: string
-        +crediter_joueur(Joueur, float)
-        +reset_table(Table)
+    class Paquet {
+        -cartes : List<Carte>
+        +remettre_a_zero() : None
+        +melanger() : None
+        +tirer() : Carte
+        +taille() : int
     }
 
-    class PartieResult {
-        +joueur: Joueur
-        +gain: float
-        +resultat: string
+    class Joueur {
+        +pseudo : str
+        +solde : Decimal
+        +cartes_privees : List<Carte>
+        +en_partie : bool
+        +mise_courante : Decimal
+        +recevoir_carte(carte : Carte) : None
+        +se_coucher() : None
+        +check(mise_maximale : Decimal) : None
+        +suivre(mise_maximale : Decimal) : None
+        +miser(montant : Decimal) : None
+        +reset_pour_nouvelle_main() : None
     }
 
-    %% Relations
-    Joueur --> Table : "rejoint"
-    Table --> Partie : "contient"
-    Partie --> Deck
-    Partie --> Carte : "utilise"
-    Partie --> Joueur : "implique"
-    Admin --> Joueur : "gère"
-    PartieResult --> Joueur
+    class Table {
+        +nom : str
+        +joueurs : List<Joueur>
+        +petite_mise : Decimal
+        +grosse_mise : Decimal
+        +asseoir(joueur : Joueur) : None
+        +quitter(joueur : Joueur) : None
+        +nombre_joueurs() : int
+    }
 
+    class Partie {
+        +table : Table
+        +paquet : Paquet
+        +cartes_communes : List<Carte>
+        +pot : Decimal
+        +index_dealer : int
+        +position_actuelle : int
+        +phase_index : int
+        +demarrer() : None
+        +passer_phase() : None
+        +jouer_action(joueur : Joueur, action : str, montant : Decimal) : None
+        -distribuer_flop() : None
+        -distribuer_turn() : None
+        -distribuer_river() : None
+        -showdown() : None
+    }
+
+    class EvaluateurMain {
+        +evalue_5(cartes : List<Carte>) : (RangMain, List<int>)
+        +evalue_main(privees : List<Carte>, cartes_communes : List<Carte>) : (RangMain, List<int>)
+    }
+
+    Carte *-- Valeur
+    Carte *-- Couleur
+    Paquet *-- Carte
+    Joueur "0..2" -- "List<Carte>" Carte : cartes_privees
+    Table *-- Joueur : joueurs
+    Partie *-- Table
+    Partie *-- Paquet
+    Partie *-- Carte : cartes_communes
+    EvaluateurMain ..> Carte
+    EvaluateurMain ..> RangMain
+    
 ```
