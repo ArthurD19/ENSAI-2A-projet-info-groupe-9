@@ -126,3 +126,26 @@ classDiagram
     EvaluateurMain ..> RangMain
     
 ```
+
+```mermaid
+gantt
+    title Planning global – Poker Texas Hold’em
+    dateFormat  YYYY-MM-DD
+    section Étude préalable
+      Analyse des besoins       :a1, 2025-09-15, 10d
+      Cas d’utilisation        :after a1, 5d
+      Diagrammes d’analyse     :5d
+    section Conception générale
+      Diagramme de classes     :2025-10-01, 7d
+      Architecture paquetages  :7d
+      Modèle physique données  :7d
+    section Réalisation & Validation
+      Implémentation modules   :2025-10-15, 30d
+      Tests unitaires          :20d
+      Tests utilisateurs       :10d
+      Documentation pydoc      :10d
+      Déploiement CI/CD        :15d
+```
+
+
+
