@@ -126,7 +126,7 @@ classDiagram
     Carte *-- Valeur
     Carte *-- Couleur
     Partie *-- Table
-    Partie *-- distrib
+    Partie *-- distrib 
     Partie *-- Comptage
     Partie ..> EvaluateurMain
     Table *-- Joueur
