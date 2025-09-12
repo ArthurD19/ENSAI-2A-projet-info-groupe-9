@@ -16,7 +16,9 @@ Pour afficher ce diagramme dans VScode :
 
 ```mermaid
 classDiagram
+    %% Enums
     class Couleur {
+        <<enumeration>>
         PIQUE
         TREFLE
         CARREAU
@@ -24,6 +26,7 @@ classDiagram
     }
 
     class Valeur {
+        <<enumeration>>
         DEUX
         TROIS
         QUATRE
@@ -39,8 +42,9 @@ classDiagram
         AS
     }
 
-    class Combinaison {
-        HAUTEUR
+    class RangMain {
+        <<enumeration>>
+        HAUTE_CARTE
         PAIRE
         DEUX_PAIRES
         BRELANT
@@ -52,60 +56,86 @@ classDiagram
         QUINTE_ROYALE
     }
 
+    %% Objets métiers
     class Carte {
         +valeur : Valeur
         +couleur : Couleur
-        +__repr__() : str
-        +__lt__(autre : Carte) : bool
-        +__eq__(autre : Carte) : bool
+        +__repr__()
+        +__eq__()
     }
 
-    class Paquet {
-        -cartes : List<Carte>
-        +remettre_a_zero() : None
-        +melanger() : None
-        +tirer() : Carte
-        +taille() : int
+    class Deck {
+        +cartes
+        +remplir()
+        +melanger()
+        +tirer()
+        +ajouter()
+        +len()
     }
 
     class Joueur {
-        +pseudo : str
-        +solde : Decimal
-        +cartes_privees : List<Carte>
-        +en_partie : bool
-        +mise_courante : Decimal
-        +action
+        +pseudo
+        +solde
+        +main
+        +mise
+        +miser()
+        +suivre()
+        +se_coucher()
     }
 
     class Table {
-        +nom : str
-        +joueurs : List<Joueur>
-        +petite_mise : Decimal
-        +grosse_mise : Decimal
-        +ajouter_joueur(joueur : Joueur) : None
-        +nombre_joueurs() : int
+        +id
+        +joueurs
+        +blind
+        +ajouter_joueur()
+        +supprimer_joueur()
     }
 
     class Partie {
-        +table : Table
+        +table
+        +cartes_communes
+        +pot
+        +index_dealer
+        +position_actuelle
+        +phase_index
+        +demarrer()
+        +passer_phase()
+        +jouer_action()
+    }
+
+    class distrib {
+        +pre_flop()
+        +flop()
+        +turn()
+        +river()
+        +fin()
+    }
+
+    class Comptage {
+        +pot
+        +pot_perso
+        +ajouter_pot()
+        +ajouter_pot_perso()
+        +distrib_pots()
     }
 
     class EvaluateurMain {
-        +evalue_5(cartes : List<Carte>) : (RangMain, List<int>)
-        +evalue_main(privees : List<Carte>, cartes_communes : List<Carte>) : (RangMain, List<int>)
+        +evalue_main()
+        +comparer_mains()
     }
 
+    %% Relations
     Carte *-- Valeur
     Carte *-- Couleur
-    Paquet *-- Carte
-    Joueur "0..2" -- "List<Carte>" Carte : cartes_privees
-    Table *-- Joueur : joueurs
     Partie *-- Table
-    Partie *-- Paquet
-    Partie *-- Carte : cartes_communes
-    EvaluateurMain ..> Carte
-    EvaluateurMain ..> RangMain
-    
+    Partie *-- distrib
+    Partie *-- Comptage
+    Partie ..> EvaluateurMain
+    Table *-- Joueur
+    Joueur "0..2" *-- "List<Carte>" Carte : cartes_privees
+    Deck *-- Carte
+
+
 ```
 
 ```mermaid
