@@ -39,8 +39,8 @@ classDiagram
         AS
     }
 
-    class RangMain {
-        HAUTE_CARTE
+    class Combinaison {
+        HAUTEUR
         PAIRE
         DEUX_PAIRES
         BRELANT
@@ -74,12 +74,7 @@ classDiagram
         +cartes_privees : List<Carte>
         +en_partie : bool
         +mise_courante : Decimal
-        +recevoir_carte(carte : Carte) : None
-        +se_coucher() : None
-        +check(mise_maximale : Decimal) : None
-        +suivre(mise_maximale : Decimal) : None
-        +miser(montant : Decimal) : None
-        +reset_pour_nouvelle_main() : None
+        +action
     }
 
     class Table {
@@ -87,26 +82,12 @@ classDiagram
         +joueurs : List<Joueur>
         +petite_mise : Decimal
         +grosse_mise : Decimal
-        +asseoir(joueur : Joueur) : None
-        +quitter(joueur : Joueur) : None
+        +ajouter_joueur(joueur : Joueur) : None
         +nombre_joueurs() : int
     }
 
     class Partie {
         +table : Table
-        +paquet : Paquet
-        +cartes_communes : List<Carte>
-        +pot : Decimal
-        +index_dealer : int
-        +position_actuelle : int
-        +phase_index : int
-        +demarrer() : None
-        +passer_phase() : None
-        +jouer_action(joueur : Joueur, action : str, montant : Decimal) : None
-        -distribuer_flop() : None
-        -distribuer_turn() : None
-        -distribuer_river() : None
-        -showdown() : None
     }
 
     class EvaluateurMain {
@@ -144,7 +125,6 @@ gantt
       Tests unitaires          :20d
       Tests utilisateurs       :10d
       Documentation pydoc      :10d
-      Déploiement CI/CD        :15d
 ```
 
 
