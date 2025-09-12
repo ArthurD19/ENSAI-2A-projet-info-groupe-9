@@ -1,28 +1,51 @@
-@startuml
 ' à coller ici pour visualiser : https://www.plantuml.com/plantuml/uml/SyfFKj2rKt3CoKnELR1Io4ZDoSa70000
 ' doc : https://plantuml.com/fr/use-case-diagram
 
-
+@startuml
 left to right direction
 
 actor "Utilisateur"      as user
 actor "Administrateur"   as admin
 actor "Joueur"           as joueur
 
-rectangle {
-  usecase "S'inscrire"        as inscription
-  usecase "S'authentifier"    as authentification
-  usecase "Quitter"           as quitter
-  usecase "Lister joueurs"    as lister_joueurs
+node "Serveur Poker" as Titre {
+   package "Fonctions Utilisateur" {
+    usecase "Créer compte / Se connecter" as authentification
+    usecase "Consulter son solde"         as consultation_solde
+    usecase "Quitter"                     as quitter_application
+  }
+
+  package "Fonctions Joueur" {
+    usecase "Rejoindre une table"         as rejoindre_table
+    usecase "Jouer"                       as actions_poker
+    usecase "Quitter la partie"           as quitter_partie
+  }
+
+  package "Fonctions Admin" {
+    usecase "Superviser parties"          as supervision
+    usecase "Bannir joueur"               as bannissement
+    usecase "Créer table"                 as creation_table
+    usecase "Fermer table"                as fermeture_table
+    usecase "Créditer compte"             as creditation
+    usecase "Retirer crédit"              as penalites
+  }
+  
 }
 
-joueur --> quitter
-
-user --> inscription
 user --> authentification
-user --> quitter
+user --> consultation_solde
+user --> quitter_application
 
-admin --> quitter
-admin --> lister_joueurs
+joueur --> quitter_partie
+joueur --> rejoindre_table
+joueur --> actions_poker
+
+admin --> supervision
+admin --> bannissement
+admin --> creation_table
+admin --> fermeture_table
+admin --> creditation
+admin --> penalites
+
 
 @enduml
