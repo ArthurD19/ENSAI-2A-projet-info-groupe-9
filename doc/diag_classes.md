@@ -92,15 +92,12 @@ classDiagram
     }
 
     class Partie {
-        +table
-        +cartes_communes
+        +table_id
+        +paquet
         +pot
-        +index_dealer
-        +position_actuelle
-        +phase_index
-        +demarrer()
-        +passer_phase()
-        +jouer_action()
+        +indice_dealer
+        +joueurs
+        +démarrer_tour()
     }
 
     class distrib {
