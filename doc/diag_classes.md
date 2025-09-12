@@ -122,6 +122,7 @@ classDiagram
     }
 
     %% Relations
+    EvaluateurMain *-- RangMain
     Carte *-- Valeur
     Carte *-- Couleur
     Partie *-- Table
