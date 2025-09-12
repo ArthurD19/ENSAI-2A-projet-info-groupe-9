@@ -4,21 +4,15 @@
 @startuml
 left to right direction
 
-actor "Utilisateur"      as user
 actor "Administrateur"   as admin
 actor "Joueur"           as joueur
 
 node "Serveur Poker" as Titre {
-   package "Fonctions Utilisateur" {
-    usecase "Créer compte / Se connecter" as authentification
-    usecase "Consulter son solde"         as consultation_solde
-    usecase "Quitter"                     as quitter_application
-  }
-
+   
   package "Fonctions Joueur" {
     usecase "Rejoindre une table"         as rejoindre_table
     usecase "Jouer"                       as actions_poker
-    usecase "Quitter la partie"           as quitter_partie
+    usecase "Consulter son solde"         as consultation_solde
   }
 
   package "Fonctions Admin" {
@@ -32,11 +26,7 @@ node "Serveur Poker" as Titre {
   
 }
 
-user --> authentification
-user --> consultation_solde
-user --> quitter_application
-
-joueur --> quitter_partie
+joueur --> consultation_solde
 joueur --> rejoindre_table
 joueur --> actions_poker
 
