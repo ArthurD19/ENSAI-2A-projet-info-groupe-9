@@ -61,7 +61,7 @@ classDiagram
         +valeur : Valeur
         +couleur : Couleur
         +__repr__()
-        +__eq__()
+        +__str__()
     }
 
     class Deck {
