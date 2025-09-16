@@ -3,7 +3,7 @@ from cartes import Carte, couleurs, valeurs, combinaisons
 from evaluateur import EvaluateurMain
 
 
-def build_ev(cartes):
+def ev(cartes):
     return EvaluateurMain(cartes).evalue_main()
 
 
@@ -15,7 +15,7 @@ def test_hauteur():
         Carte(couleurs.TREFLE, valeurs.SIX),
         Carte(couleurs.COEUR, valeurs.DAME),
     ]
-    assert build_ev(cartes) == combinaisons.HAUTEUR
+    assert ev(cartes) == combinaisons.HAUTEUR
 
 
 def test_paire():
@@ -26,7 +26,7 @@ def test_paire():
         Carte(couleurs.TREFLE, valeurs.SIX),
         Carte(couleurs.COEUR, valeurs.DAME),
     ]
-    assert build_ev(cartes) == combinaisons.PAIRE
+    assert ev(cartes) == combinaisons.PAIRE
 
 
 def test_double_paire():
@@ -37,7 +37,7 @@ def test_double_paire():
         Carte(couleurs.TREFLE, valeurs.QUATRE),
         Carte(couleurs.COEUR, valeurs.DAME),
     ]
-    assert build_ev(cartes) == combinaisons.DOUBLE_PAIRE
+    assert ev(cartes) == combinaisons.DOUBLE_PAIRE
 
 
 def test_brelan():
@@ -48,7 +48,7 @@ def test_brelan():
         Carte(couleurs.TREFLE, valeurs.SIX),
         Carte(couleurs.COEUR, valeurs.DAME),
     ]
-    assert build_ev(cartes) == combinaisons.BRELAN
+    assert ev(cartes) == combinaisons.BRELAN
 
 
 def test_suite():
@@ -59,7 +59,7 @@ def test_suite():
         Carte(couleurs.TREFLE, valeurs.HUIT),
         Carte(couleurs.COEUR, valeurs.NEUF),
     ]
-    assert build_ev(cartes) == combinaisons.QUINTE
+    assert ev(cartes) == combinaisons.QUINTE
 
 
 def test_couleur():
@@ -70,7 +70,7 @@ def test_couleur():
         Carte(couleurs.COEUR, valeurs.HUIT),
         Carte(couleurs.COEUR, valeurs.DAME),
     ]
-    assert build_ev(cartes) == combinaisons.COULEUR
+    assert ev(cartes) == combinaisons.COULEUR
 
 
 def test_full():
@@ -81,7 +81,7 @@ def test_full():
         Carte(couleurs.TREFLE, valeurs.DAME),
         Carte(couleurs.COEUR, valeurs.DAME),
     ]
-    assert build_ev(cartes) == combinaisons.FULL
+    assert ev(cartes) == combinaisons.FULL
 
 
 def test_carre():
@@ -92,7 +92,7 @@ def test_carre():
         Carte(couleurs.TREFLE, valeurs.DEUX),
         Carte(couleurs.COEUR, valeurs.DAME),
     ]
-    assert build_ev(cartes) == combinaisons.CARRE
+    assert ev(cartes) == combinaisons.CARRE
 
 
 def test_quinte_flush():
@@ -103,7 +103,7 @@ def test_quinte_flush():
         Carte(couleurs.COEUR, valeurs.HUIT),
         Carte(couleurs.COEUR, valeurs.NEUF),
     ]
-    assert build_ev(cartes) == combinaisons.QUINTE_FLUSH
+    assert ev(cartes) == combinaisons.QUINTE_FLUSH
 
 
 def test_quinte_flush_royale():
@@ -114,7 +114,7 @@ def test_quinte_flush_royale():
         Carte(couleurs.COEUR, valeurs.ROI),
         Carte(couleurs.COEUR, valeurs.AS),
     ]
-    assert build_ev(cartes) == combinaisons.QUINTE_FLUSH_ROYALE
+    assert ev(cartes) == combinaisons.QUINTE_FLUSH_ROYALE
 
 
 def test_comparer_mains():
