@@ -62,6 +62,17 @@ def test_suite():
     assert ev(cartes) == combinaisons.QUINTE
 
 
+def test_suite_as():
+    cartes = [
+        Carte(couleurs.COEUR, valeurs.DEUX),
+        Carte(couleurs.CARREAU, valeurs.TROIS),
+        Carte(couleurs.COEUR, valeurs.QUATRE),
+        Carte(couleurs.COEUR, valeurs.CINQ),
+        Carte(couleurs.TREFLE, valeurs.AS),
+    ]
+    assert ev(cartes) == combinaisons.QUINTE
+
+
 def test_couleur():
     cartes = [
         Carte(couleurs.COEUR, valeurs.DEUX),

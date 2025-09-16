@@ -40,16 +40,24 @@ class EvaluateurMain:
             couleurs[c.couleur] = couleurs.get(c.couleur, 0) + 1
         return max(couleurs.values()) >= 5
 
-    def _is_straight(self, valeurs_list):
-        """Vérifie si les cartes forment une suite (quinte)."""
-        valeurs_uniques = sorted(set(valeurs_list))
-        # Cas particulier : A peut compter comme 1 dans une quinte A-2-3-4-5
-        if 14 in valeurs_uniques:
-            valeurs_uniques.append(1)
+    def _is_straight(self, valeurs):
+        """Retourne True si la liste de valeurs forme une quinte (As bas inclus)."""
+        valeurs = sorted(set(valeurs))
 
-        for i in range(len(valeurs_uniques) - 4):
-            if valeurs_uniques[i+4] - valeurs_uniques[i] == 4:
+        # Quinte (ex: 5-6-7-8-9 ou 10-J-Q-K-A)
+        for i in range(len(valeurs) - 4):
+            if valeurs[i + 4] - valeurs[i] == 4 and len(set(valeurs[i:i+5])) == 5:
                 return True
+
+        # Quinte basse : A-2-3-4-5
+        # on remplace l'As (14) par 1 pour tester ce scénario
+        if 14 in valeurs:
+            quinte_basse = [1 if v == 14 else v for v in valeurs]
+            quinte_basse = sorted(set(quinte_basse))
+            for i in range(len(quinte_basse) - 4):
+                if quinte_basse[i + 4] - quinte_basse[i] == 4 and len(set(quinte_basse[i:i+5])) == 5:
+                    return True
+
         return False
 
     def evalue_main(self):
