@@ -1,0 +1,44 @@
+{
+  "joueurs": {
+    "clemence": {
+      "pseudo": "clemence",
+      "password": "1234",
+      "solde": 100.0,
+      "wins": 0,
+      "losses": 0,
+      "gains": 0.0
+    },
+    "Arthur Deletang": {
+      "pseudo": "Arthur Deletang",
+      "password": "arthur",
+      "solde": 100.0,
+      "wins": 0,
+      "losses": 0,
+      "gains": 0.0
+    },
+    "MaxenceGoualou": {
+      "pseudo": "MaxenceGoualou",
+      "password": "Jaimelepoker29*",
+      "solde": 100.0,
+      "wins": 0,
+      "losses": 0,
+      "gains": 0.0
+    }
+  },
+  "tables": {
+    "table_1": [
+      "clemence",
+      "MaxenceGoualou",
+      "Arthur Deletang"
+    ],
+    "table_2": [],
+    "table_3": [],
+    "table_4": [],
+    "table_5": [],
+    "table_6": [],
+    "table_7": [],
+    "table_8": [],
+    "table_9": [],
+    "table_10": []
+  }
+}

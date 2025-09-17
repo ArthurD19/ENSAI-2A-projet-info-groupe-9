@@ -87,16 +87,14 @@ classDiagram
         +id
         +joueurs
         +blind
+        +pot
+        +indice_dealer
+        +paquet
         +ajouter_joueur()
         +supprimer_joueur()
     }
 
     class Partie {
-        +table_id
-        +paquet
-        +pot
-        +indice_dealer
-        +joueurs
         +démarrer_tour()
     }
 
@@ -121,20 +119,22 @@ classDiagram
         +comparer_mains()
     }
 
-    %% Relations
-    EvaluateurMain *-- RangMain
+    %% Relations / hiérarchies
     Carte *-- Valeur
     Carte *-- Couleur
-    Partie *-- Table
-    Partie *-- distrib 
-    Partie *-- Comptage
-    Partie ..> EvaluateurMain
-    Table *-- Joueur
-    Joueur "0..2" *-- "List<Carte>" Carte : cartes_privees
+    Joueur "0..2" *-- Carte
     Deck *-- Carte
+    Table *-- Joueur
+    Table *-- Deck
+    Partie *-- distrib
+    Partie *-- Comptage
+    Partie *-- EvaluateurMain
+    Partie ..> Table
+    EvaluateurMain *-- RangMain
 
 
 ```
+
 
 ```mermaid
 gantt
