@@ -60,63 +60,64 @@ classDiagram
     class Carte {
         +valeur : Valeur
         +couleur : Couleur
-        +__repr__()
-        +__str__()
+        +__repr__() str
+        +__str__() str
     }
 
     class Deck {
-        +cartes
-        +remplir()
-        +melanger()
-        +tirer()
-        +ajouter()
-        +len()
+        +cartes : List~Carte~
+        +remplir() None
+        +melanger() None
+        +tirer() Carte
+        +ajouter(carte : Carte) None
+        +len() int
     }
 
     class Joueur {
-        +pseudo
-        +solde
-        +main
-        +mise
-        +miser()
-        +suivre()
-        +se_coucher()
+        +pseudo : str
+        +solde : int
+        +main : List~Carte~
+        +mise : int
+        +miser(montant : int) None
+        +suivre() None
+        +se_coucher() None
     }
 
     class Table {
-        +id
-        +joueurs
-        +blind
-        +pot
-        +indice_dealer
-        +paquet
-        +ajouter_joueur()
-        +supprimer_joueur()
+        +id : int
+        +joueurs : List~Joueur~
+        +blind : int
+        +pot : int
+        +indice_dealer : int
+        +paquet : Deck
+        +board : List~Carte~
+        +ajouter_joueur(joueur : Joueur) None
+        +supprimer_joueur(joueur : Joueur) None
     }
 
     class Partie {
-        +démarrer_tour()
+        +démarrer_tour() None
     }
 
     class distrib {
-        +pre_flop()
-        +flop()
-        +turn()
-        +river()
-        +fin()
+        +pre_flop(table : Table, indice_dealer : int) None
+        +flop(table : Table, indice_dealer : int) None
+        +turn(table : Table, indice_dealer : int) None
+        +river(table : Table, indice_dealer : int) None
+        +fin(table : Table) None
     }
 
     class Comptage {
-        +pot
-        +pot_perso
-        +ajouter_pot()
-        +ajouter_pot_perso()
-        +distrib_pots()
+        +pot : int
+        +pots_perso : List~Dict~Joueur, int~~
+        +ajouter_pot(table : Table) None
+        +ajouter_pot_perso(joueur : Joueur, montant : int) None
+        +distrib_pots(gagnants : List~Joueur~) Dict~Joueur, int~
     }
 
     class EvaluateurMain {
-        +evalue_main()
-        +comparer_mains()
+        +evalue_main(main : List~Carte~, board : List~Carte~) RangMain
+        +comparer_mains(mains : Dict~Joueur, List~Carte~) Joueur
     }
 
     %% Relations / hiérarchies
@@ -131,9 +132,9 @@ classDiagram
     Partie *-- EvaluateurMain
     Partie ..> Table
     EvaluateurMain *-- RangMain
-
-
 ```
+
+
 
 
 ```mermaid
