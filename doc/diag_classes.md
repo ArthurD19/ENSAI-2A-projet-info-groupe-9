@@ -156,5 +156,35 @@ gantt
       Documentation pydoc      :10d
 ```
 
+```mermaid
+classDiagram
+    %% Package Presentation
+    class Interface
+    class API
+
+    %% Package Metier
+    class Controleur
+    class Service
+    class EvaluateurMain
+    class GestionPartie
+
+    %% Package DAO
+    class JoueurDAO
+    class TableDAO
+
+    %% Package Persistance
+    class BaseDeDonnees
+
+    %% Relations
+    Interface --> Controleur
+    API --> Controleur
+    Controleur --> Service
+    Service --> JoueurDAO
+    Service --> TableDAO
+    JoueurDAO --> BaseDeDonnees
+    TableDAO --> BaseDeDonnees
+
+```
+
 
 
