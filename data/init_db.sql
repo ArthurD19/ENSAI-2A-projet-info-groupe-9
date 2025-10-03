@@ -7,7 +7,7 @@ DROP TABLE IF EXISTS players CASCADE;
 -- Table des joueurs (infos administratives)
 CREATE TABLE players (
     pseudo VARCHAR(50) PRIMARY KEY,
-    mot_de_passe TEXT NOT NULL,
+    mdp TEXT NOT NULL,
     portefeuille INT,
     code_parrainage VARCHAR(5) UNIQUE
 );
@@ -23,11 +23,8 @@ CREATE TABLE player_stats (
     nombre_mises INT DEFAULT 0,
     nombre_relances INT DEFAULT 0,
     nombre_suivis INT DEFAULT 0,
-    nombre_checks INT DEFAULT 0
+    nombre_checks INT DEFAULT 0,
+    FOREIGN KEY (username) REFERENCES players(username) ON DELETE CASCADE
 );
 
--- Table des tables de poker
-CREATE TABLE poker_tables (
-    table_id SERIAL PRIMARY KEY,
-    players TEXT[] DEFAULT '{}'
-);
+
