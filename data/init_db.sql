@@ -1,7 +1,5 @@
 -- Supprime les tables si elles existent déjà (utile pour réinitialiser la base)
-DROP TABLE IF EXISTS table_players CASCADE;
 DROP TABLE IF EXISTS player_stats CASCADE;
-DROP TABLE IF EXISTS poker_tables CASCADE;
 DROP TABLE IF EXISTS players CASCADE;
 
 -- Table des joueurs (infos administratives)
