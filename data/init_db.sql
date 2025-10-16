@@ -22,7 +22,7 @@ CREATE TABLE player_stats (
     nombre_relances INT DEFAULT 0,
     nombre_suivis INT DEFAULT 0,
     nombre_checks INT DEFAULT 0,
-    FOREIGN KEY (username) REFERENCES players(username) ON DELETE CASCADE
+    FOREIGN KEY (pseudo) REFERENCES players(pseudo) ON DELETE CASCADE
 );
 
 
