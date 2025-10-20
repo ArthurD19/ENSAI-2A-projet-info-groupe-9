@@ -15,7 +15,6 @@ def setup_test_environment():
     Prépare un environnement de test isolé 
     """
     with patch.dict(os.environ, {"SCHEMA": "projet_test_dao"}):
-        # ResetDatabase pas encore codée
         ResetDatabase().lancer(test_dao=True)
         yield
 
@@ -58,32 +57,59 @@ def test_creer_statistiques_pour_joueur_ok():
 
 def test_mettre_a_jour_statistique_ok():
     """Mise à jour d'une valeur puis vérification"""
+    #GIVEN
     pseudo = "arthur"
-    champ = "nombre_folds"
+    stat_a_mettre_a_jour = "nombre_folds"
     nouvelle_valeur = 22
-
-    StatistiqueDao().mettre_a_jour_statistique(pseudo, champ, nouvelle_valeur)
+    # WHEN
+    StatistiqueDao().mettre_a_jour_statistique(pseudo, stat_a_mettre_a_jour, nouvelle_valeur)
     stats = StatistiqueDao().trouver_statistiques_par_id(pseudo)
+    # THEN 
     assert stats[champ] == nouvelle_valeur
 
 
 def test_mettre_a_jour_statistique_champ_non_autorise():
     """Erreur si on tente de mettre à jour un champ non autorisé"""
     # GIVEN
-    pseudo = "batricia"
+    pseudo = "lucas"
     # THEN
     with pytest.raises(ValueError):
-        StatistiqueDao().mettre_a_jour_statistique(pseudo, "champ_invalide", 10)
+        StatistiqueDao().mettre_a_jour_statistique(pseudo, "stat_inconnue", 10)
 
 
-def test_incrementer_statistique_ok():
+def test_incrementer_statistique_valeur_par_defaut_ok():
     """Incrémentation puis vérification"""
+    # GIVEN
     pseudo = "maxence"
-    champ = "nombre_mises"
-
+    stat_a_incrementer = "nombre_mises"
+    # WHEN
     stats_avant = StatistiqueDao().trouver_statistiques_par_id(pseudo)
     val_avant = stats_avant[champ]
-
-    StatistiqueDao().incrementer_statistique(pseudo, champ)
+    StatistiqueDao().incrementer_statistique(pseudo, stat_a_incrementer)
     stats_apres = StatistiqueDao().trouver_statistiques_par_id(pseudo)
+    # THEN 
     assert stats_apres[champ] == val_avant + 1
+
+
+def test_incrementer_statistique_valeur_autre_ok():
+    """Incrémentation puis vérification"""
+    # GIVEN
+    pseudo = "maxence"
+    stat_a_incrementer = "nombre_mises"
+    valeur = 5
+    # WHEN 
+    stats_avant = StatistiqueDao().trouver_statistiques_par_id(pseudo)
+    val_avant = stats_avant[champ]
+    StatistiqueDao().incrementer_statistique(pseudo, stat_a_incrementer, valeur)
+    stats_apres = StatistiqueDao().trouver_statistiques_par_id(pseudo)
+    # THEN
+    assert stats_apres[champ] == val_avant + valeur
+
+
+def test_incrementer_statistique_champ_non_autorise():
+    """Erreur si on tente d'incrémenter un champ non autorisé"""
+    # GIVEN
+    pseudo = "lucas"
+    # THEN
+    with pytest.raises(ValueError):
+        StatistiqueDao().mettre_a_jour_statistique(pseudo, "stat_inconnue")

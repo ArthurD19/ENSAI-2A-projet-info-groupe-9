@@ -19,7 +19,8 @@ class ResetDatabase(metaclass=Singleton):
     @log
     def lancer(self, test_dao=False):
         """Lancement de la réinitialisation des données
-        Si test_dao = True : réinitialisation des données de test"""
+        Si test_dao = True : réinitialisation des données de test sinon réinitialisation des 
+        données globales"""
         if test_dao:
             mock.patch.dict(os.environ, {"POSTGRES_SCHEMA": "projet_test_dao"}).start()
             pop_data_path = "data/pop_db_test.sql"
@@ -50,7 +51,7 @@ class ResetDatabase(metaclass=Singleton):
             logging.info(e)
             raise
 
-        # Appliquer le hashage des mots de passe à chaque joueur
+        # Appliquer le hashage des mots de passe à chaque joueur (a modifier surement !!)
         joueur_service = JoueurService()
         for j in joueur_service.lister_tous(inclure_mdp=True):
             joueur_service.modifier(j)

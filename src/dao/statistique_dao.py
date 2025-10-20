@@ -25,7 +25,7 @@ class StatistiqueDao(metaclass=Singleton):
     }
 
     def creer_statistiques_pour_joueur(self, pseudo: str):
-        """Crée une nouvelle ligne de statistiques pour un joueur."""
+        """Crée une nouvelle ligne de statistiques pour un joueur dans la base de données."""
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
@@ -76,26 +76,47 @@ class StatistiqueDao(metaclass=Singleton):
         return statistiques
 
     
-    def mettre_a_jour_statistique(self, pseudo: str, champ: str, valeur: int):
-        """Met à jour une statistique spécifique d'un joueur, si le champ est valide."""
-        if champ not in self.CHAMPS_AUTORISES:
-            raise ValueError(f"Champ '{champ}' non autorisé pour la mise à jour.")
+    def mettre_a_jour_statistique(self, pseudo: str, stat_a_mettre_a_jour: str, valeur: int):
+        """Met à jour une statistique spécifique d'un joueur, si le champ est valide.
+        
+        Parameters
+        ----------
+        pseudo: str
+            pseudo du joueur dont on veut mettre à jour une statistique
+        stat_a_mettre_a_jour: str
+            nom de la statistique que l'on souhaite mettre à jour
+        valeur: int
+            nouvelle valeur de la statistique
+        """
+        if stat_a_mettre_a_jour not in self.CHAMPS_AUTORISES:
+            raise ValueError(f"Champ '{stat_a_mettre_a_jour}' non autorisé pour la mise à jour.")
 
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
-                    query = f"UPDATE player_stats SET {champ} = %(valeur)s WHERE pseudo = %(pseudo)s;"
+                    query = f"UPDATE player_stats SET {stat_a_mettre_a_jour} = %(valeur)s WHERE pseudo = %(pseudo)s;"
                     cursor.execute(query, {"valeur": valeur, "pseudo": pseudo})
         except Exception as e:
             logging.info(e)
             raise
 
-    def incrementer_statistique(self, pseudo: str, champ: str, valeur: int = 1):
-        """Incrémente une statistique (par exemple +1 main jouée)."""
+    def incrementer_statistique(self, pseudo: str, stat_a_incrementer: str, valeur: int = 1):
+        """Incrémente une statistique (par exemple +1 main jouée).
+        
+        Parameters
+        ----------
+        pseudo: str 
+            pseudo du joueur dont on souhaite incrémenter une statistique
+        stat_a_incrementer: str
+            nom de la statistique que l'on souhaite incrementer
+        valeur: int
+            valeur dont on souhaite augmenter la statistique, par défaut vaut 1"""
+        if stat_a_incrementer not in self.CHAMPS_AUTORISES:
+            raise ValueError(f"Champ '{stat_a_incrementer}' non autorisé pour la mise à jour.")
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
-                    query = f"UPDATE player_stats SET {champ} = {champ} + %(valeur)s WHERE pseudo = %(pseudo)s;"
+                    query = f"UPDATE player_stats SET {stat_a_incrementer} = {stat_a_incrementer} + %(valeur)s WHERE pseudo = %(pseudo)s;"
                     cursor.execute(query, {"valeur": valeur, "pseudo": pseudo})
         except Exception as e:
             logging.info(e)
