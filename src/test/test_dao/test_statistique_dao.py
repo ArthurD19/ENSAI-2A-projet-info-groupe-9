@@ -20,7 +20,9 @@ def setup_test_environment():
 
 
 def test_trouver_statistiques_par_id_existant():
-    """Récupération des statistiques d'un joueur existant"""
+    """
+    Récupération des statistiques d'un joueur existant (le joueur existe dans la base de données)
+    """
     # GIVEN
     pseudo = "clemence"  # joueur déjà présent dans la base de test
     # WHEN
@@ -33,7 +35,9 @@ def test_trouver_statistiques_par_id_existant():
 
 
 def test_trouver_statistiques_par_id_inexistant():
-    """Lecture d'un pseudo inexistant"""
+    """
+    Lecture d'un pseudo inexistant dans la base de données
+    """
     # GIVEN
     pseudo = "inconnu"
     # WHEN
@@ -46,7 +50,9 @@ from dao.joueur_dao import JoueurDao
 
 
 def test_creer_statistiques_pour_joueur_ok():
-    """Création de statistiques réussie pour un joueur"""
+    """
+    Création de statistiques réussie pour un joueur
+    """
     # GIVEN
     pseudo = "nouveau_joueur"
     # joueur = 
@@ -58,10 +64,12 @@ def test_creer_statistiques_pour_joueur_ok():
     assert stats is not None
     assert stats["pseudo"] == pseudo
 
-
+# est ce qu'il faut faire le test dans le cas où ça ne marche pas car le joueur n'existe pas dans la base de données
 
 def test_mettre_a_jour_statistique_ok():
-    """Mise à jour d'une valeur puis vérification"""
+    """
+    Mise à jour d'une valeur puis vérification que la mise à jour s'est faite correctement
+    """
     #GIVEN
     pseudo = "arthur"
     stat_a_mettre_a_jour = "nombre_folds"
@@ -73,8 +81,10 @@ def test_mettre_a_jour_statistique_ok():
     assert stats[stat_a_mettre_a_jour] == nouvelle_valeur
 
 
-def test_mettre_a_jour_statistique_champ_non_autorise():
-    """Erreur si on tente de mettre à jour un champ non autorisé"""
+def test_mettre_a_jour_statistique_non_autorisee():
+    """
+    Erreur si on tente de mettre à jour une statistique qui n'existe pas
+    """
     # GIVEN
     pseudo = "lucas"
     # THEN
@@ -82,7 +92,9 @@ def test_mettre_a_jour_statistique_champ_non_autorise():
         StatistiqueDao().mettre_a_jour_statistique("lucas", "stat_inconnue", 10)
 
 def test_incrementer_statistique_valeur_par_defaut_ok():
-    """Incrémentation puis vérification"""
+    """
+    Incrémentation d'une statistique puis vérification que l'incrémentation s'est faite correctement
+    """
     # GIVEN
     pseudo = "maxence"
     stat_a_incrementer = "nombre_mises"
@@ -96,7 +108,9 @@ def test_incrementer_statistique_valeur_par_defaut_ok():
 
 
 def test_incrementer_statistique_valeur_autre_ok():
-    """Incrémentation puis vérification"""
+    """
+    Incrémentation d'une statistique puis vérification que l'incrémentation s'est faite correctement
+    """
     # GIVEN
     pseudo = "maxence"
     stat_a_incrementer = "nombre_mises"
@@ -111,7 +125,9 @@ def test_incrementer_statistique_valeur_autre_ok():
 
 
 def test_incrementer_statistique_champ_non_autorise():
-    """Erreur si on tente d'incrémenter un champ non autorisé"""
+    """
+    Erreur si on tente d'incrémenter une statistique inconnue ou non autorisee
+    """
     # GIVEN
     pseudo = "lucas"
     # THEN

@@ -23,7 +23,12 @@ class StatistiqueDao(metaclass=Singleton):
     }
 
     def creer_statistiques_pour_joueur(self, pseudo: str):
-        """Crée une nouvelle ligne de statistiques pour un joueur dans la base de données."""
+        """Crée une nouvelle ligne de statistiques pour un joueur dans la base de données.
+        
+        Parameters
+        ----------
+        pseudo: str
+            pseudo du joueur que l'on souhaite ajouter dans la base de données, dans la table player_stats"""
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
@@ -122,7 +127,16 @@ class StatistiqueDao(metaclass=Singleton):
 
     
     def recuperer_top_joueurs(self, limite: int = 10) -> list[dict]:
-        """Renvoie la liste des meilleurs joueurs selon leur meilleur classement."""
+        """Renvoie la liste des meilleurs joueurs selon leur meilleur classement.
+        
+        Parameters
+        ----------
+        limite: int
+            nombre de top joueur que l'on souhaite renvoyer
+            
+        Return
+        ------
+        dict ou list"""
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
