@@ -141,4 +141,3 @@ class StatistiqueDao(metaclass=Singleton):
         except Exception as e:
             logging.info(e)
             raise
-    

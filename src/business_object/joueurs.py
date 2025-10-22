@@ -1,4 +1,4 @@
-from cartes import Carte, Deck
+from business_object.cartes import Carte, Deck
 
 class Joueur:
     def __init__(self, pseudo: str, solde: int):
