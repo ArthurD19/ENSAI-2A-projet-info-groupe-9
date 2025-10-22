@@ -5,8 +5,6 @@ from utils.log_decorator import log
 
 from dao.db_connection import DBConnection
 
-from business_object.joueur import Joueur
-
 
 class StatistiqueDao(metaclass=Singleton):
     """Classe contenant les méthodes pour accéder aux Statistiques des joueurs de la 

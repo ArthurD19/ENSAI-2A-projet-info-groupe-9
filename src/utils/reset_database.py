@@ -8,8 +8,6 @@ from utils.log_decorator import log
 from utils.singleton import Singleton
 from dao.db_connection import DBConnection
 
-from service.joueur_service import JoueurService
-
 
 class ResetDatabase(metaclass=Singleton):
     """
@@ -51,14 +49,8 @@ class ResetDatabase(metaclass=Singleton):
             logging.info(e)
             raise
 
-        # Appliquer le hashage des mots de passe à chaque joueur (a modifier surement !!)
-        joueur_service = JoueurService()
-        for j in joueur_service.lister_tous(inclure_mdp=True):
-            joueur_service.modifier(j)
-
         return True
 
 
 if __name__ == "__main__":
-    ResetDatabase().lancer()
     ResetDatabase().lancer(True)

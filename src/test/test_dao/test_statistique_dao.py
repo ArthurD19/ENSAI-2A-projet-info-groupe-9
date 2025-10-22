@@ -42,11 +42,16 @@ def test_trouver_statistiques_par_id_inexistant():
     assert stats == {}
 
 
+from dao.joueur_dao import JoueurDao
+
+
 def test_creer_statistiques_pour_joueur_ok():
     """Création de statistiques réussie pour un joueur"""
     # GIVEN
     pseudo = "nouveau_joueur"
+    # joueur = 
     # WHEN
+    # JoueurDao().creer(joueur)
     StatistiqueDao().creer_statistiques_pour_joueur(pseudo)
     # THEN
     stats = StatistiqueDao().trouver_statistiques_par_id(pseudo)
@@ -65,7 +70,7 @@ def test_mettre_a_jour_statistique_ok():
     StatistiqueDao().mettre_a_jour_statistique(pseudo, stat_a_mettre_a_jour, nouvelle_valeur)
     stats = StatistiqueDao().trouver_statistiques_par_id(pseudo)
     # THEN 
-    assert stats[champ] == nouvelle_valeur
+    assert stats[stat_a_mettre_a_jour] == nouvelle_valeur
 
 
 def test_mettre_a_jour_statistique_champ_non_autorise():
@@ -74,8 +79,7 @@ def test_mettre_a_jour_statistique_champ_non_autorise():
     pseudo = "lucas"
     # THEN
     with pytest.raises(ValueError):
-        StatistiqueDao().mettre_a_jour_statistique(pseudo, "stat_inconnue", 10)
-
+        StatistiqueDao().mettre_a_jour_statistique("lucas", "stat_inconnue", 10)
 
 def test_incrementer_statistique_valeur_par_defaut_ok():
     """Incrémentation puis vérification"""
@@ -84,11 +88,11 @@ def test_incrementer_statistique_valeur_par_defaut_ok():
     stat_a_incrementer = "nombre_mises"
     # WHEN
     stats_avant = StatistiqueDao().trouver_statistiques_par_id(pseudo)
-    val_avant = stats_avant[champ]
+    val_avant = stats_avant[stat_a_incrementer]
     StatistiqueDao().incrementer_statistique(pseudo, stat_a_incrementer)
     stats_apres = StatistiqueDao().trouver_statistiques_par_id(pseudo)
     # THEN 
-    assert stats_apres[champ] == val_avant + 1
+    assert stats_apres[stat_a_incrementer] == val_avant + 1
 
 
 def test_incrementer_statistique_valeur_autre_ok():
@@ -99,11 +103,11 @@ def test_incrementer_statistique_valeur_autre_ok():
     valeur = 5
     # WHEN 
     stats_avant = StatistiqueDao().trouver_statistiques_par_id(pseudo)
-    val_avant = stats_avant[champ]
+    val_avant = stats_avant[stat_a_incrementer]
     StatistiqueDao().incrementer_statistique(pseudo, stat_a_incrementer, valeur)
     stats_apres = StatistiqueDao().trouver_statistiques_par_id(pseudo)
     # THEN
-    assert stats_apres[champ] == val_avant + valeur
+    assert stats_apres[stat_a_incrementer] == val_avant + valeur
 
 
 def test_incrementer_statistique_champ_non_autorise():
@@ -112,4 +116,4 @@ def test_incrementer_statistique_champ_non_autorise():
     pseudo = "lucas"
     # THEN
     with pytest.raises(ValueError):
-        StatistiqueDao().mettre_a_jour_statistique(pseudo, "stat_inconnue")
+        StatistiqueDao().incrementer_statistique(pseudo, "stat_inconnue", 1)
