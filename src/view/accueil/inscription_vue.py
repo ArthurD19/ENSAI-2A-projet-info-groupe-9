@@ -29,23 +29,10 @@ class InscriptionVue(VueAbstraite):
             ),
         ).execute()
 
-        age = inquirer.number(
-            message="Entrez votre age : ",
-            min_allowed=0,
-            max_allowed=120,
-            validate=EmptyInputValidator(),
-        ).execute()
-
-        mail = inquirer.text(message="Entrez votre mail : ", validate=MailValidator()).execute()
-
-        fan_pokemon = inquirer.confirm(
-            message="Etes-vous fan de pokemons : ",
-            confirm_letter="o",
-            reject_letter="n",
-        ).execute()
+        code_de_parrainage = inquirer.text(message="Entrez votre code de parrainage : ").execute()
 
         # Appel du service pour créer le joueur
-        joueur = JoueurService().creer(pseudo, mdp, age, mail, fan_pokemon)
+        joueur = JoueurService().creer(pseudo, mdp, code_de_parrainage)
 
         # Si le joueur a été créé
         if joueur:
@@ -59,14 +46,3 @@ class InscriptionVue(VueAbstraite):
 
         return AccueilVue(message)
 
-
-class MailValidator(Validator):
-    """la classe MailValidator verifie si la chaine de caractères
-    que l'on entre correspond au format de l'email"""
-
-    def validate(self, document) -> None:
-        ok = regex.match(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$", document.text)
-        if not ok:
-            raise ValidationError(
-                message="Please enter a valid mail", cursor_position=len(document.text)
-            )

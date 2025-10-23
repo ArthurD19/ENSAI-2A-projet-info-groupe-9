@@ -162,3 +162,9 @@ class JoueurDao(metaclass=Singleton):
             res = None
 
         return res
+
+
+# Il faut fonction qui renvoie la valeur du portefeuille pour un joueur donné, le classement des joueurs
+# selon la valeur de leur portefeuille, une fonction qui regarde si une valeur donnée de code de
+# parrainage existe déjà ou pas et une fonction qui met à jour la valeur du code de parrainage (pour le mettre
+# à jour après qu'il soit généré)

@@ -34,9 +34,10 @@ class MenuJoueurVue(VueAbstraite):
         choix = inquirer.select(
             message="Faites votre choix : ",
             choices=[
-                "Afficher les joueurs de la base de données",
-                "Afficher des pokemons (par appel à un Webservice)",
-                "Infos de session",
+                "Rejoindre une table",
+                "Afficher la valeur du portefeuille",
+                "Afficher le classement",
+                "Générer un code de parrainage",
                 "Se déconnecter",
             ],
         ).execute()
@@ -48,14 +49,19 @@ class MenuJoueurVue(VueAbstraite):
 
                 return AccueilVue()
 
-            case "Infos de session":
-                return MenuJoueurVue(Session().afficher())
+            case "Afficher la valeur du portefeuille":
+                portefeuille = JoueurService().afficher_valeur_portefeuille(pseudo)
+                return MenuJoueurVue(portefeuille)
 
-            case "Afficher les joueurs de la base de données":
-                joueurs_str = JoueurService().afficher_tous()
-                return MenuJoueurVue(joueurs_str)
+            case "Afficher le classement":
+                classement_joueur = JoueurService().afficher_classement_joueur(pseudo)
+                return MenuJoueurVue(classement_joueur)
 
-            case "Afficher des pokemons (par appel à un Webservice)":
-                from view.pokemon_vue import PokemonVue
+            case "Générer un code de parrainage":
+                code_parrainage = JoueurService().generer_code_parrainage(pseudo)
+                return MenuJoueurVue(code_parrainage)
 
-                return PokemonVue()
+            case "Rejoindre une table":
+                from view.menu_table_vue import MenuTableVue
+                JoueurService().rejoindre_table()
+                return MenuTableVue()
