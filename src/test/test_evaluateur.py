@@ -1,6 +1,6 @@
 import pytest
-from cartes import Carte, couleurs, valeurs, combinaisons
-from evaluateur import EvaluateurMain
+from business_object.cartes import Carte, couleurs, valeurs, combinaisons
+from business_object.evaluateur import EvaluateurMain
 
 
 def ev(cartes):

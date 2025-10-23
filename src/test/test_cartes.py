@@ -1,5 +1,5 @@
 import pytest
-from cartes import Carte, Deck, couleurs, valeurs
+from business_object.cartes import Carte, Deck, couleurs, valeurs
 
 
 def test_Carte_str_repr():

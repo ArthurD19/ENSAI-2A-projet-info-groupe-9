@@ -1,4 +1,4 @@
-from cartes import Carte, valeurs, combinaisons
+from business_object.cartes import Carte, couleurs, valeurs, combinaisons
 
 
 class EvaluateurMain:
