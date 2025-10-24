@@ -1,4 +1,5 @@
 import os
+import uuid
 import pytest
 from unittest.mock import patch
 
@@ -203,6 +204,105 @@ def test_se_connecter_ko():
 
     # THEN
     assert joueur is None
+
+
+# --------------------------------------------------------------------------
+# NOUVEAUX TESTS pour les méthodes ajoutées
+# --------------------------------------------------------------------------
+
+def test_valeur_portefeuille_existant():
+    """Renvoie la valeur du portefeuille pour un joueur existant"""
+
+    # GIVEN
+    id_joueur = 998  # joueur présent dans la DB de test
+
+    # WHEN
+    valeur = JoueurDao().valeur_portefeuille(id_joueur)
+
+    # THEN
+    assert valeur is not None
+    assert isinstance(valeur, (int, float))
+
+
+def test_valeur_portefeuille_non_existant():
+    """None pour un id de joueur qui n'existe pas"""
+
+    # GIVEN
+    id_joueur = 9999999999999
+
+    # WHEN
+    valeur = JoueurDao().valeur_portefeuille(id_joueur)
+
+    # THEN
+    assert valeur is None
+
+
+def test_classement_par_portefeuille():
+    """Vérifie le classement décroissant par portefeuille"""
+
+    # WHEN
+    classement = JoueurDao().classement_par_portefeuille()
+
+    # THEN
+    assert isinstance(classement, list)
+    # Au moins deux joueurs pour vérifier l'ordre
+    assert len(classement) >= 2
+    # Vérifier la forme et l'ordre décroissant
+    valeurs = []
+    for item in classement:
+        assert isinstance(item, dict)
+        assert "id_joueur" in item
+        assert "pseudo" in item
+        assert "portefeuille" in item
+        valeurs.append(item["portefeuille"])
+    assert valeurs == sorted(valeurs, reverse=True)
+
+
+def test_classement_par_portefeuille_limite():
+    """Vérifie que la limite fonctionne"""
+
+    # WHEN
+    classement_limit = JoueurDao().classement_par_portefeuille(limit=2)
+
+    # THEN
+    assert isinstance(classement_limit, list)
+    assert len(classement_limit) <= 2
+
+
+def test_code_de_parrainage_existe_et_non_existe():
+    """Vérifie la détection de l'existence d'un code de parrainage"""
+
+    code = "EXISTE123"
+    joueur = {
+        "pseudo": "pierre",
+        "mdp": hash_password("mdp", "pierre"),
+        "portefeuille": 0,
+        "code_de_parrainage": code,
+    }
+    JoueurDao().creer(joueur)
+
+    assert JoueurDao().code_de_parrainage_existe(code) is True
+    assert JoueurDao().code_de_parrainage_existe("INEXISTANT999") is False
+
+
+def test_mettre_a_jour_code_de_parrainage():
+    """Met à jour le code de parrainage d’un joueur"""
+
+    joueur = {
+        "pseudo": "jean",
+        "mdp": hash_password("mdp", "jean"),
+        "portefeuille": 0,
+        "code_de_parrainage": "OLD001",
+    }
+    JoueurDao().creer(joueur)
+    id_joueur = joueur["id_joueur"]
+
+    nouveau_code = "NEW001"
+    maj_ok = JoueurDao().mettre_a_jour_code_de_parrainage(id_joueur, nouveau_code)
+
+    assert maj_ok is True
+    assert JoueurDao().code_de_parrainage_existe(nouveau_code) is True
+    assert JoueurDao().code_de_parrainage_existe("OLD001") is False
 
 
 if __name__ == "__main__":

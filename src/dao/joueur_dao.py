@@ -163,8 +163,121 @@ class JoueurDao(metaclass=Singleton):
 
         return res
 
+    # --------------------------------------------------------------------------
 
-# Il faut fonction qui renvoie la valeur du portefeuille pour un joueur donné, le classement des joueurs
-# selon la valeur de leur portefeuille, une fonction qui regarde si une valeur donnée de code de
-# parrainage existe déjà ou pas et une fonction qui met à jour la valeur du code de parrainage (pour le mettre
-# à jour après qu'il soit généré)
+    @log
+    def valeur_portefeuille(self, id_joueur: int) -> int | float | None:
+        """
+        Renvoie la valeur du portefeuille pour un joueur donné.
+        Retourne None si le joueur n'existe pas.
+        """
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        """
+                        SELECT portefeuille
+                        FROM joueur
+                        WHERE id_joueur = %(id_joueur)s;
+                        """,
+                        {"id_joueur": id_joueur},
+                    )
+                    res = cursor.fetchone()
+        except Exception as e:
+            logging.exception(e)
+            return None
+
+        if res:
+            # res est un dict contenant 'portefeuille'
+            return res["portefeuille"]
+        return None
+
+    # --------------------------------------------------------------------------
+
+    @log
+    def classement_par_portefeuille(self, limit: int | None = None) -> list[dict]:
+        """
+        Retourne le classement des joueurs selon la valeur de leur portefeuille (desc).
+        Si 'limit' est fourni, limite le nombre de résultats.
+        Chaque élément retourné est un dict avec au moins : id_joueur, pseudo, portefeuille
+        """
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    if limit is not None:
+                        cursor.execute(
+                            """
+                            SELECT id_joueur, pseudo, portefeuille
+                            FROM joueur
+                            ORDER BY portefeuille DESC
+                            LIMIT %(limit)s;
+                            """,
+                            {"limit": limit},
+                        )
+                    else:
+                        cursor.execute(
+                            """
+                            SELECT id_joueur, pseudo, portefeuille
+                            FROM joueur
+                            ORDER BY portefeuille DESC;
+                            """
+                        )
+                    res = cursor.fetchall()
+        except Exception as e:
+            logging.exception(e)
+            res = []
+
+        return res or []
+
+    # --------------------------------------------------------------------------
+
+    @log
+    def code_de_parrainage_existe(self, code: str) -> bool:
+        """
+        Vérifie si une valeur de code de parrainage existe déjà.
+        Retourne True si le code existe, False sinon.
+        """
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        """
+                        SELECT 1
+                        FROM joueur
+                        WHERE code_de_parrainage = %(code)s
+                        LIMIT 1;
+                        """,
+                        {"code": code},
+                    )
+                    res = cursor.fetchone()
+        except Exception as e:
+            logging.exception(e)
+            return False
+
+        return res is not None
+
+    # --------------------------------------------------------------------------
+
+    @log
+    def mettre_a_jour_code_de_parrainage(self, id_joueur: int, nouveau_code: str) -> bool:
+        """
+        Met à jour la valeur du code_de_parrainage pour un joueur donné.
+        Retourne True si une ligne a été modifiée, False sinon.
+        """
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        """
+                        UPDATE joueur
+                        SET code_de_parrainage = %(nouveau_code)s
+                        WHERE id_joueur = %(id_joueur)s;
+                        """,
+                        {"nouveau_code": nouveau_code, "id_joueur": id_joueur},
+                    )
+                    rowcount = cursor.rowcount
+        except Exception as e:
+            logging.exception(e)
+            return False
+
+        return rowcount == 1
