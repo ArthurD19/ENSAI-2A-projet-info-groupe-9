@@ -2,6 +2,7 @@
 DROP TABLE IF EXISTS player_stats CASCADE;
 DROP TABLE IF EXISTS players CASCADE;
 
+
 -- Table des joueurs (infos administratives)
 CREATE TABLE players (
     pseudo VARCHAR(50) PRIMARY KEY,

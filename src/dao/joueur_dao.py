@@ -1,7 +1,10 @@
 import logging
+import psycopg2
+import psycopg2.extras
 from utils.singleton import Singleton
 from utils.log_decorator import log
 from dao.db_connection import DBConnection
+
 
 
 class JoueurDao(metaclass=Singleton):
@@ -12,65 +15,52 @@ class JoueurDao(metaclass=Singleton):
         """
         Création d'un joueur dans la base de données
 
-        Parameters
-        ----------
         joueur : dict
             Exemple :
             {
                 "pseudo": "Alice",
                 "mdp": "motdepasse123",
                 "portefeuille": 1000,
-                "code_de_parrainage": "ABC123"
+                "code_parrainage": "ABC12"
             }
 
-        Returns
-        -------
-        bool : True si la création est un succès, False sinon
+        Retourne True si succès, False sinon
         """
-        res = None
-
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
                     cursor.execute(
                         """
-                        INSERT INTO joueur (pseudo, mdp, portefeuille, code_de_parrainage)
-                        VALUES (%(pseudo)s, %(mdp)s, %(portefeuille)s, %(code_de_parrainage)s)
-                        RETURNING id_joueur;
+                        INSERT INTO players (pseudo, mdp, portefeuille, code_parrainage)
+                        VALUES (%(pseudo)s, %(mdp)s, %(portefeuille)s, %(code_parrainage)s);
                         """,
                         joueur,
                     )
-                    res = cursor.fetchone()
+            return True
         except Exception as e:
             logging.exception(e)
-
-        if res:
-            joueur["id_joueur"] = res["id_joueur"]
-            return True
-        return False
+            return False
 
     # --------------------------------------------------------------------------
 
     @log
-    def trouver_par_id(self, id_joueur: int) -> dict | None:
-        """Trouver un joueur grâce à son id"""
+    def trouver_par_pseudo(self, pseudo: str) -> dict | None:
+        """Trouver un joueur grâce à son pseudo"""
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
                     cursor.execute(
                         """
-                        SELECT id_joueur, pseudo, mdp, portefeuille, code_de_parrainage
-                        FROM joueur
-                        WHERE id_joueur = %(id_joueur)s;
+                        SELECT pseudo, mdp, portefeuille, code_parrainage
+                        FROM players
+                        WHERE pseudo = %(pseudo)s;
                         """,
-                        {"id_joueur": id_joueur},
+                        {"pseudo": pseudo},
                     )
-                    res = cursor.fetchone()
+                    return cursor.fetchone()
         except Exception as e:
             logging.exception(e)
             return None
-
-        return res  # res est un dict (ou None)
 
     # --------------------------------------------------------------------------
 
@@ -82,133 +72,120 @@ class JoueurDao(metaclass=Singleton):
                 with connection.cursor() as cursor:
                     cursor.execute(
                         """
-                        SELECT id_joueur, pseudo, mdp, portefeuille, code_de_parrainage
-                        FROM joueur;
+                        SELECT pseudo, mdp, portefeuille, code_parrainage
+                        FROM players;
                         """
                     )
-                    res = cursor.fetchall()
+                    return cursor.fetchall() or []
         except Exception as e:
             logging.exception(e)
-            res = []
-
-        return res or []
+            return []
 
     # --------------------------------------------------------------------------
 
     @log
     def modifier(self, joueur: dict) -> bool:
         """Modifier les informations d'un joueur dans la base"""
-        res = None
-
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
                     cursor.execute(
                         """
-                        UPDATE joueur
-                           SET pseudo = %(pseudo)s,
-                               mdp = %(mdp)s,
+                        UPDATE players
+                           SET mdp = %(mdp)s,
                                portefeuille = %(portefeuille)s,
-                               code_de_parrainage = %(code_de_parrainage)s
-                         WHERE id_joueur = %(id_joueur)s;
+                               code_parrainage = %(code_parrainage)s
+                         WHERE pseudo = %(pseudo)s;
                         """,
                         joueur,
                     )
-                    res = cursor.rowcount
-        except Exception as e:
-            logging.exception(e)
-
-        return res == 1
-
-    # --------------------------------------------------------------------------
-
-    @log
-    def supprimer(self, id_joueur: int) -> bool:
-        """Supprimer un joueur grâce à son id"""
-        try:
-            with DBConnection().connection as connection:
-                with connection.cursor() as cursor:
-                    cursor.execute(
-                        "DELETE FROM joueur WHERE id_joueur = %(id_joueur)s;",
-                        {"id_joueur": id_joueur},
-                    )
-                    res = cursor.rowcount
+                    return cursor.rowcount == 1
         except Exception as e:
             logging.exception(e)
             return False
 
-        return res > 0
+    # --------------------------------------------------------------------------
+
+    @log
+    def supprimer(self, pseudo: str) -> bool:
+        """Supprimer un joueur grâce à son pseudo"""
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "DELETE FROM players WHERE pseudo = %(pseudo)s;",
+                        {"pseudo": pseudo},
+                    )
+                    return cursor.rowcount > 0
+        except Exception as e:
+            logging.exception(e)
+            return False
 
     # --------------------------------------------------------------------------
 
     @log
     def se_connecter(self, pseudo: str, mdp: str) -> dict | None:
-        """Se connecter grâce à un pseudo et un mot de passe"""
+        """
+        Vérifie si un joueur existe avec ce pseudo et ce mot de passe exact.
+        Retourne un dict avec pseudo, mdp, portefeuille, code_parrainage
+        ou None si aucun joueur trouvé.
+        """
         try:
             with DBConnection().connection as connection:
-                with connection.cursor() as cursor:
+                with connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
                     cursor.execute(
                         """
-                        SELECT id_joueur, pseudo, mdp, portefeuille, code_de_parrainage
-                        FROM joueur
+                        SELECT pseudo, mdp, portefeuille, code_parrainage
+                        FROM players
                         WHERE pseudo = %(pseudo)s
                           AND mdp = %(mdp)s;
                         """,
                         {"pseudo": pseudo, "mdp": mdp},
                     )
                     res = cursor.fetchone()
+                    return dict(res) if res else None
         except Exception as e:
             logging.exception(e)
-            res = None
+            return None
 
-        return res
 
     # --------------------------------------------------------------------------
 
     @log
-    def valeur_portefeuille(self, id_joueur: int) -> int | float | None:
-        """
-        Renvoie la valeur du portefeuille pour un joueur donné.
-        Retourne None si le joueur n'existe pas.
-        """
+    def valeur_portefeuille(self, pseudo: str) -> int | None:
+        """Renvoie la valeur du portefeuille pour un joueur donné"""
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
                     cursor.execute(
                         """
                         SELECT portefeuille
-                        FROM joueur
-                        WHERE id_joueur = %(id_joueur)s;
+                        FROM players
+                        WHERE pseudo = %(pseudo)s;
                         """,
-                        {"id_joueur": id_joueur},
+                        {"pseudo": pseudo},
                     )
                     res = cursor.fetchone()
+                    return res["portefeuille"] if res else None
         except Exception as e:
             logging.exception(e)
             return None
-
-        if res:
-            # res est un dict contenant 'portefeuille'
-            return res["portefeuille"]
-        return None
 
     # --------------------------------------------------------------------------
 
     @log
     def classement_par_portefeuille(self, limit: int | None = None) -> list[dict]:
         """
-        Retourne le classement des joueurs selon la valeur de leur portefeuille (desc).
-        Si 'limit' est fourni, limite le nombre de résultats.
-        Chaque élément retourné est un dict avec au moins : id_joueur, pseudo, portefeuille
+        Retourne le classement des joueurs selon la valeur de leur portefeuille (desc)
         """
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
-                    if limit is not None:
+                    if limit:
                         cursor.execute(
                             """
-                            SELECT id_joueur, pseudo, portefeuille
-                            FROM joueur
+                            SELECT pseudo, portefeuille
+                            FROM players
                             ORDER BY portefeuille DESC
                             LIMIT %(limit)s;
                             """,
@@ -217,67 +194,55 @@ class JoueurDao(metaclass=Singleton):
                     else:
                         cursor.execute(
                             """
-                            SELECT id_joueur, pseudo, portefeuille
-                            FROM joueur
+                            SELECT pseudo, portefeuille
+                            FROM players
                             ORDER BY portefeuille DESC;
                             """
                         )
-                    res = cursor.fetchall()
+                    return cursor.fetchall() or []
         except Exception as e:
             logging.exception(e)
-            res = []
-
-        return res or []
+            return []
 
     # --------------------------------------------------------------------------
 
     @log
     def code_de_parrainage_existe(self, code: str) -> bool:
-        """
-        Vérifie si une valeur de code de parrainage existe déjà.
-        Retourne True si le code existe, False sinon.
-        """
+        """Vérifie si un code de parrainage existe déjà"""
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
                     cursor.execute(
                         """
                         SELECT 1
-                        FROM joueur
-                        WHERE code_de_parrainage = %(code)s
+                        FROM players
+                        WHERE code_parrainage = %(code)s
                         LIMIT 1;
                         """,
                         {"code": code},
                     )
-                    res = cursor.fetchone()
+                    return cursor.fetchone() is not None
         except Exception as e:
             logging.exception(e)
             return False
 
-        return res is not None
-
     # --------------------------------------------------------------------------
 
     @log
-    def mettre_a_jour_code_de_parrainage(self, id_joueur: int, nouveau_code: str) -> bool:
-        """
-        Met à jour la valeur du code_de_parrainage pour un joueur donné.
-        Retourne True si une ligne a été modifiée, False sinon.
-        """
+    def mettre_a_jour_code_de_parrainage(self, pseudo: str, nouveau_code: str) -> bool:
+        """Met à jour le code de parrainage pour un joueur donné"""
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
                     cursor.execute(
                         """
-                        UPDATE joueur
-                        SET code_de_parrainage = %(nouveau_code)s
-                        WHERE id_joueur = %(id_joueur)s;
+                        UPDATE players
+                        SET code_parrainage = %(nouveau_code)s
+                        WHERE pseudo = %(pseudo)s;
                         """,
-                        {"nouveau_code": nouveau_code, "id_joueur": id_joueur},
+                        {"pseudo": pseudo, "nouveau_code": nouveau_code},
                     )
-                    rowcount = cursor.rowcount
+                    return cursor.rowcount == 1
         except Exception as e:
             logging.exception(e)
             return False
-
-        return rowcount == 1
