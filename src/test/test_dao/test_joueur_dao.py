@@ -26,7 +26,7 @@ def test_verifier_joueurs_existent():
     # GIVEN / WHEN
     with DBConnection().connection as connection:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT pseudo, mdp, portefeuille, code_parrainage FROM players;")
+            cursor.execute("SELECT pseudo, mdp, portefeuille, code_parrainage FROM joueurs;")
             joueurs = cursor.fetchall()
             print("Joueurs présents dans la DB:", joueurs)
     
@@ -189,12 +189,11 @@ def test_supprimer_ko():
 
 def test_se_connecter_ok():
     pseudo = "arthur"
-    mdp = "6aaa410dfb03069e6b3f31e3389c1c666b5db409e96eba06d971630146064bc1"  # avec le truc juste en dessous là jai pu voir le mdp hashé je crois ? donc je l'ai mis directement dans mdp sur la ligne du dessus là mais cest bizarre je pense
-    # 👉 Debug : afficher ce qu'il y a vraiment dans la table players
+    mdp = "6aaa410dfb03069e6b3f31e3389c1c666b5db409e96eba06d971630146064bc1"
     from dao.db_connection import DBConnection
     with DBConnection().connection as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT pseudo, mdp FROM players;")
+            cur.execute("SELECT pseudo, mdp FROM joueurs;")
             print("DEBUG contenu players:", cur.fetchall())
 
     # WHEN

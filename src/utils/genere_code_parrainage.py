@@ -1,7 +1,7 @@
 import random
 import string
 
-from dao.joueur_dao import existe_code_parrainage
+from dao.joueur_dao import JoueurDao
 # existe_code_parrainage à coder dans DAO joueur
 
 class GenerateurDeCode:
@@ -16,5 +16,5 @@ class GenerateurDeCode:
             code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=self.length))
             
             # Vérifie via la fonction importée si le code existe déjà
-            if not existe_code_parrainage(code):
+            if not JoueurDao().code_de_parrainage_existe(code):
                 return code

@@ -1,10 +1,10 @@
 -- Supprime les tables si elles existent déjà (utile pour réinitialiser la base)
-DROP TABLE IF EXISTS player_stats CASCADE;
-DROP TABLE IF EXISTS players CASCADE;
+DROP TABLE IF EXISTS joueurs CASCADE;
+DROP TABLE IF EXISTS joueurs_statistiques CASCADE;
 
 
 -- Table des joueurs (infos administratives)
-CREATE TABLE players (
+CREATE TABLE joueurs (
     pseudo VARCHAR(50) PRIMARY KEY,
     mdp TEXT NOT NULL,
     portefeuille INT,
@@ -12,7 +12,7 @@ CREATE TABLE players (
 );
 
 -- Table des statistiques
-CREATE TABLE player_stats (
+CREATE TABLE joueurs_statistiques (
     pseudo VARCHAR(50) PRIMARY KEY,
     meilleur_classement INT,
     nombre_total_mains_jouees INT DEFAULT 0,
@@ -23,7 +23,7 @@ CREATE TABLE player_stats (
     nombre_relances INT DEFAULT 0,
     nombre_suivis INT DEFAULT 0,
     nombre_checks INT DEFAULT 0,
-    FOREIGN KEY (pseudo) REFERENCES players(pseudo) ON DELETE CASCADE
+    FOREIGN KEY (pseudo) REFERENCES joueurs(pseudo) ON DELETE CASCADE
 );
 
 

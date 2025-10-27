@@ -1,10 +1,17 @@
-INSERT INTO players (pseudo, mdp, portefeuille, code_parrainage) VALUES
-('arthur', 'hash_mdp_9876', 500, 'AAA11'),
-('maxence', 'hash_mdp_1234', 300, 'BBB22'),
-('lucas', 'hash_mdp_5678', 800, 'CCC33'),
-('clemence', 'hash_mdp_0987', 400, 'DDD44');
+INSERT INTO joueurs (pseudo, mdp, portefeuille, code_parrainage) VALUES
+('arthur', '5e5273fdb85dc5d8ed9b10759ffcde9c82936ef8333b67ccc2a3aa0be58e7b7c', 500, 'AAA11'),
+('maxence', 'cebf15dd1986dd82dae11c2c36acf0b5fa4ea4996bd9116dc9c25f6c2cfdc598', 300, 'BBB22'),
+('lucas', 'b0c704ea2c8cb6bafc4521b920e721472d128741706ca3224d5be983c1ee8fc9', 800, 'CCC33'),
+('clemence', '5a5616fe03309e0e04bea7d20bc5aa5d0000c819697c96d4a20198a2d10e2de2', 400, 'DDD44');
 
-INSERT INTO player_stats (
+-- Les mots de passe sont : 
+-- pour arthur : hash_mdp_9876
+-- pour maxence : hash_mdp_1234
+-- pour lucas : hash_mdp_5678
+-- pour clemence : hash_mdp_0987
+-- après hashage par la fonction dans utils/securite.py et sel = ""
+
+INSERT INTO joueurs_statistiques (
     pseudo,
     meilleur_classement,
     nombre_total_mains_jouees,

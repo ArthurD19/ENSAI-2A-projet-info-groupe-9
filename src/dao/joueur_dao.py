@@ -31,7 +31,7 @@ class JoueurDao(metaclass=Singleton):
                 with connection.cursor() as cursor:
                     cursor.execute(
                         """
-                        INSERT INTO players (pseudo, mdp, portefeuille, code_parrainage)
+                        INSERT INTO joueurs (pseudo, mdp, portefeuille, code_parrainage)
                         VALUES (%(pseudo)s, %(mdp)s, %(portefeuille)s, %(code_parrainage)s);
                         """,
                         joueur,
@@ -52,7 +52,7 @@ class JoueurDao(metaclass=Singleton):
                     cursor.execute(
                         """
                         SELECT pseudo, mdp, portefeuille, code_parrainage
-                        FROM players
+                        FROM joueurs
                         WHERE pseudo = %(pseudo)s;
                         """,
                         {"pseudo": pseudo},
@@ -73,7 +73,7 @@ class JoueurDao(metaclass=Singleton):
                     cursor.execute(
                         """
                         SELECT pseudo, mdp, portefeuille, code_parrainage
-                        FROM players;
+                        FROM joueurs;
                         """
                     )
                     return cursor.fetchall() or []
@@ -91,7 +91,7 @@ class JoueurDao(metaclass=Singleton):
                 with connection.cursor() as cursor:
                     cursor.execute(
                         """
-                        UPDATE players
+                        UPDATE joueurs
                            SET mdp = %(mdp)s,
                                portefeuille = %(portefeuille)s,
                                code_parrainage = %(code_parrainage)s
@@ -113,7 +113,7 @@ class JoueurDao(metaclass=Singleton):
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
                     cursor.execute(
-                        "DELETE FROM players WHERE pseudo = %(pseudo)s;",
+                        "DELETE FROM joueurs WHERE pseudo = %(pseudo)s;",
                         {"pseudo": pseudo},
                     )
                     return cursor.rowcount > 0
@@ -136,7 +136,7 @@ class JoueurDao(metaclass=Singleton):
                     cursor.execute(
                         """
                         SELECT pseudo, mdp, portefeuille, code_parrainage
-                        FROM players
+                        FROM joueurs
                         WHERE pseudo = %(pseudo)s
                           AND mdp = %(mdp)s;
                         """,
@@ -160,7 +160,7 @@ class JoueurDao(metaclass=Singleton):
                     cursor.execute(
                         """
                         SELECT portefeuille
-                        FROM players
+                        FROM joueurs
                         WHERE pseudo = %(pseudo)s;
                         """,
                         {"pseudo": pseudo},
@@ -185,7 +185,7 @@ class JoueurDao(metaclass=Singleton):
                         cursor.execute(
                             """
                             SELECT pseudo, portefeuille
-                            FROM players
+                            FROM joueurs
                             ORDER BY portefeuille DESC
                             LIMIT %(limit)s;
                             """,
@@ -195,7 +195,7 @@ class JoueurDao(metaclass=Singleton):
                         cursor.execute(
                             """
                             SELECT pseudo, portefeuille
-                            FROM players
+                            FROM joueurs
                             ORDER BY portefeuille DESC;
                             """
                         )
@@ -215,7 +215,7 @@ class JoueurDao(metaclass=Singleton):
                     cursor.execute(
                         """
                         SELECT 1
-                        FROM players
+                        FROM joueurs
                         WHERE code_parrainage = %(code)s
                         LIMIT 1;
                         """,
@@ -236,7 +236,7 @@ class JoueurDao(metaclass=Singleton):
                 with connection.cursor() as cursor:
                     cursor.execute(
                         """
-                        UPDATE players
+                        UPDATE joueurs
                         SET code_parrainage = %(nouveau_code)s
                         WHERE pseudo = %(pseudo)s;
                         """,

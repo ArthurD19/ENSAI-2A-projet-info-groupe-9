@@ -33,7 +33,7 @@ class StatistiqueDao(metaclass=Singleton):
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
                     cursor.execute(
-                        "INSERT INTO player_stats (pseudo) VALUES (%(pseudo)s);",
+                        "INSERT INTO joueurs_statistiques (pseudo) VALUES (%(pseudo)s);",
                         {"pseudo": pseudo},
                     )
         except Exception as e:
@@ -59,7 +59,7 @@ class StatistiqueDao(metaclass=Singleton):
                 with connection.cursor() as cursor:
                     cursor.execute(
                         "SELECT *                           "
-                        "  FROM player_stats                      "
+                        "  FROM joueurs_statistiques                      "
                         " WHERE pseudo = %(pseudo)s;  ",
                         {"pseudo": pseudo},
                     )
@@ -103,7 +103,7 @@ class StatistiqueDao(metaclass=Singleton):
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
-                    query = f"UPDATE player_stats SET {stat_a_mettre_a_jour} = %(valeur)s WHERE pseudo = %(pseudo)s;"
+                    query = f"UPDATE joueurs_statistiques SET {stat_a_mettre_a_jour} = %(valeur)s WHERE pseudo = %(pseudo)s;"
                     cursor.execute(query, {"valeur": valeur, "pseudo": pseudo})
         except Exception as e:
             logging.info(e)
@@ -125,7 +125,7 @@ class StatistiqueDao(metaclass=Singleton):
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
-                    query = f"UPDATE player_stats SET {stat_a_incrementer} = {stat_a_incrementer} + %(valeur)s WHERE pseudo = %(pseudo)s;"
+                    query = f"UPDATE joueurs_statistiques SET {stat_a_incrementer} = {stat_a_incrementer} + %(valeur)s WHERE pseudo = %(pseudo)s;"
                     cursor.execute(query, {"valeur": valeur, "pseudo": pseudo})
         except Exception as e:
             logging.info(e)
@@ -149,7 +149,7 @@ class StatistiqueDao(metaclass=Singleton):
                     cursor.execute(
                         """
                         SELECT pseudo, meilleur_classement
-                        FROM player_stats
+                        FROM joueurs_statistiques
                         WHERE meilleur_classement IS NOT NULL
                         ORDER BY meilleur_classement ASC
                         LIMIT %(limite)s;
