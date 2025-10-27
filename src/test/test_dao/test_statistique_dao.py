@@ -7,6 +7,7 @@ from utils.reset_database import ResetDatabase
 from utils.securite import hash_password
 
 from dao.statistique_dao import StatistiqueDao
+from dao.joueur_dao import JoueurDao
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -54,15 +55,19 @@ def test_creer_statistiques_pour_joueur_ok():
     Création de statistiques réussie pour un joueur
     """
     # GIVEN
-    pseudo = "nouveau_joueur"
-    # joueur = 
+    joueur = {
+        "pseudo": "nouveau_joueur",
+        "mdp": "mdp",
+        "portefeuille": None,
+        "code_parrainage": None
+    }
     # WHEN
-    # JoueurDao().creer(joueur)
-    StatistiqueDao().creer_statistiques_pour_joueur(pseudo)
+    JoueurDao().creer(joueur)
+    StatistiqueDao().creer_statistiques_pour_joueur(joueur["pseudo"])
     # THEN
-    stats = StatistiqueDao().trouver_statistiques_par_id(pseudo)
+    stats = StatistiqueDao().trouver_statistiques_par_id(joueur["pseudo"])
     assert stats is not None
-    assert stats["pseudo"] == pseudo
+    assert stats["pseudo"] == joueur["pseudo"]
 
 # est ce qu'il faut faire le test dans le cas où ça ne marche pas car le joueur n'existe pas dans la base de données
 

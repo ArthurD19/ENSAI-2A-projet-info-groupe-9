@@ -71,11 +71,17 @@ class StatistiqueDao(metaclass=Singleton):
         statistiques = {}
         if res:
             statistiques = res
-            statistiques["taux_main_all_in"] = statistiques["nombre_all_in"]/statistiques["nombre_total_mains_jouees"]
-            statistiques["taux_main_fold"] = statistiques["nombre_folds"]/statistiques["nombre_total_mains_jouees"]
-            # il reste taux_victoire_abattage, type_joueur_selon_frequence_jeux, badge
-            statistiques["agression_factor"] = (statistiques["nombre_mises"] + statistiques["nombre_relances"])/statistiques["nombre_suivis"]
-            statistiques["agression_frequency"] = (statistiques["nombre_mises"] + statistiques["nombre_relances"])/(statistiques["nombre_suivis"] + statistiques["nombre_checks"] + statistiques["nombre_folds"] + statistiques["nombre_relances"] + statistiques["nombre_mises"])
+            if statistiques["nombre_total_mains_jouees"] != 0:
+                statistiques["taux_main_all_in"] = statistiques["nombre_all_in"]/statistiques["nombre_total_mains_jouees"]
+                statistiques["taux_main_fold"] = statistiques["nombre_folds"]/statistiques["nombre_total_mains_jouees"]
+                # il reste taux_victoire_abattage, type_joueur_selon_frequence_jeux, badge
+                statistiques["agression_factor"] = (statistiques["nombre_mises"] + statistiques["nombre_relances"])/statistiques["nombre_suivis"]
+                statistiques["agression_frequency"] = (statistiques["nombre_mises"] + statistiques["nombre_relances"])/(statistiques["nombre_suivis"] + statistiques["nombre_checks"] + statistiques["nombre_folds"] + statistiques["nombre_relances"] + statistiques["nombre_mises"])
+            else:
+                statistiques["taux_main_all_in"] = 0
+                statistiques["taux_main_fold"] = 0
+                statistiques["agression_factor"] = 0
+                statistiques["agression_frequency"] = 0
         return statistiques
 
     
