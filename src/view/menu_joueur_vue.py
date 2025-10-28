@@ -62,6 +62,5 @@ class MenuJoueurVue(VueAbstraite):
                 return MenuJoueurVue(code_parrainage)
 
             case "Rejoindre une table":
-                from view.menu_table_vue import MenuTableVue
-                JoueurService().rejoindre_table()
-                return MenuTableVue()
+                from view.menu_rejoindre_table_vue import MenuRejoindreTableVue
+                return MenuRejoindreTableVue()

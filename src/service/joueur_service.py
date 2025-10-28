@@ -17,10 +17,12 @@ class JoueurService:
 
         nouveau_joueur = {}
         nouveau_joueur[pseudo] = pseudo
-        nouveau_joueur[mdp] = mdp
+        nouveau_joueur[mdp] = hash_password(mdp, pseudo)
 
         if JoueurDao().creer(nouveau_joueur):
-            # gérer le code de parrainage si renseigné (si code de parrainage appartient à un joueur on met à jour portefeuille, sinon rien)
+            if JoueurDao().code_de_parrainage_existe(code_de_parrainage):
+                # coder lorsque l'on aura déterminer ce qu'on fait si le code de parrainage est valide
+                pass 
             return nouveau_joueur 
         else: None
 
@@ -91,7 +93,11 @@ class JoueurService:
     @log
     def se_connecter(self, pseudo, mdp) -> Joueur:
         """Se connecter à partir de pseudo et mdp"""
-        return JoueurDao().se_connecter(pseudo, hash_password(mdp, pseudo))
+        joueur = JoueurDao().se_connecter(pseudo, hash_password(mdp, pseudo))
+        if joueur is not None:
+            return True
+        else:
+            return False
 
     @log
     def pseudo_deja_utilise(self, pseudo) -> bool:
@@ -115,6 +121,6 @@ class JoueurService:
         return code
 
     @log
-    def rejoindre_table(self, pseudo):
+    def rejoindre_table(self, pseudo: str, num_table: str):
         # on la codera une fois qu'on saura comment gérer les tables
         pass

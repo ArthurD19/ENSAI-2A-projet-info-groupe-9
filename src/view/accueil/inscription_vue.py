@@ -29,7 +29,7 @@ class InscriptionVue(VueAbstraite):
             ),
         ).execute()
 
-        code_de_parrainage = inquirer.text(message="Entrez votre code de parrainage : ").execute()
+        code_de_parrainage = inquirer.text(message="Entrez un code de parrainage : ").execute()
 
         # Appel du service pour créer le joueur
         joueur = JoueurService().creer(pseudo, mdp, code_de_parrainage)
