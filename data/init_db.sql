@@ -23,6 +23,9 @@ CREATE TABLE joueurs_statistiques (
     nombre_relances INT DEFAULT 0,
     nombre_suivis INT DEFAULT 0,
     nombre_checks INT DEFAULT 0,
+    nombre_victoire_abattage INT DEFAULT 0,
+    nombre_fois_abattage INT DEFAULT 0,
+    nombre_parties_dernier_mois INT DEFAULT 0,
     FOREIGN KEY (pseudo) REFERENCES joueurs(pseudo) ON DELETE CASCADE
 );
 

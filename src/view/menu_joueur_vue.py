@@ -42,26 +42,34 @@ class MenuJoueurVue(VueAbstraite):
             ],
         ).execute()
 
+        pseudo = Session().joueur
+
         match choix:
             case "Se déconnecter":
                 Session().deconnexion()
                 from view.accueil.accueil_vue import AccueilVue
-
+                print("\nVous êtes maintenant déconnecté.\n")
                 return AccueilVue()
 
             case "Afficher la valeur du portefeuille":
                 portefeuille = JoueurService().afficher_valeur_portefeuille(pseudo)
-                return MenuJoueurVue(portefeuille)
+                print(f"\nVotre portefeuille contient : {portefeuille} jetons.\n")
+                input("Appuyez sur Entrée pour revenir au menu précédent.")
+                return MenuJoueurVue()
 
             case "Afficher le classement":
                 classement_joueur = JoueurService().afficher_classement_joueur(pseudo)
-                return MenuJoueurVue(classement_joueur)
+                print("\nVotre position actuelle dans le classement :")
+                print(classement_joueur)
+                input("\nAppuyez sur Entrée pour revenir au menu précédent.")
+                return MenuJoueurVue()
 
             case "Générer un code de parrainage":
                 code_parrainage = JoueurService().generer_code_parrainage(pseudo)
-                return MenuJoueurVue(code_parrainage)
+                print(f"\nVotre code de parrainage est : {code_parrainage}\n")
+                input("Appuyez sur Entrée pour revenir au menu parrainage.")
+                return MenuJoueurVue()
 
             case "Rejoindre une table":
-                from view.menu_table_vue import MenuTableVue
-                JoueurService().rejoindre_table()
-                return MenuTableVue()
+                from view.menu_rejoindre_table_vue import MenuRejoindreTableVue
+                return MenuRejoindreTableVue()

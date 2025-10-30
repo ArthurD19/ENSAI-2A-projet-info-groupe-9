@@ -74,14 +74,30 @@ class StatistiqueDao(metaclass=Singleton):
             if statistiques["nombre_total_mains_jouees"] != 0:
                 statistiques["taux_main_all_in"] = statistiques["nombre_all_in"]/statistiques["nombre_total_mains_jouees"]
                 statistiques["taux_main_fold"] = statistiques["nombre_folds"]/statistiques["nombre_total_mains_jouees"]
-                # il reste taux_victoire_abattage, type_joueur_selon_frequence_jeux, badge
+                # il reste type_joueur_selon_frequence_jeux
                 statistiques["agression_factor"] = (statistiques["nombre_mises"] + statistiques["nombre_relances"])/statistiques["nombre_suivis"]
                 statistiques["agression_frequency"] = (statistiques["nombre_mises"] + statistiques["nombre_relances"])/(statistiques["nombre_suivis"] + statistiques["nombre_checks"] + statistiques["nombre_folds"] + statistiques["nombre_relances"] + statistiques["nombre_mises"])
+                if statistiques["taux_main_all_in"] > 0.3:
+                    statistiques["badge"] = "Le mitrailleur"
+                elif statistiques["taux_main_fold"] > 0.45:
+                    statistiques["badge"] = "Gérard j'ai pas les bonnes cartes"
+                elif statistiques["agression_factor"] >= 3.5 and statistiques["agression_frequency"] >= 0.55:
+                    statistiques["bagde"] = "Bluffeur fou"
+                elif 2 <= statistiques["agression_factor"] < 3.5 and 0.3 <= statistiques["agression_frequency"] < 0.55:
+                    statistiques["bagde"] = "Agressif"
+                elif statistiques["agression_factor"] < 2 and statistiques["agression_frequency"] < 0.3:
+                    statistiques["badge"] = "Poule mouillée"
+                else:
+                    statistiques["badge"] = "Sans badge"
             else:
                 statistiques["taux_main_all_in"] = 0
                 statistiques["taux_main_fold"] = 0
                 statistiques["agression_factor"] = 0
                 statistiques["agression_frequency"] = 0
+            if statistiques["nombre_fois_abattage"] != 0:
+                statistiques["taux_victoire_abattage"] = statistiques["nombre_victoire_abattage"]/statistiques["nombre_fois_abattage"]
+            else:
+                statistiques["taux_victoire_abattage"] = 0
         return statistiques
 
     

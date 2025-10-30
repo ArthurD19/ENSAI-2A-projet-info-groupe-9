@@ -20,6 +20,6 @@ class MenuTableVue(VueAbstraite):
         retourne la prochaine vue, celle qui est choisie par l'utilisateur
     """
 
-    def choisir_action(self):
+    def choisir_menu(self):
         # on la codera plus tard (quand on aura notre partie)
         pass

@@ -2,7 +2,7 @@ INSERT INTO joueurs (pseudo, mdp, portefeuille, code_parrainage) VALUES
 ('arthur', '5e5273fdb85dc5d8ed9b10759ffcde9c82936ef8333b67ccc2a3aa0be58e7b7c', 500, 'AAA11'),
 ('maxence', 'cebf15dd1986dd82dae11c2c36acf0b5fa4ea4996bd9116dc9c25f6c2cfdc598', 300, 'BBB22'),
 ('lucas', 'b0c704ea2c8cb6bafc4521b920e721472d128741706ca3224d5be983c1ee8fc9', 800, 'CCC33'),
-('clemence', '5a5616fe03309e0e04bea7d20bc5aa5d0000c819697c96d4a20198a2d10e2de2', 400, 'DDD44');
+('clemence', '4797d000dadc042a6b6d6cd6d5ac8069e56f0aa3a2e03055a31cf8ae09899700', 400, 'DDD44');
 
 -- Les mots de passe sont : 
 -- pour arthur : hash_mdp_9876
