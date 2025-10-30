@@ -320,6 +320,26 @@ def test_mettre_a_jour_code_de_parrainage():
     assert JoueurDao().code_de_parrainage_existe(nouveau_code) is True
     assert JoueurDao().code_de_parrainage_existe("VVV11") is False
 
+def test_trouver_par_code_parrainage_ok():
+    #GIVEN
+    code_a_chercher = 'DDD44'
+
+    #WHEN
+    joueur = JoueurDao().trouver_par_code_parrainage(code_a_chercher)
+
+    #THEN
+    assert joueur != {}
+    assert joueur["code_parrainage"] == code_a_chercher
+
+def test_trouver_par_code_parrainage_ko():
+    #GIVEN
+    code_a_chercher = 'DDD45'
+
+    #WHEN
+    joueur = JoueurDao().trouver_par_code_parrainage(code_a_chercher)
+
+    #THEN
+    assert joueur == {}
 
 if __name__ == "__main__":
     pytest.main([__file__])

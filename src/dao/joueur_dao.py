@@ -246,3 +246,38 @@ class JoueurDao(metaclass=Singleton):
         except Exception as e:
             logging.exception(e)
             return False
+
+    @log
+    def trouver_par_code_parrainage(self, code: str) -> dict | None:
+        """
+        Renvoie le joueur auquel appartient le code de parrainage donné.
+
+        Parameters
+        ----------
+        code : str
+            Le code de parrainage à rechercher.
+
+        Returns
+        -------
+        joueur: dict
+            Dictionnaire avec pseudo, mdp, portefeuille, code_parrainage du joueur, ou dictionnaire vide
+            si le joueur n'existe pas.
+        """
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+                    cursor.execute(
+                        """
+                        SELECT pseudo, portefeuille, code_parrainage
+                        FROM joueurs
+                        WHERE code_parrainage = %(code)s
+                        LIMIT 1;
+                        """,
+                        {"code": code},
+                    )
+                    joueur = cursor.fetchone()
+                    return dict(joueur) if joueur else {}
+        except Exception as e:
+            logging.exception(e)
+            return None
+

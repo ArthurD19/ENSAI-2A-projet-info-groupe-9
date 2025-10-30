@@ -18,11 +18,20 @@ class JoueurService:
         nouveau_joueur = {}
         nouveau_joueur[pseudo] = pseudo
         nouveau_joueur[mdp] = hash_password(mdp, pseudo)
+        nouveau_joueur[portefeuille] = 100
 
         if JoueurDao().creer(nouveau_joueur):
             if JoueurDao().code_de_parrainage_existe(code_de_parrainage):
-                # coder lorsque l'on aura déterminer ce qu'on fait si le code de parrainage est valide
-                pass 
+                joueur = JoueurDao().trouver_par_code_parrainage(code_de_parrainage)
+                pseudo_parrain = joueur[pseudo]
+                porte_feuille_parrain = JoueurDao().valeur_portefeuille(pseudo_parrain)
+                porte_feuille = JoueurDao().valeur_portefeuille(pseudo)
+                nouveau_joueur[portefeuille] = nouveau_joueur[porte_feuille] + 50
+                joueur[porte_feuille] = joueur[porte_feuille] + 50 
+                modification_ok = JoueurDao().modifier(joueur)
+                modification_ok2 = JoueurDao().modifier(nouveau_joueur)
+                if modification_ok and modification_ok2:
+                    return nouveau_joueur
             return nouveau_joueur 
         else: None
 
