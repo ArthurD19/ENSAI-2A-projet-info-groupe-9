@@ -72,7 +72,7 @@ class JoueurDao(metaclass=Singleton):
                     cursor.execute(
                         """
                         SELECT pseudo, mdp, portefeuille, code_parrainage
-                        FROM joueurs;
+                        FROM public.joueurs;
                         """
                     )
                     return cursor.fetchall() or []
@@ -245,6 +245,9 @@ class JoueurDao(metaclass=Singleton):
         except Exception as e:
             logging.exception(e)
             return False
+
+    # --------------------------------------------------------------------------
+
 
     @log
     def trouver_par_code_parrainage(self, code: str) -> dict | None:

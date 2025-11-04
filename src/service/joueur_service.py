@@ -12,28 +12,19 @@ class JoueurService:
     """Classe contenant les méthodes de service des Joueurs"""
 
     @log
-    def creer(self, pseudo, mdp, code_de_parrainage) -> Joueur:
+    def creer(self, pseudo_joueur, mdp) -> Joueur:
         """Création d'un joueur à partir de ses attributs"""
 
-        nouveau_joueur = {}
-        nouveau_joueur[pseudo] = pseudo
-        nouveau_joueur[mdp] = hash_password(mdp, pseudo)
-        nouveau_joueur[portefeuille] = 1000
+        nouveau_joueur = {
+            "pseudo": pseudo_joueur,
+            "mdp": hash_password(mdp, pseudo_joueur),
+            "portefeuille": 1000, 
+            "code_parrainage": None}
 
         if JoueurDao().creer(nouveau_joueur):
-            if JoueurDao().code_de_parrainage_existe(code_de_parrainage):
-                joueur = JoueurDao().trouver_par_code_parrainage(code_de_parrainage)
-                pseudo_parrain = joueur[pseudo]
-                porte_feuille_parrain = JoueurDao().valeur_portefeuille(pseudo_parrain)
-                porte_feuille = JoueurDao().valeur_portefeuille(pseudo)
-                nouveau_joueur[portefeuille] = nouveau_joueur[porte_feuille] + 100
-                joueur[porte_feuille] = joueur[porte_feuille] + 20 
-                modification_ok = JoueurDao().modifier(joueur)
-                modification_ok2 = JoueurDao().modifier(nouveau_joueur)
-                if modification_ok and modification_ok2:
-                    return nouveau_joueur
             return nouveau_joueur 
-        else: None
+        else: 
+            None
 
     @log
     def lister_tous(self, inclure_mdp=False) -> list[Joueur]:
@@ -103,7 +94,7 @@ class JoueurService:
     def se_connecter(self, pseudo, mdp) -> Joueur:
         """Se connecter à partir de pseudo et mdp"""
         joueur = JoueurDao().se_connecter(pseudo, hash_password(mdp, pseudo))
-        if joueur is not None:
+        if joueur:
             return True
         else:
             return False
@@ -117,16 +108,16 @@ class JoueurService:
 
     @log
     def afficher_valeur_portefeuille(self, pseudo):
-        return JoueurDao().recuperer_valeur_portefeuille(pseudo)
+        return JoueurDao().valeur_portefeuille(pseudo)
 
     @log
     def afficher_classement_joueur(self, pseudo):
-        return JoueurDao().classement_joueur(pseudo)
+        return JoueurDao().classement_par_portefeuille()
 
     @log
     def generer_code_parrainage(self, pseudo):
         code = GenerateurDeCode().generate_unique_code()
-        JoueurDao().mettre_a_jour_code(pseudo, code)
+        JoueurDao().mettre_a_jour_code_de_parrainage(pseudo, code)
         return code
 
     @log
