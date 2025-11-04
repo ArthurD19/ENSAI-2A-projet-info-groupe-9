@@ -11,6 +11,7 @@ from view.vue_abstraite import VueAbstraite
 
 class InscriptionVue(VueAbstraite):
     def choisir_menu(self):
+        length = int(os.environ.get("PASSWORD_LENGTH", 16))
         # Demande à l'utilisateur de saisir pseudo, mot de passe...
         pseudo = inquirer.text(message="Entrez votre pseudo : ").execute()
 
@@ -20,24 +21,23 @@ class InscriptionVue(VueAbstraite):
             return AccueilVue(f"Le pseudo {pseudo} est déjà utilisé.")
 
         mdp = inquirer.secret(
-            message="Entrez votre mot de passe : ",
+            message="Entrez votre mot de passe, il doit contenir au moins 16 caractères, une majuscule et un chiffre: ",
             validate=PasswordValidator(
-                length=os.environ["PASSWORD_LENGTH"],
+                length,
                 cap=True,
                 number=True,
-                message="Au moins 16 caractères, incluant une majuscule et un chiffre",
             ),
         ).execute()
 
-        code_de_parrainage = inquirer.text(message="Entrez un code de parrainage : ").execute()
+        
 
         # Appel du service pour créer le joueur
-        joueur = JoueurService().creer(pseudo, mdp, code_de_parrainage)
+        joueur = JoueurService().creer(pseudo, mdp)
 
         # Si le joueur a été créé
-        if joueur:
+        if joueur is not None:
             message = (
-                f"Votre compte {joueur.pseudo} a été créé. Vous pouvez maintenant vous connecter."
+                f"Votre compte {joueur[pseudo]} a été créé. Vous pouvez maintenant vous connecter."
             )
         else:
             message = "Erreur de connexion (pseudo ou mot de passe invalide)"
