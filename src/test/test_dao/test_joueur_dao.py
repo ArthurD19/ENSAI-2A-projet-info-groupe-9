@@ -341,5 +341,15 @@ def test_trouver_par_code_parrainage_ko():
     #THEN
     assert joueur == {}
 
+def test_pseudo_existe_et_non_existe():
+    """Vérifie la détection de l'existence d'un pseudo"""
+    # GIVEN
+    pseudo1 = "lucas"
+    pseudo2 = "lucas1"
+
+    # THEN
+    assert JoueurDao().pseudo_existe(pseudo1) is True
+    assert JoueurDao().pseudo_existe(pseudo2) is False
+
 if __name__ == "__main__":
     pytest.main([__file__])

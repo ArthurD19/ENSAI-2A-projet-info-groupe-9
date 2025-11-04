@@ -5,7 +5,7 @@ from dao.joueur_dao import JoueurDao
 # existe_code_parrainage à coder dans DAO joueur
 
 class GenerateurDeCode:
-    def __init__(self, length=8):
+    def __init__(self, length=5):
         """Initialise le générateur de code avec une longueur par défaut."""
         self.length = length
 

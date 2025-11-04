@@ -29,15 +29,15 @@ class InscriptionVue(VueAbstraite):
             ),
         ).execute()
 
-        
+        code_de_parrainage = inquirer.text(message="Entrez un code de parrainage : ").execute()
 
         # Appel du service pour créer le joueur
-        joueur = JoueurService().creer(pseudo, mdp)
+        joueur = JoueurService().creer(pseudo, mdp, code_de_parrainage)
 
         # Si le joueur a été créé
         if joueur is not None:
             message = (
-                f"Votre compte {joueur[pseudo]} a été créé. Vous pouvez maintenant vous connecter."
+                f"Votre compte {joueur['pseudo']} a été créé. Vous pouvez maintenant vous connecter."
             )
         else:
             message = "Erreur de connexion (pseudo ou mot de passe invalide)"

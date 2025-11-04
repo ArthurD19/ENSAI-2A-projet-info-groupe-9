@@ -91,8 +91,7 @@ class JoueurDao(metaclass=Singleton):
                     cursor.execute(
                         """
                         UPDATE joueurs
-                           SET mdp = %(mdp)s,
-                               portefeuille = %(portefeuille)s,
+                           SET portefeuille = %(portefeuille)s,
                                code_parrainage = %(code_parrainage)s
                          WHERE pseudo = %(pseudo)s;
                         """,
@@ -283,3 +282,22 @@ class JoueurDao(metaclass=Singleton):
             logging.exception(e)
             return None
 
+    @log
+    def pseudo_existe(self, pseudo: str) -> bool:
+        """Vérifie si un pseudo existe déjà"""
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        """
+                        SELECT 1
+                        FROM joueurs
+                        WHERE pseudo = %(pseudo)s
+                        LIMIT 1;
+                        """,
+                        {"pseudo": pseudo},
+                    )
+                    return cursor.fetchone() is not None
+        except Exception as e:
+            logging.exception(e)
+            return False

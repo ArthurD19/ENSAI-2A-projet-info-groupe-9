@@ -37,7 +37,7 @@ class MenuJoueurVue(VueAbstraite):
                 "Rejoindre une table",
                 "Afficher la valeur du portefeuille",
                 "Afficher le classement",
-                "Générer un code de parrainage",
+                "Générer ou voir mon code de parrainage",
                 "Se déconnecter",
             ],
         ).execute()
@@ -64,7 +64,7 @@ class MenuJoueurVue(VueAbstraite):
                 input("\nAppuyez sur Entrée pour revenir au menu précédent.")
                 return MenuJoueurVue()
 
-            case "Générer un code de parrainage":
+            case "Générer ou voir mon code de parrainage":
                 code_parrainage = JoueurService().generer_code_parrainage(pseudo)
                 print(f"\nVotre code de parrainage est : {code_parrainage}\n")
                 input("Appuyez sur Entrée pour revenir au menu parrainage.")

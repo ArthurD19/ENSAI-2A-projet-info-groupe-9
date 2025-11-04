@@ -12,17 +12,26 @@ class JoueurService:
     """Classe contenant les méthodes de service des Joueurs"""
 
     @log
-    def creer(self, pseudo_joueur, mdp) -> Joueur:
+    def creer(self, pseudo_joueur, mdp, code_parrain) -> Joueur:
         """Création d'un joueur à partir de ses attributs"""
 
         nouveau_joueur = {
             "pseudo": pseudo_joueur,
             "mdp": hash_password(mdp, pseudo_joueur),
             "portefeuille": 1000, 
-            "code_parrainage": None}
+            "code_parrainage": ""}
 
         if JoueurDao().creer(nouveau_joueur):
-            return nouveau_joueur 
+            if code_parrain:
+                if JoueurDao().code_de_parrainage_existe(code_parrain):
+                    parrain = JoueurDao().trouver_par_code_parrainage(code_parrain)
+                    parrain["portefeuille"] = parrain["portefeuille"] + 20
+                    nouveau_joueur["portefeuille"] = nouveau_joueur["portefeuille"] + 100
+                    modif_nouveau_joueur = JoueurDao().modifier(nouveau_joueur)
+                    modif_parrain = JoueurDao().modifier(parrain)
+                    if modif_nouveau_joueur and modif_parrain:
+                        return nouveau_joueur
+                return nouveau_joueur 
         else: 
             None
 
@@ -103,8 +112,7 @@ class JoueurService:
     def pseudo_deja_utilise(self, pseudo) -> bool:
         """Vérifie si le pseudo est déjà utilisé
         Retourne True si le pseudo existe déjà en BDD"""
-        joueurs = JoueurDao().lister_tous()
-        return pseudo in [j.pseudo for j in joueurs]
+        return JoueurDao().pseudo_existe(pseudo)
 
     @log
     def afficher_valeur_portefeuille(self, pseudo):
@@ -116,9 +124,16 @@ class JoueurService:
 
     @log
     def generer_code_parrainage(self, pseudo):
-        code = GenerateurDeCode().generate_unique_code()
-        JoueurDao().mettre_a_jour_code_de_parrainage(pseudo, code)
-        return code
+        joueur = JoueurDao().trouver_par_pseudo(pseudo)
+        if joueur['code_parrainage'] == "":
+            code = GenerateurDeCode().generate_unique_code()
+            maj_ok = JoueurDao().mettre_a_jour_code_de_parrainage(pseudo, code)
+            if maj_ok:
+                return code
+            else:
+                return "code non genere"
+        else:
+            return joueur['code_parrainage']
 
     @log
     def rejoindre_table(self, pseudo: str, num_table: str):
