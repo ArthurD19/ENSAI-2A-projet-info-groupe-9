@@ -19,7 +19,7 @@ class JoueurService:
             "pseudo": pseudo_joueur,
             "mdp": hash_password(mdp, pseudo_joueur),
             "portefeuille": 1000, 
-            "code_parrainage": ""}
+            "code_parrainage": None}
 
         if JoueurDao().creer(nouveau_joueur):
             if code_parrain:
@@ -32,6 +32,21 @@ class JoueurService:
                     if modif_nouveau_joueur and modif_parrain:
                         return nouveau_joueur
                 return nouveau_joueur 
+        else: 
+            None
+
+    @log
+    def creer_sans_code_parrainage(self, pseudo_joueur, mdp) -> Joueur:
+        """Création d'un joueur à partir de ses attributs"""
+
+        nouveau_joueur = {
+            "pseudo": pseudo_joueur,
+            "mdp": hash_password(mdp, pseudo_joueur),
+            "portefeuille": 1000, 
+            "code_parrainage": None}
+
+        if JoueurDao().creer(nouveau_joueur):
+            return nouveau_joueur 
         else: 
             None
 

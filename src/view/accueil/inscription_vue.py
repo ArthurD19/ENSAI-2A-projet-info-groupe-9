@@ -31,8 +31,10 @@ class InscriptionVue(VueAbstraite):
 
         code_de_parrainage = inquirer.text(message="Entrez un code de parrainage : ").execute()
 
-        # Appel du service pour créer le joueur
-        joueur = JoueurService().creer(pseudo, mdp, code_de_parrainage)
+        if code_de_parrainage != "":
+            joueur = JoueurService().creer(pseudo, mdp, code_de_parrainage)
+        else:
+            joueur = JoueurService().creer_sans_code_parrainage(pseudo, mdp)
 
         # Si le joueur a été créé
         if joueur is not None:
