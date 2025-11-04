@@ -244,7 +244,7 @@ def test_valeur_portefeuille_existant():
 
     # WHEN
     valeur = JoueurDao().valeur_portefeuille(pseudo)
-
+    
     # THEN
     assert valeur is not None
     assert isinstance(valeur, (int, float))

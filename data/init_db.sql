@@ -28,5 +28,3 @@ CREATE TABLE joueurs_statistiques (
     nombre_parties_dernier_mois INT DEFAULT 0,
     FOREIGN KEY (pseudo) REFERENCES joueurs(pseudo) ON DELETE CASCADE
 );
-
-

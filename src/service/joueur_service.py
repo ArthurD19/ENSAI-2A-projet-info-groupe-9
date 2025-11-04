@@ -95,7 +95,7 @@ class JoueurService:
         """Se connecter à partir de pseudo et mdp"""
         joueur = JoueurDao().se_connecter(pseudo, hash_password(mdp, pseudo))
         if joueur:
-            return True
+            return joueur
         else:
             return False
 

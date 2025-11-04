@@ -20,8 +20,7 @@ class ConnexionVue(VueAbstraite):
         # Si le joueur a été trouvé à partir des ses identifiants de connexion
         if joueur:
             message = f"Vous êtes connecté sous le pseudo {pseudo}"
-            Session().connexion(joueur)
-
+            Session().connexion(joueur["pseudo"])  # stocke le pseudo uniquement
             from view.menu_joueur_vue import MenuJoueurVue
 
             return MenuJoueurVue(message)
