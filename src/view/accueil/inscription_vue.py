@@ -21,7 +21,7 @@ class InscriptionVue(VueAbstraite):
             return AccueilVue(f"Le pseudo {pseudo} est déjà utilisé.")
 
         mdp = inquirer.secret(
-            message="Entrez votre mot de passe, il doit contenir au moins 16 caractères, une majuscule et un chiffre: ",
+            message="Entrez votre mot de passe, il doit contenir au moins 8 caractères, une majuscule et un chiffre: ",
             validate=PasswordValidator(
                 length,
                 cap=True,
