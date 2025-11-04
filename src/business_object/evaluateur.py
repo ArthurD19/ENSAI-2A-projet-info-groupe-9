@@ -1,11 +1,10 @@
-from business_object.cartes import Carte, couleurs, valeurs, combinaisons
-
+from business_object.cartes import Carte, combinaisons, valeurs
 
 class EvaluateurMain:
     """
-    Évalue une main de poker Texas Hold'em.
+    Évalue une main de poker Texas Hold'em (7 cartes max).
     Prend en entrée 5 à 7 cartes (2 privées + 5 communes).
-    Retourne le rang de la meilleure combinaison trouvée.
+    Retourne la meilleure combinaison.
     """
 
     valeur_order = {
@@ -22,11 +21,11 @@ class EvaluateurMain:
         self.cartes = cartes
 
     def _valeurs_numeriques(self):
-        """Retourne les valeurs des cartes en nombres triés (du plus grand au plus petit)."""
+        """Retourne les valeurs numériques triées du plus grand au plus petit."""
         return sorted([self.valeur_order[c.valeur] for c in self.cartes], reverse=True)
 
     def _compter_occurrences(self):
-        """Compte combien de fois chaque valeur apparaît."""
+        """Compte combien de fois chaque valeur apparaît dans la main."""
         counts = {}
         for c in self.cartes:
             v = self.valeur_order[c.valeur]
@@ -34,78 +33,63 @@ class EvaluateurMain:
         return counts
 
     def _is_flush(self):
-        """Vérifie si toutes les cartes ont la même couleur (au moins 5 cartes)."""
-        couleurs = {}
+        """Vérifie si la main contient au moins 5 cartes de la même couleur."""
+        couleurs_count = {}
         for c in self.cartes:
-            couleurs[c.couleur] = couleurs.get(c.couleur, 0) + 1
-        return max(couleurs.values()) >= 5
+            couleurs_count[c.couleur] = couleurs_count.get(c.couleur, 0) + 1
+        return max(couleurs_count.values()) >= 5
 
     def _is_straight(self, valeurs):
-        """Retourne True si la liste de valeurs forme une quinte (As bas inclus)."""
+        """Vérifie si la main contient une suite de 5 cartes consécutives."""
         valeurs = sorted(set(valeurs))
-
-        # Quinte (ex: 5-6-7-8-9 ou 10-J-Q-K-A)
         for i in range(len(valeurs) - 4):
-            if valeurs[i + 4] - valeurs[i] == 4 and len(set(valeurs[i:i+5])) == 5:
+            if valeurs[i + 4] - valeurs[i] == 4:
                 return True
-
-        # Quinte basse : A-2-3-4-5
-        # on remplace l'As (14) par 1 pour tester ce scénario
+        # Quinte basse A-2-3-4-5
         if 14 in valeurs:
             quinte_basse = [1 if v == 14 else v for v in valeurs]
             quinte_basse = sorted(set(quinte_basse))
             for i in range(len(quinte_basse) - 4):
-                if quinte_basse[i + 4] - quinte_basse[i] == 4 and len(set(quinte_basse[i:i+5])) == 5:
+                if quinte_basse[i + 4] - quinte_basse[i] == 4:
                     return True
-
         return False
 
     def evalue_main(self):
         """
         Détermine la meilleure combinaison de la main.
+        Retourne une valeur de 'combinaisons'.
         """
         counts = self._compter_occurrences()
         valeurs_counts = sorted(counts.values(), reverse=True)
         valeurs_list = self._valeurs_numeriques()
-
         is_flush = self._is_flush()
         is_straight = self._is_straight(valeurs_list)
 
-        # Quinte Flush Royale
         if is_flush and set([10, 11, 12, 13, 14]).issubset(valeurs_list):
             return combinaisons.QUINTE_FLUSH_ROYALE
-        # Quinte Flush
-        if is_flush and is_straight:
+        elif is_flush and is_straight:
             return combinaisons.QUINTE_FLUSH
-        # Carré
-        if 4 in valeurs_counts:
+        elif 4 in valeurs_counts:
             return combinaisons.CARRE
-        # Full (3 + 2)
-        if 3 in valeurs_counts and 2 in valeurs_counts:
+        elif 3 in valeurs_counts and 2 in valeurs_counts:
             return combinaisons.FULL
-        # Couleur
-        if is_flush:
+        elif is_flush:
             return combinaisons.COULEUR
-        # Suite
-        if is_straight:
+        elif is_straight:
             return combinaisons.QUINTE
-        # Brelan
-        if 3 in valeurs_counts:
+        elif 3 in valeurs_counts:
             return combinaisons.BRELAN
-        # Double paire
-        if valeurs_counts.count(2) == 2:
+        elif valeurs_counts.count(2) == 2:
             return combinaisons.DOUBLE_PAIRE
-        # Paire
-        if 2 in valeurs_counts:
+        elif 2 in valeurs_counts:
             return combinaisons.PAIRE
-
-        # Sinon hauteur
-        return combinaisons.HAUTEUR
+        else:
+            return combinaisons.HAUTEUR
 
     @staticmethod
     def comparer_mains(main1, main2):
         """
-        Compare deux mains :
+        Compare deux combinaisons de mains :
         - retourne 1 si main1 gagne
         - retourne -1 si main2 gagne
         - retourne 0 si égalité
