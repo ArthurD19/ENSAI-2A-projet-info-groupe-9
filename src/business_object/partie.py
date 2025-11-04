@@ -1,8 +1,9 @@
 import random
-from business_object.cartes import Deck, Carte
+from business_object.cartes import Carte
 from business_object.joueurs import Joueur
 from business_object.distrib import Distrib
 from business_object.comptage import Comptage
+from business_object.evaluateur import EvaluateurMain
 
 class Partie:
     """Gestion complète d'une partie de poker Texas Hold'em."""
@@ -22,16 +23,13 @@ class Partie:
             return
         petite_blind = 10
         grosse_blind = 20
-        # petite blind
         joueur_pb = self.table.joueurs[self.table.indice_dealer % len(self.table.joueurs)]
         joueur_pb.miser(petite_blind)
         print(f"{joueur_pb.pseudo} place la petite blind ({petite_blind})")
-        # grosse blind
         joueur_gb = self.table.joueurs[(self.table.indice_dealer + 1) % len(self.table.joueurs)]
         joueur_gb.miser(grosse_blind)
         print(f"{joueur_gb.pseudo} place la grosse blind ({grosse_blind})")
         self.mise_max = grosse_blind
-        # tour après la grosse blind
         self.indice_joueur_courant = (self.table.indice_dealer + 2) % len(self.table.joueurs)
 
     def demarrer_partie(self):
@@ -53,10 +51,16 @@ class Partie:
             self.actions_joueurs()
             self.passer_tour()
 
-        # Fin de la main : demander si les joueurs veulent rester
+        self.annoncer_resultats()
+
+        # Demander si les joueurs veulent rejouer
         for j in self.table.joueurs[:]:
-            reponse = input(f"{j.pseudo}, voulez-vous rester à la table ? (oui/non) : ")
-            if reponse.lower() != "oui":
+            if j.solde > 0:
+                reponse = input(f"{j.pseudo}, voulez-vous rejouer ? (oui/non) : ")
+                if reponse.lower() != "oui":
+                    self.table.supprimer_joueur(j)
+            else:
+                print(f"{j.pseudo} n'a plus d'argent et est retiré de la table.")
                 self.table.supprimer_joueur(j)
 
         if len(self.table.joueurs) < 2:
@@ -78,17 +82,17 @@ class Partie:
         print(f"Taille du deck : {len(self.table.deck)}")
 
     def actions_joueurs(self):
-        """Boucle d'enchères : continue tant que tous les joueurs n'ont pas égalisé la mise ou se sont couchés."""
+        """Boucle d'enchères : tous les joueurs suivent la mise max ou se couchent."""
         nb_joueurs = len(self.table.joueurs)
         joueurs_actifs = [j for j in self.table.joueurs if j.actif]
-
-        dernier_relançant = None
         joueurs_a_jouer = set(joueurs_actifs)
 
         while len(joueurs_actifs) > 1 and joueurs_a_jouer:
             joueur = self.table.joueurs[self.indice_joueur_courant]
 
-            if not joueur.actif:
+            if not joueur.actif or joueur.solde == 0:
+                if joueur.solde == 0:
+                    print(f"{joueur.pseudo} n'a plus d'argent et ne peut plus agir ce tour.")
                 self.indice_joueur_courant = (self.indice_joueur_courant + 1) % nb_joueurs
                 continue
 
@@ -104,7 +108,6 @@ class Partie:
             if action == "voir partie":
                 self.afficher_etat()
                 continue
-
             elif action == "miser":
                 montant = int(input("Montant à miser (ajouté à votre mise actuelle) : "))
                 total = joueur.mise + montant
@@ -113,15 +116,11 @@ class Partie:
                     continue
                 joueur.miser(montant)
                 self.mise_max = joueur.mise
-                dernier_relançant = joueur
                 joueurs_a_jouer = {j for j in joueurs_actifs if j != joueur}
-
             elif action == "suivre":
-                # 🔹 MODIFICATION : le joueur complète exactement pour égaler la mise_max
                 montant_a_ajouter = self.mise_max - joueur.mise
                 if montant_a_ajouter > 0:
-                    joueur.suivre(montant_a_ajouter)
-
+                    joueur.suivre(self.mise_max)
             elif action == "se coucher":
                 joueur.se_coucher()
                 joueurs_actifs.remove(joueur)
@@ -136,6 +135,7 @@ class Partie:
 
             self.indice_joueur_courant = (self.indice_joueur_courant + 1) % nb_joueurs
 
+        # Si un seul joueur reste actif → il gagne immédiatement
         if len(joueurs_actifs) == 1:
             gagnant = joueurs_actifs[0]
             for j in self.table.joueurs:
@@ -143,7 +143,7 @@ class Partie:
                     self.comptage.ajouter_pot_perso(j, j.mise)
                     j.mise = 0
             self.comptage.ajouter_pot()
-            print(f"{gagnant.pseudo} remporte le pot principal ({self.comptage.pot})")
+            print(f"{gagnant.pseudo} remporte le pot principal ({self.comptage.pot}) avec la meilleure main !")
             gagnant.solde += self.comptage.pot
             self.comptage.pot = 0
             self.tour_actuel = "fin"
@@ -155,6 +155,7 @@ class Partie:
                 self.comptage.ajouter_pot_perso(j, j.mise)
                 j.mise = 0
         self.comptage.ajouter_pot()
+        self.mise_max = 0
 
         if self.tour_actuel == "preflop":
             self.distrib.distribuer_flop()
@@ -171,3 +172,21 @@ class Partie:
         elif self.tour_actuel == "river":
             self.tour_actuel = "fin"
             print("Fin de la main.")
+
+    def annoncer_resultats(self):
+        """Évalue et annonce la combinaison de chaque joueur et le gagnant."""
+        joueurs_en_jeu = [j for j in self.table.joueurs if j.actif and j.solde > 0]
+        if not joueurs_en_jeu:
+            print("Aucun joueur n'est en jeu.")
+            return
+
+        scores = {}
+        for j in joueurs_en_jeu:
+            cartes_totales = j.main + self.table.board
+            evaluateur = EvaluateurMain(cartes_totales)
+            combinaison = evaluateur.evalue_main()
+            scores[j] = combinaison
+            print(f"{j.pseudo} a {combinaison.name}")
+
+        gagnant = max(scores, key=lambda j: scores[j].value)
+        print(f"{gagnant.pseudo} remporte le pot principal ({self.comptage.pot}) avec {scores[gagnant].name} !")
