@@ -94,7 +94,7 @@ class JoueurService:
     def se_connecter(self, pseudo, mdp) -> Joueur:
         """Se connecter à partir de pseudo et mdp"""
         joueur = JoueurDao().se_connecter(pseudo, hash_password(mdp, pseudo))
-        if joueur is not None:
+        if joueur:
             return True
         else:
             return False
@@ -117,7 +117,7 @@ class JoueurService:
     @log
     def generer_code_parrainage(self, pseudo):
         code = GenerateurDeCode().generate_unique_code()
-        JoueurDao().mettre_a_jour_code(pseudo, code)
+        JoueurDao().mettre_a_jour_code_de_parrainage(pseudo, code)
         return code
 
     @log
