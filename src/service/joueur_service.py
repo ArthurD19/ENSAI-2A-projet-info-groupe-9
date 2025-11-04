@@ -108,7 +108,7 @@ class JoueurService:
 
     @log
     def afficher_valeur_portefeuille(self, pseudo):
-        return JoueurDao().recuperer_valeur_portefeuille(pseudo)
+        return JoueurDao().valeur_portefeuille(pseudo)
 
     @log
     def afficher_classement_joueur(self, pseudo):
