@@ -10,7 +10,7 @@ class Joueur:
 
     def recevoir_carte(self, carte: Carte):
         if len(self.main) >= 2:  
-            raise ValueError("Le joueur a déjà 2 cartes privées.")
+            raise ValueError("Le joueur a déjà 2 cartes.")
         self.main.append(carte)
 
     def recevoir_du_deck(self, deck: Deck):

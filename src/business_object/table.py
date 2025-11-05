@@ -13,8 +13,12 @@ class Table:
 
     def ajouter_joueur(self, joueur: Joueur):
         if joueur in self.joueurs:
-            raise ValueError("Ce joueur est déjà à la table.")
+            return 2
+        if len(self.joueurs) >= 5:
+            return 3
+            self.joueurs.append(joueur)
         self.joueurs.append(joueur)
+        return 1
 
     def supprimer_joueur(self, joueur: Joueur):
         if joueur not in self.joueurs:

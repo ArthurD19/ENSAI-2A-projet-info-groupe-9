@@ -22,8 +22,8 @@ def test_Deck_remplir():
     assert len(deck_unique) == 52
     cols = set(c.couleur for c in deck.cartes)
     vals = set(c.valeur for c in deck.cartes)
-    assert cols == set(couleurs)   # compare avec Enum
-    assert vals == set(valeurs)    # compare avec Enum
+    assert cols == set(couleurs)  
+    assert vals == set(valeurs)    
 
 
 def test_deck_melanger():

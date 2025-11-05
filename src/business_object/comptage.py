@@ -3,7 +3,7 @@ from business_object.joueurs import Joueur
 class Comptage:
     def __init__(self):
         self.pot = 0
-        self.pots_perso = {}  # dict Joueur -> mise perso
+        self.pots_perso = {}  
 
     def ajouter_pot_perso(self, joueur: Joueur, montant: int):
         self.pots_perso[joueur] = self.pots_perso.get(joueur, 0) + montant
