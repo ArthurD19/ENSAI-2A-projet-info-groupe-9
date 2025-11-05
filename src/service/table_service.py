@@ -2,6 +2,7 @@ from business_object.table import Table
 from business_object.joueurs import Joueur
 
 from utils.singleton import Singleton
+from utils.log_decorator import log
 
 from dao.joueur_dao import JoueurDao
 

@@ -15,8 +15,8 @@ def setup_test_environment():
     """
     Prépare un environnement de test isolé 
     """
-    with patch.dict(os.environ, {"SCHEMA": "projet_test_dao"}):
-        ResetDatabase().lancer(test_dao=True)
+    with patch.dict(os.environ, {"POSTGRES_SCHEMA": "projet_test_dao"}):
+        ResetDatabase().lancer()
         yield
 
 

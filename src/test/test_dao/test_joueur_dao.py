@@ -13,7 +13,7 @@ from dao.db_connection import DBConnection
 def setup_test_environment():
     """Initialisation des données de test"""
     with patch.dict(os.environ, {"POSTGRES_SCHEMA": "projet_test_dao"}):
-        ResetDatabase().lancer(test_dao=True)
+        ResetDatabase().lancer()
         yield
 
 
