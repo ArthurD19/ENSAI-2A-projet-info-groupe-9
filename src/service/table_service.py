@@ -11,6 +11,7 @@ class TableService(metaclass=Singleton):
         for i in range(1, nb_tables + 1):
             self.tables[i] = Table(id=i, blind=blind)
 
+    @log
     def get_table(self, id_table: int):
         """
         Fonction qui renvoie la table correspondant à l'identifiant si elle existe, None sinon.
@@ -26,6 +27,7 @@ class TableService(metaclass=Singleton):
         """
         return self.tables.get(id_table)
 
+    @log
     def rejoindre_table(self, pseudo: str, id_table: int):
         """
         Permet à un joueur de rejoindre une table si elle existe et qu'il y reste de la place
@@ -52,6 +54,7 @@ class TableService(metaclass=Singleton):
             return 4
         return table.ajouter_joueur(joueur_partie)
 
+    @log
     def lister_tables(self):
         """
         Renvoie la liste de toutes les tables
@@ -67,3 +70,33 @@ class TableService(metaclass=Singleton):
             }
             for t in self.tables.values()
         ]
+
+    @log
+    def quitter_table(self, pseudo, id_table):
+        """
+        Supprime un joueur de la table demandée à partir de son pseudo
+        
+        Parameters
+        ----------
+        pseudo: str
+            pseudo du joueur que l'on veut supprimer
+        id_table: int
+            identifiant de la table où l'on veut supprimer le joueur
+            
+        Returns
+        -------
+        int: 1 si le joueur est supprimé et 2 sinon"""
+        table = self.tables[id_table]
+        joueurs = table.joueurs
+        for j in joueurs:
+            if j.pseudo == pseudo:
+                table.supprimer_joueur(j)
+                self.tables[id_table] = table
+                return 1
+        return 2
+
+    @log
+    def reset_table(self, id_table):
+        table = self.tables[id_table]
+        table.reset_table()
+        self.tables[id_table] = table
