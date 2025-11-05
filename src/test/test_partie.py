@@ -42,16 +42,21 @@ def test_initialiser_blinds(table_exemple_blinds):
     partie.initialiser_blinds()
 
     alice = table_exemple_blinds.joueurs[0]   # Alice = dealer
-    bob = table_exemple_blinds.joueurs[1]     # Bob = grosse blind
-    charlie = table_exemple_blinds.joueurs[2] # Charlie = petite blind
+    bob = table_exemple_blinds.joueurs[1]     # Bob = petite blind
+    charlie = table_exemple_blinds.joueurs[2] # Charlie = grosse blind
 
-    # D'après la nouvelle logique :
-    assert charlie.mise == 10     # Petite blind
-    assert bob.mise == 20         # Grosse blind
+    # Vérifie les mises
+    assert bob.mise == 10         # Petite blind
+    assert charlie.mise == 20     # Grosse blind
     assert alice.mise == 0        # Dealer ne mise pas
+
+    # Vérifie la mise max et le joueur courant
     assert partie.mise_max == 20
-    assert partie.indice_joueur_courant == 2  # Charlie joue après la grosse blind
+    assert partie.indice_joueur_courant == 0  # Alice joue après la grosse blind
+
+    # Vérifie que le dealer a tourné
     assert table_exemple_blinds.indice_dealer == 1  # Dealer tourne vers Bob
+
 
 
 

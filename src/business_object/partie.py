@@ -19,36 +19,43 @@ class Partie:
 
     def initialiser_blinds(self):
         """Place automatiquement la petite et la grosse blind correctement."""
-        if len(self.table.joueurs) < 2:
+
+        nb_joueurs = len(self.table.joueurs)
+        if nb_joueurs < 2:
+            print("Pas assez de joueurs pour initialiser les blinds.")
             return
 
         petite_blind = 10
         grosse_blind = 20
 
-        nb_joueurs = len(self.table.joueurs)
-
         # Dealer actuel
         dealer_idx = self.table.indice_dealer % nb_joueurs
+        dealer = self.table.joueurs[dealer_idx]
+        print(f"Dealer : {dealer.pseudo}")
 
         # Petite blind = joueur à gauche du dealer
-        pb_idx = (dealer_idx - 1) % nb_joueurs
+        pb_idx = (dealer_idx + 1) % nb_joueurs
         joueur_pb = self.table.joueurs[pb_idx]
         joueur_pb.miser(petite_blind)
         print(f"{joueur_pb.pseudo} place la petite blind ({petite_blind})")
 
         # Grosse blind = joueur à gauche de la petite blind
-        gb_idx = (pb_idx - 1) % nb_joueurs
+        gb_idx = (pb_idx + 1) % nb_joueurs
         joueur_gb = self.table.joueurs[gb_idx]
         joueur_gb.miser(grosse_blind)
         print(f"{joueur_gb.pseudo} place la grosse blind ({grosse_blind})")
 
-        self.mise_max = grosse_blind
-
         # Premier joueur à agir = joueur à gauche de la grosse blind
         self.indice_joueur_courant = (gb_idx + 1) % nb_joueurs
+        joueur_courant = self.table.joueurs[self.indice_joueur_courant]
+        print(f"Premier joueur à agir : {joueur_courant.pseudo}")
+
+        # Mise max initiale
+        self.mise_max = grosse_blind
 
         # Faire tourner le dealer pour la prochaine main
         self.table.indice_dealer = (self.table.indice_dealer + 1) % nb_joueurs
+
 
     def demarrer_partie(self):
         """Déroule un tour complet de la partie."""
