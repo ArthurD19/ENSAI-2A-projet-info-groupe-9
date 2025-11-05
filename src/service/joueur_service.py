@@ -8,6 +8,7 @@ from dao.joueur_dao import JoueurDao
 from utils.genere_code_parrainage import GenerateurDeCode
 
 
+
 class JoueurService:
     """Classe contenant les méthodes de service des Joueurs"""
 

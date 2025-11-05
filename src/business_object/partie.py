@@ -4,6 +4,8 @@ from business_object.joueurs import Joueur
 from business_object.distrib import Distrib
 from business_object.comptage import Comptage
 from business_object.evaluateur import EvaluateurMain
+from dao.statistique_dao import StatistiqueDao
+
 
 class Partie:
     """Gestion complète d'une partie de poker Texas Hold'em."""
@@ -16,6 +18,7 @@ class Partie:
         self.tour_actuel = "preflop"
         self.mise_max = 0
         self.indice_joueur_courant = 0
+        self.stats_dao = StatistiqueDao() 
 
     def initialiser_blinds(self):
         """Place automatiquement la petite et la grosse blind correctement."""
@@ -142,18 +145,23 @@ class Partie:
                 joueur.miser(montant)
                 self.mise_max = joueur.mise
                 joueurs_a_jouer = {j for j in joueurs_actifs if j != joueur}
+                self.stats_dao.incrementer_statistique(joueur.pseudo, "nombre_mises")
             elif action == "suivre":
                 montant_a_ajouter = self.mise_max - joueur.mise
                 if montant_a_ajouter > 0:
                     joueur.suivre(self.mise_max)
+                self.stats_dao.incrementer_statistique(joueur.pseudo, "nombre_suivis")
             elif action == "se coucher":
                 joueur.se_coucher()
                 joueurs_actifs.remove(joueur)
                 if joueur in joueurs_a_jouer:
                     joueurs_a_jouer.remove(joueur)
+                self.stats_dao.incrementer_statistique(joueur.pseudo, "nombre_folds")
             else:
                 print("Action non reconnue.")
                 continue
+            self.stats_dao.incrementer_statistique(joueur.pseudo, "nombre_total_mains_jouees")
+            self.stats_dao.incrementer_statistique(joueur.pseudo, "nombre_mains_jouees_session")
 
             if joueur in joueurs_a_jouer:
                 joueurs_a_jouer.remove(joueur)

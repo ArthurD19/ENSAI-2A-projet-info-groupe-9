@@ -33,7 +33,11 @@ class StatistiqueDao(metaclass=Singleton):
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
                     cursor.execute(
-                        "INSERT INTO joueurs_statistiques (pseudo) VALUES (%(pseudo)s);",
+                        """
+                        INSERT INTO joueurs_statistiques (pseudo) 
+                        VALUES (%(pseudo)s)
+                        ON CONFLICT (pseudo) DO NOTHING;
+                        """,
                         {"pseudo": pseudo},
                     )
         except Exception as e:

@@ -7,6 +7,15 @@ from utils.log_decorator import log
 from dao.joueur_dao import JoueurDao
 
 class TableService(metaclass=Singleton):
+
+    def __init__(self, nb_tables=10, blind=20):
+        """
+        Initialise les tables avec un nombre de tables et un blind par défaut
+        """
+        self.tables = {}
+        for i in range(1, nb_tables + 1):
+            self.tables[i] = Table(id=i, blind=blind)
+
     @log
     def get_table(self, id_table: int):
         """
