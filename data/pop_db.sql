@@ -1,11 +1,11 @@
-INSERT INTO table_partie (id, blind, pot, indice_dealer, deck, board) VALUES
-(1, 10, 0, 0, NULL, NULL),
-(2, 10, 0, 0, NULL, NULL),
-(3, 10, 0, 0, NULL, NULL),
-(4, 10, 0, 0, NULL, NULL),
-(5, 10, 0, 0, NULL, NULL),
-(6, 10, 0, 0, NULL, NULL),
-(7, 10, 0, 0, NULL, NULL),
-(8, 10, 0, 0, NULL, NULL),
-(9, 10, 0, 0, NULL, NULL),
-(10, 10, 0, 0, NULL, NULL);
+INSERT INTO table_joueurs (id, joueur1, joueur2, joueur3, joueur4, joueur5) VALUES
+(1, NULL, NULL, NULL, NULL, NULL),
+(2, NULL, NULL, NULL, NULL, NULL),
+(3, NULL, NULL, NULL, NULL, NULL),
+(4, NULL, NULL, NULL, NULL, NULL),
+(5, NULL, NULL, NULL, NULL, NULL),
+(6, NULL, NULL, NULL, NULL, NULL),
+(7, NULL, NULL, NULL, NULL, NULL),
+(8, NULL, NULL, NULL, NULL, NULL),
+(9, NULL, NULL, NULL, NULL, NULL),
+(10, NULL, NULL, NULL, NULL, NULL);

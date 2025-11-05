@@ -1,8 +1,7 @@
 -- Supprime les tables si elles existent déjà (utile pour réinitialiser la base)
 DROP TABLE IF EXISTS joueurs CASCADE;
 DROP TABLE IF EXISTS joueurs_statistiques CASCADE;
-DROP TABLE IF EXISTS table_partie CASCADE;
-DROP TABLE IF EXISTS table_joueur CASCADE;
+DROP TABLE IF EXISTS table_joueurs CASCADE;
 
 
 -- Table des joueurs (infos administratives)
@@ -31,20 +30,13 @@ CREATE TABLE joueurs_statistiques (
     FOREIGN KEY (pseudo) REFERENCES joueurs(pseudo) ON DELETE CASCADE
 );
 
--- Table Partie (correspond à la table où se déroule la partie)
-CREATE TABLE table_partie (
-    id SERIAL PRIMARY KEY,
-    blind INTEGER DEFAULT 10 CHECK (blind >= 0),
-    pot INTEGER DEFAULT 0 CHECK (pot >= 0),
-    indice_dealer INTEGER NOT NULL DEFAULT 0,
-    deck JSONB NOT NULL,
-    board JSONB NOT NULL
-);
-
--- Table joueur fait le lien entre la table et les joueurs
-CREATE TABLE table_joueur (
-    table_id INTEGER REFERENCES table_partie(id) ON DELETE CASCADE,
-    joueur_id INTEGER REFERENCES joueurs(id) ON DELETE CASCADE,
-    PRIMARY KEY (table_id, joueur_id)
+-- Table qui retient les joueurs présents à chaque table
+CREATE TABLE table_joueurs (
+    id INTEGER PRIMARY KEY,
+    joueur1 VARCHAR REFERENCES joueurs(pseudo) ON DELETE CASCADE,
+    joueur2 VARCHAR REFERENCES joueurs(pseudo) ON DELETE CASCADE,
+    joueur3 VARCHAR REFERENCES joueurs(pseudo) ON DELETE CASCADE,
+    joueur4 VARCHAR REFERENCES joueurs(pseudo) ON DELETE CASCADE,
+    joueur5 VARCHAR REFERENCES joueurs(pseudo) ON DELETE CASCADE
 );
 
