@@ -189,7 +189,7 @@ def test_supprimer_ko():
 
 def test_se_connecter_ok():
     pseudo = "arthur"
-    mdp = "6aaa410dfb03069e6b3f31e3389c1c666b5db409e96eba06d971630146064bc1"
+    mdp = "5e5273fdb85dc5d8ed9b10759ffcde9c82936ef8333b67ccc2a3aa0be58e7b7c"
     from dao.db_connection import DBConnection
     with DBConnection().connection as conn:
         with conn.cursor() as cur:
