@@ -38,18 +38,22 @@ def table_exemple_blinds():
     return t
 
 def test_initialiser_blinds(table_exemple_blinds):
-
     partie = Partie(id=1, table=table_exemple_blinds)
     partie.initialiser_blinds()
 
-    alice = table_exemple_blinds.joueurs[0]  
-    bob = table_exemple_blinds.joueurs[1]    
-    charlie = table_exemple_blinds.joueurs[2]  
-    assert alice.mise == 10
-    assert bob.mise == 20
-    assert charlie.mise == 0
+    alice = table_exemple_blinds.joueurs[0]   # Alice = dealer
+    bob = table_exemple_blinds.joueurs[1]     # Bob = grosse blind
+    charlie = table_exemple_blinds.joueurs[2] # Charlie = petite blind
+
+    # D'après la nouvelle logique :
+    assert charlie.mise == 10     # Petite blind
+    assert bob.mise == 20         # Grosse blind
+    assert alice.mise == 0        # Dealer ne mise pas
     assert partie.mise_max == 20
-    assert partie.indice_joueur_courant == 2  
+    assert partie.indice_joueur_courant == 2  # Charlie joue après la grosse blind
+    assert table_exemple_blinds.indice_dealer == 1  # Dealer tourne vers Bob
+
+
 
 @pytest.fixture
 def table_etat():
