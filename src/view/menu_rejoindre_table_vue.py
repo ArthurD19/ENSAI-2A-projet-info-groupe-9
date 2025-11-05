@@ -6,6 +6,8 @@ from view.menu_joueur_vue import MenuJoueurVue
 from view.menu_table_vue import MenuTableVue
 
 from service.joueur_service import JoueurService
+from service.table_service import TableService
+
 
 
 class MenuRejoindreTableVue(VueAbstraite):
@@ -52,7 +54,7 @@ class MenuRejoindreTableVue(VueAbstraite):
 
         match choix:
             case "1":
-                table = JoueurService().rejoindre_table("1")
+                table = TableService().rejoindre_table(joueur, 1)
                 if table:
                     message = "Vous avez rejoint la table 1"
                     return MenuTableVue(message)
@@ -60,7 +62,7 @@ class MenuRejoindreTableVue(VueAbstraite):
                 return MenuRejoindreTableVue(message)
 
             case "2":
-                table = JoueurService().rejoindre_table("2")
+                table = TableService().rejoindre_table(joueur, 2)
                 if table:
                     message = "Vous avez rejoint la table 2"
                     return MenuTableVue(message)
@@ -68,7 +70,7 @@ class MenuRejoindreTableVue(VueAbstraite):
                 return MenuRejoindreTableVue(message)
             
             case "3":
-                table = JoueurService().rejoindre_table("3")
+                table = TableService().rejoindre_table(joueur, 3)
                 if table:
                     message = "Vous avez rejoint la table 3"
                     return MenuTableVue(message)
@@ -76,7 +78,7 @@ class MenuRejoindreTableVue(VueAbstraite):
                 return MenuRejoindreTableVue(message)
 
             case "4":
-                table = JoueurService().rejoindre_table("4")
+                table = TableService().rejoindre_table(joueur, 4)
                 if table:
                     message = "Vous avez rejoint la table 4"
                     return MenuTableVue(message)
@@ -84,7 +86,7 @@ class MenuRejoindreTableVue(VueAbstraite):
                 return MenuRejoindreTableVue(message)
 
             case "5":
-                table = JoueurService().rejoindre_table("5")
+                table = TableService().rejoindre_table(joueur, 5)
                 if table:
                     message = "Vous avez rejoint la table 5"
                     return MenuTableVue(message)
@@ -92,7 +94,7 @@ class MenuRejoindreTableVue(VueAbstraite):
                 return MenuRejoindreTableVue(message)
 
             case "6":
-                table = JoueurService().rejoindre_table("6")
+                table = TableService().rejoindre_table(joueur, 6)
                 if table:
                     message = "Vous avez rejoint la table 6"
                     return MenuTableVue(message)
@@ -100,7 +102,7 @@ class MenuRejoindreTableVue(VueAbstraite):
                 return MenuRejoindreTableVue(message)
 
             case "7":
-                table = JoueurService().rejoindre_table("7")
+                table = TableService().rejoindre_table(joueur, 7)
                 if table:
                     message = "Vous avez rejoint la table 7"
                     return MenuTableVue(message)
@@ -108,7 +110,7 @@ class MenuRejoindreTableVue(VueAbstraite):
                 return MenuRejoindreTableVue(message)
 
             case "8":
-                table = JoueurService().rejoindre_table("8")
+                table = TableService().rejoindre_table(joueur, 8)
                 if table:
                     message = "Vous avez rejoint la table 8"
                     return MenuTableVue(message)
@@ -116,7 +118,7 @@ class MenuRejoindreTableVue(VueAbstraite):
                 return MenuRejoindreTableVue(message)
 
             case "9":
-                table = JoueurService().rejoindre_table("9")
+                table = TableService().rejoindre_table(joueur, 9)
                 if table:
                     message = "Vous avez rejoint la table 9"
                     return MenuTableVue(message)
@@ -124,7 +126,7 @@ class MenuRejoindreTableVue(VueAbstraite):
                 return MenuRejoindreTableVue(message)
 
             case "10":
-                table = JoueurService().rejoindre_table("10")
+                table = TableService().rejoindre_table(joueur, 10)
                 if table:
                     message = "Vous avez rejoint la table 10"
                     return MenuTableVue(message)
