@@ -32,7 +32,13 @@ class InscriptionVue(VueAbstraite):
         code_de_parrainage = inquirer.text(message="Entrez un code de parrainage : ").execute()
 
         if code_de_parrainage != "":
-            joueur = JoueurService().creer(pseudo, mdp, code_de_parrainage)
+            if JoueurService().code_valide(code_de_parrainage):
+                joueur = JoueurService().creer(pseudo, mdp, code_de_parrainage)
+            else:
+                message = "Code de parrainage non valide."
+                from view.accueil.accueil_vue import AccueilVue
+                return AccueilVue(message)
+
         else:
             joueur = JoueurService().creer_sans_code_parrainage(pseudo, mdp)
 
