@@ -18,19 +18,37 @@ class Partie:
         self.indice_joueur_courant = 0
 
     def initialiser_blinds(self):
-        """Place automatiquement la petite et la grosse blind."""
+        """Place automatiquement la petite et la grosse blind correctement."""
         if len(self.table.joueurs) < 2:
             return
+
         petite_blind = 10
         grosse_blind = 20
-        joueur_pb = self.table.joueurs[self.table.indice_dealer % len(self.table.joueurs)]
+
+        nb_joueurs = len(self.table.joueurs)
+
+        # Dealer actuel
+        dealer_idx = self.table.indice_dealer % nb_joueurs
+
+        # Petite blind = joueur à gauche du dealer
+        pb_idx = (dealer_idx - 1) % nb_joueurs
+        joueur_pb = self.table.joueurs[pb_idx]
         joueur_pb.miser(petite_blind)
         print(f"{joueur_pb.pseudo} place la petite blind ({petite_blind})")
-        joueur_gb = self.table.joueurs[(self.table.indice_dealer + 1) % len(self.table.joueurs)]
+
+        # Grosse blind = joueur à gauche de la petite blind
+        gb_idx = (pb_idx - 1) % nb_joueurs
+        joueur_gb = self.table.joueurs[gb_idx]
         joueur_gb.miser(grosse_blind)
         print(f"{joueur_gb.pseudo} place la grosse blind ({grosse_blind})")
+
         self.mise_max = grosse_blind
-        self.indice_joueur_courant = (self.table.indice_dealer + 2) % len(self.table.joueurs)
+
+        # Premier joueur à agir = joueur à gauche de la grosse blind
+        self.indice_joueur_courant = (gb_idx + 1) % nb_joueurs
+
+        # Faire tourner le dealer pour la prochaine main
+        self.table.indice_dealer = (self.table.indice_dealer + 1) % nb_joueurs
 
     def demarrer_partie(self):
         """Déroule un tour complet de la partie."""
@@ -176,18 +194,22 @@ class Partie:
     def annoncer_resultats(self):
         """Évalue et annonce la combinaison de chaque joueur et le(s) gagnant(s)."""
         joueurs_en_jeu = [j for j in self.table.joueurs if j.actif and j.solde > 0]
-        if not joueurs_en_jeu:
-            print("Aucun joueur n'est en jeu.")
+
+        # Si un seul joueur reste, il gagne directement
+        if len(joueurs_en_jeu) == 1:
+            gagnant = joueurs_en_jeu[0]
+            gagnant.solde += self.comptage.pot
+            print(f"{gagnant.pseudo} remporte le pot principal ({self.comptage.pot}) !")
+            self.comptage.pot = 0
             return
 
-        # Évaluation des mains
+        # Évaluation des mains seulement si plusieurs joueurs encore actifs
         scores = {}
         for j in joueurs_en_jeu:
             cartes_totales = j.main + self.table.board
             evaluateur = EvaluateurMain(cartes_totales)
             resultat = evaluateur.evalue_main()
             scores[j] = resultat
-            # Affichage compatible avec le nouvel EvaluateurMain
             tiebreaker_str = [v.name for v in resultat.tiebreaker_cards]
             print(f"{j.pseudo} a {resultat.combinaison.name} avec kickers {tiebreaker_str}")
 
@@ -196,16 +218,20 @@ class Partie:
         for j in joueurs_en_jeu[1:]:
             cmp = EvaluateurMain.comparer_mains(scores[j], scores[gagnants[0]])
             if cmp == 1:
-                gagnants = [j]  # nouveau gagnant
+                gagnants = [j]
             elif cmp == 0:
-                gagnants.append(j)  # égalité
+                gagnants.append(j)
 
         # Distribuer le pot équitablement
         if self.comptage.pot > 0:
             part = self.comptage.pot // len(gagnants)
             for j in gagnants:
                 j.solde += part
-            print(f"Gagnant(s) : {', '.join(j.pseudo for j in gagnants)} remporte(nt) {part} chacun !")
+            if len(gagnants) == 1:
+                print(f"{gagnants[0].pseudo} remporte le pot principal ({part}) !")
+            else:
+                print(f"Gagnants : {', '.join(j.pseudo for j in gagnants)} remportent {part} chacun !")
+
 
         # Reset du pot
         self.comptage.pot = 0
