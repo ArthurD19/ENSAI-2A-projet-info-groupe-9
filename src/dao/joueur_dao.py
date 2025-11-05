@@ -72,7 +72,7 @@ class JoueurDao(metaclass=Singleton):
                     cursor.execute(
                         """
                         SELECT pseudo, mdp, portefeuille, code_parrainage
-                        FROM public.joueurs;
+                        FROM joueurs;
                         """
                     )
                     return cursor.fetchall() or []
