@@ -150,6 +150,10 @@ class JoueurService:
         else:
             return joueur['code_parrainage']
 
+    @log 
+    def code_valide(self, code_parrainage):
+        return JoueurDao().code_de_parrainage_existe(code_parrainage)
+
     @log
     def rejoindre_table(self, pseudo: str, num_table: str):
         # on la codera une fois qu'on saura comment gérer les tables
