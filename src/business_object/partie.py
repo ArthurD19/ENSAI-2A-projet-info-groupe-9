@@ -8,7 +8,7 @@ from business_object.evaluateur import EvaluateurMain
 class Partie:
     """Gestion complète d'une partie de poker Texas Hold'em."""
 
-    def __init__(self, id: int, table):
+    def __init__(self, id: int, table): 
         self.id = id
         self.table = table
         self.distrib = Distrib(self.table.joueurs)
@@ -174,19 +174,39 @@ class Partie:
             print("Fin de la main.")
 
     def annoncer_resultats(self):
-        """Évalue et annonce la combinaison de chaque joueur et le gagnant."""
+        """Évalue et annonce la combinaison de chaque joueur et le(s) gagnant(s)."""
         joueurs_en_jeu = [j for j in self.table.joueurs if j.actif and j.solde > 0]
         if not joueurs_en_jeu:
             print("Aucun joueur n'est en jeu.")
             return
 
+        # Évaluation des mains
         scores = {}
         for j in joueurs_en_jeu:
             cartes_totales = j.main + self.table.board
             evaluateur = EvaluateurMain(cartes_totales)
-            combinaison = evaluateur.evalue_main()
-            scores[j] = combinaison
-            print(f"{j.pseudo} a {combinaison.name}")
+            resultat = evaluateur.evalue_main()
+            scores[j] = resultat
+            # Affichage compatible avec le nouvel EvaluateurMain
+            tiebreaker_str = [v.name for v in resultat.tiebreaker_cards]
+            print(f"{j.pseudo} a {resultat.combinaison.name} avec kickers {tiebreaker_str}")
 
-        gagnant = max(scores, key=lambda j: scores[j].value)
-        print(f"{gagnant.pseudo} remporte le pot principal ({self.comptage.pot}) avec {scores[gagnant].name} !")
+        # Trouver le(s) gagnant(s)
+        gagnants = [joueurs_en_jeu[0]]
+        for j in joueurs_en_jeu[1:]:
+            cmp = EvaluateurMain.comparer_mains(scores[j], scores[gagnants[0]])
+            if cmp == 1:
+                gagnants = [j]  # nouveau gagnant
+            elif cmp == 0:
+                gagnants.append(j)  # égalité
+
+        # Distribuer le pot équitablement
+        if self.comptage.pot > 0:
+            part = self.comptage.pot // len(gagnants)
+            for j in gagnants:
+                j.solde += part
+            print(f"Gagnant(s) : {', '.join(j.pseudo for j in gagnants)} remporte(nt) {part} chacun !")
+
+        # Reset du pot
+        self.comptage.pot = 0
+        self.comptage.pots_perso = {}
