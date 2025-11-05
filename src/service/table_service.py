@@ -1,6 +1,7 @@
 from business_object.table import Table
+from utils.singleton import Singleton
 
-class TableService:
+class TableService(metaclass=Singleton):
     def __init__(self, nb_tables=10, blind=10):
         self.tables = {}
         for i in range(1, nb_tables + 1):

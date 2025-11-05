@@ -10,6 +10,11 @@ from view.vue_abstraite import VueAbstraite
 
 
 class InscriptionVue(VueAbstraite):
+
+    def __init__(self, titre, tables):
+        super().__init__(titre)
+        self.tables = tables
+
     def choisir_menu(self):
         length = int(os.environ.get("PASSWORD_LENGTH", 16))
         # Demande à l'utilisateur de saisir pseudo, mot de passe...
@@ -18,7 +23,7 @@ class InscriptionVue(VueAbstraite):
         if JoueurService().pseudo_deja_utilise(pseudo):
             from view.accueil.accueil_vue import AccueilVue
 
-            return AccueilVue(f"Le pseudo {pseudo} est déjà utilisé.")
+            return AccueilVue(f"Le pseudo {pseudo} est déjà utilisé.", self.tables)
 
         mdp = inquirer.secret(
             message="Entrez votre mot de passe, il doit contenir au moins 8 caractères, une majuscule et un chiffre: ",
@@ -37,7 +42,7 @@ class InscriptionVue(VueAbstraite):
             else:
                 message = "Code de parrainage non valide."
                 from view.accueil.accueil_vue import AccueilVue
-                return AccueilVue(message)
+                return AccueilVue(message, self.tables)
 
         else:
             joueur = JoueurService().creer_sans_code_parrainage(pseudo, mdp)
@@ -52,5 +57,5 @@ class InscriptionVue(VueAbstraite):
 
         from view.accueil.accueil_vue import AccueilVue
 
-        return AccueilVue(message)
+        return AccueilVue(message, self.tables)
 

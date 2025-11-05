@@ -9,6 +9,10 @@ from view.session import Session
 class AccueilVue(VueAbstraite):
     """Vue d'accueil de l'application"""
 
+    def __init__(self, titre, tables):
+        super().__init__(titre)
+        self.tables = tables
+
     def choisir_menu(self):
         """Choix du menu suivant
 
@@ -36,11 +40,11 @@ class AccueilVue(VueAbstraite):
             case "Se connecter":
                 from view.accueil.connexion_vue import ConnexionVue
 
-                return ConnexionVue("Connexion à l'application")
+                return ConnexionVue("Connexion à l'application", self.tables)
 
             case "Créer un compte":
                 from view.accueil.inscription_vue import InscriptionVue
 
-                return InscriptionVue("Création de compte joueur")
+                return InscriptionVue("Création de compte joueur", self.tables)
 
             

@@ -9,6 +9,10 @@ from service.joueur_service import JoueurService
 class ConnexionVue(VueAbstraite):
     """Vue de Connexion (saisie de pseudo et mdp)"""
 
+    def __init__(self, titre, tables):
+        super().__init__(titre)
+        self.tables = tables
+
     def choisir_menu(self):
         # Demande à l'utilisateur de saisir pseudo et mot de passe
         pseudo = inquirer.text(message="Entrez votre pseudo : ").execute()
@@ -23,9 +27,9 @@ class ConnexionVue(VueAbstraite):
             Session().connexion(joueur["pseudo"])  # stocke le pseudo uniquement
             from view.menu_joueur_vue import MenuJoueurVue
 
-            return MenuJoueurVue(message)
+            return MenuJoueurVue(message, self.tables)
 
         message = "Erreur de connexion (pseudo ou mot de passe invalide)"
         from view.accueil.accueil_vue import AccueilVue
 
-        return AccueilVue(message)
+        return AccueilVue(message, self.tables)

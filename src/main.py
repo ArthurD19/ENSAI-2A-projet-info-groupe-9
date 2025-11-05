@@ -4,6 +4,7 @@ import dotenv
 
 from utils.log_init import initialiser_logs
 from view.accueil.accueil_vue import AccueilVue
+from service.table_service import TableService
 
 if __name__ == "__main__":
     # On charge les variables d'envionnement
@@ -11,7 +12,9 @@ if __name__ == "__main__":
 
     initialiser_logs("Application")
 
-    vue_courante = AccueilVue("Bienvenue")
+    tables = TableService(nb_tables=10, blind=20)
+
+    vue_courante = AccueilVue("Bienvenue", tables)
     nb_erreurs = 0
 
     while vue_courante:
@@ -27,7 +30,7 @@ if __name__ == "__main__":
         except Exception as e:
             logging.info(e)
             nb_erreurs += 1
-            vue_courante = AccueilVue("Une erreur est survenue, retour au menu principal")
+            vue_courante = AccueilVue("Une erreur est survenue, retour au menu principal", tables)
 
     # Lorsque l on quitte l application
     print("----------------------------------")

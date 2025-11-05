@@ -7,18 +7,13 @@ from service.joueur_service import JoueurService
 
 
 class MenuJoueurVue(VueAbstraite):
-    """Vue du menu du joueur
-
-    Attributes
-    ----------
-    message=''
-        str
-
-    Returns
-    ------
-    view
-        retourne la prochaine vue, celle qui est choisie par l'utilisateur
     """
+    Vue du menu du joueur
+    """
+
+    def __init__(self, titre, tables):
+        super().__init__(titre)
+        self.tables = tables
 
     def choisir_menu(self):
         """Choix du menu suivant de l'utilisateur
@@ -48,28 +43,28 @@ class MenuJoueurVue(VueAbstraite):
             case "Se déconnecter":
                 Session().deconnexion()
                 from view.accueil.accueil_vue import AccueilVue
-                print("\nVous êtes maintenant déconnecté.\n")
-                return AccueilVue()
+                message = "Vous êtes maintenant déconnecté."
+                return AccueilVue(message, self.tables)
 
             case "Afficher la valeur du portefeuille":
                 portefeuille = JoueurService().afficher_valeur_portefeuille(pseudo)
                 print(f"\nVotre portefeuille contient : {portefeuille} jetons.\n")
                 input("Appuyez sur Entrée pour revenir au menu précédent.")
-                return MenuJoueurVue()
+                return MenuJoueurVue(self.tables)
 
             case "Afficher le classement":
                 classement_joueur = JoueurService().afficher_classement_joueur(pseudo)
                 print("\nVotre position actuelle dans le classement :")
                 print(classement_joueur)
                 input("\nAppuyez sur Entrée pour revenir au menu précédent.")
-                return MenuJoueurVue()
+                return MenuJoueurVue(self.tables)
 
             case "Générer ou voir mon code de parrainage":
                 code_parrainage = JoueurService().generer_code_parrainage(pseudo)
                 print(f"\nVotre code de parrainage est : {code_parrainage}\n")
                 input("Appuyez sur Entrée pour revenir au menu parrainage.")
-                return MenuJoueurVue()
+                return MenuJoueurVue(self.tables)
 
             case "Rejoindre une table":
                 from view.menu_rejoindre_table_vue import MenuRejoindreTableVue
-                return MenuRejoindreTableVue()
+                return MenuRejoindreTableVue(self.tables)
