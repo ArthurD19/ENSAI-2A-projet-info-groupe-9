@@ -55,43 +55,79 @@ class MenuRejoindreTableVue(VueAbstraite):
         match choix:
             case "1":
                 table = TableService().rejoindre_table(joueur, 1)
-                if table:
+                if table == 1:
                     message = "Vous avez rejoint la table 1"
                     return MenuTableVue(message)
-                message = "Erreur : impossible de rejoindre cette table"
-                return MenuRejoindreTableVue(message)
+                elif table == 2:
+                    message = "Vous êtes déja à la table 1"
+                    return MenuTableVue(message)
+                elif table == 3:
+                    message = "Il n'y a plus de place à la table 1"
+                    return MenuRejoindreTableVue(message)
+                else:
+                    message = "La table n'existe pas"
+                    return MenuRejoindreTableVue(message)
+                
 
             case "2":
                 table = TableService().rejoindre_table(joueur, 2)
-                if table:
+                if table == 1:
                     message = "Vous avez rejoint la table 2"
                     return MenuTableVue(message)
-                message = "Erreur : impossible de rejoindre cette table"
-                return MenuRejoindreTableVue(message)
+                elif table == 2:
+                    message = "Vous êtes déja à la table 2"
+                    return MenuTableVue(message)
+                elif table == 3:
+                    message = "Il n'y a plus de place à la table 2"
+                    return MenuRejoindreTableVue(message)
+                else:
+                    message = "La table n'existe pas"
+                    return MenuRejoindreTableVue(message)
             
             case "3":
                 table = TableService().rejoindre_table(joueur, 3)
-                if table:
+                if table == 1:
                     message = "Vous avez rejoint la table 3"
                     return MenuTableVue(message)
-                message = "Erreur : impossible de rejoindre cette table"
-                return MenuRejoindreTableVue(message)
-
+                elif table == 2:
+                    message = "Vous êtes déja à la table 3"
+                    return MenuTableVue(message)
+                elif table == 3:
+                    message = "Il n'y a plus de place à la table 3"
+                    return MenuRejoindreTableVue(message)
+                else:
+                    message = "La table n'existe pas"
+                    return MenuRejoindreTableVue(message)
+            
             case "4":
                 table = TableService().rejoindre_table(joueur, 4)
-                if table:
+                if table == 1:
                     message = "Vous avez rejoint la table 4"
                     return MenuTableVue(message)
-                message = "Erreur : impossible de rejoindre cette table"
-                return MenuRejoindreTableVue(message)
+                elif table == 2:
+                    message = "Vous êtes déja à la table 4"
+                    return MenuTableVue(message)
+                elif table == 3:
+                    message = "Il n'y a plus de place à la table 4"
+                    return MenuRejoindreTableVue(message)
+                else:
+                    message = "La table n'existe pas"
+                    return MenuRejoindreTableVue(message)
 
             case "5":
                 table = TableService().rejoindre_table(joueur, 5)
-                if table:
+                if table == 1:
                     message = "Vous avez rejoint la table 5"
                     return MenuTableVue(message)
-                message = "Erreur : impossible de rejoindre cette table"
-                return MenuRejoindreTableVue(message)
+                elif table == 2:
+                    message = "Vous êtes déja à la table 5"
+                    return MenuTableVue(message)
+                elif table == 3:
+                    message = "Il n'y a plus de place à la table 5"
+                    return MenuRejoindreTableVue(message)
+                else:
+                    message = "La table n'existe pas"
+                    return MenuRejoindreTableVue(message)
 
             case "6":
                 table = TableService().rejoindre_table(joueur, 6)
