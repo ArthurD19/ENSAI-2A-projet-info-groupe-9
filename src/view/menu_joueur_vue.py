@@ -50,20 +50,31 @@ class MenuJoueurVue(VueAbstraite):
                 portefeuille = JoueurService().afficher_valeur_portefeuille(pseudo)
                 print(f"\nVotre portefeuille contient : {portefeuille} jetons.\n")
                 input("Appuyez sur Entrée pour revenir au menu précédent.")
-                return MenuJoueurVue(self.tables)
+                return MenuJoueurVue("", self.tables)
 
             case "Afficher le classement":
                 classement_joueur = JoueurService().afficher_classement_joueur(pseudo)
-                print("\nVotre position actuelle dans le classement :")
-                print(classement_joueur)
+
+                print("\nClassement des joueurs :")
+                print("-" * 40)
+                for i, joueur in enumerate(classement_joueur, start=1):
+                    pseudo_joueur = joueur["pseudo"]
+                    portefeuille = joueur["portefeuille"]
+                    if pseudo_joueur == pseudo:
+                        print(f">>> {i}. {pseudo_joueur} - {portefeuille} jetons (vous)")
+                    else:
+                        print(f"    {i}. {pseudo_joueur} - {portefeuille} jetons")
+                print("-" * 40)
+
                 input("\nAppuyez sur Entrée pour revenir au menu précédent.")
-                return MenuJoueurVue(self.tables)
+                return MenuJoueurVue("", self.tables)
+
 
             case "Générer ou voir mon code de parrainage":
                 code_parrainage = JoueurService().generer_code_parrainage(pseudo)
                 print(f"\nVotre code de parrainage est : {code_parrainage}\n")
-                input("Appuyez sur Entrée pour revenir au menu parrainage.")
-                return MenuJoueurVue(self.tables)
+                input("Appuyez sur Entrée pour revenir au menu précédent.")
+                return MenuJoueurVue("", self.tables)
 
             case "Rejoindre une table":
                 from view.menu_rejoindre_table_vue import MenuRejoindreTableVue

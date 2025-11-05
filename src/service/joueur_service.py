@@ -140,7 +140,7 @@ class JoueurService:
     @log
     def generer_code_parrainage(self, pseudo):
         joueur = JoueurDao().trouver_par_pseudo(pseudo)
-        if joueur['code_parrainage'] == "":
+        if not joueur.get('code_parrainage') or str(joueur['code_parrainage']).strip() == "":
             code = GenerateurDeCode().generate_unique_code()
             maj_ok = JoueurDao().mettre_a_jour_code_de_parrainage(pseudo, code)
             if maj_ok:
