@@ -47,9 +47,11 @@ class MenuRejoindreTableVue(VueAbstraite):
             ],
         ).execute()
 
+        pseudo = Session().joueur
+
         match choix:
             case "1":
-                table = TableService().rejoindre_table(joueur, 1)
+                table = TableService().rejoindre_table(pseudo, 1)
                 if table == 1:
                     message = "Vous avez rejoint la table 1"
                     return MenuTableVue(message, self.tables)
@@ -65,7 +67,7 @@ class MenuRejoindreTableVue(VueAbstraite):
                 
 
             case "2":
-                table = TableService().rejoindre_table(joueur, 2)
+                table = TableService().rejoindre_table(pseudo, 2)
                 if table == 1:
                     message = "Vous avez rejoint la table 2"
                     return MenuTableVue(message, self.tables)
@@ -80,7 +82,7 @@ class MenuRejoindreTableVue(VueAbstraite):
                     return MenuRejoindreTableVue(message, self.tables)
             
             case "3":
-                table = TableService().rejoindre_table(joueur, 3)
+                table = TableService().rejoindre_table(pseudo, 3)
                 if table == 1:
                     message = "Vous avez rejoint la table 3"
                     return MenuTableVue(message, self.tables)
@@ -95,7 +97,7 @@ class MenuRejoindreTableVue(VueAbstraite):
                     return MenuRejoindreTableVue(message, self.tables)
             
             case "4":
-                table = TableService().rejoindre_table(joueur, 4)
+                table = TableService().rejoindre_table(pseudo, 4)
                 if table == 1:
                     message = "Vous avez rejoint la table 4"
                     return MenuTableVue(message, self.tables)
@@ -110,7 +112,7 @@ class MenuRejoindreTableVue(VueAbstraite):
                     return MenuRejoindreTableVue(message, self.tables)
 
             case "5":
-                table = TableService().rejoindre_table(joueur, 5)
+                table = TableService().rejoindre_table(pseudo, 5)
                 if table == 1:
                     message = "Vous avez rejoint la table 5"
                     return MenuTableVue(message, self.tables)
@@ -125,7 +127,7 @@ class MenuRejoindreTableVue(VueAbstraite):
                     return MenuRejoindreTableVue(message, self.tables)
 
             case "6":
-                table = TableService().rejoindre_table(joueur, 6)
+                table = TableService().rejoindre_table(pseudo, 6)
                 if table == 1:
                     message = "Vous avez rejoint la table 6"
                     return MenuTableVue(message, self.tables)
@@ -140,7 +142,7 @@ class MenuRejoindreTableVue(VueAbstraite):
                     return MenuRejoindreTableVue(message, self.tables)
 
             case "7":
-                table = TableService().rejoindre_table(joueur, 7)
+                table = TableService().rejoindre_table(pseudo, 7)
                 if table == 1:
                     message = "Vous avez rejoint la table 7"
                     return MenuTableVue(message, self.tables)
@@ -155,7 +157,7 @@ class MenuRejoindreTableVue(VueAbstraite):
                     return MenuRejoindreTableVue(message, self.tables)
 
             case "8":
-                table = TableService().rejoindre_table(joueur, 8)
+                table = TableService().rejoindre_table(pseudo, 8)
                 if table == 1:
                     message = "Vous avez rejoint la table 8"
                     return MenuTableVue(message, self.tables)
@@ -170,7 +172,7 @@ class MenuRejoindreTableVue(VueAbstraite):
                     return MenuRejoindreTableVue(message, self.tables)
 
             case "9":
-                table = TableService().rejoindre_table(joueur, 9)
+                table = TableService().rejoindre_table(pseudo, 9)
                 if table == 1:
                     message = "Vous avez rejoint la table 9"
                     return MenuTableVue(message, self.tables)
@@ -185,7 +187,7 @@ class MenuRejoindreTableVue(VueAbstraite):
                     return MenuRejoindreTableVue(message, self.tables)
 
             case "10":
-                table = TableService().rejoindre_table(joueur, 10)
+                table = TableService().rejoindre_table(pseudo, 10)
                 if table == 1:
                     message = "Vous avez rejoint la table 10"
                     return MenuTableVue(message, self.tables)

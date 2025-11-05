@@ -1,5 +1,9 @@
 from business_object.table import Table
+from business_object.joueurs import Joueur
+
 from utils.singleton import Singleton
+
+from dao.joueur_dao import JoueurDao
 
 class TableService(metaclass=Singleton):
     def __init__(self, nb_tables=10, blind=10):
@@ -7,7 +11,7 @@ class TableService(metaclass=Singleton):
         for i in range(1, nb_tables + 1):
             self.tables[i] = Table(id=i, blind=blind)
 
-    def get_table(self, id_table):
+    def get_table(self, id_table: int):
         """
         Fonction qui renvoie la table correspondant à l'identifiant si elle existe, None sinon.
         
@@ -22,7 +26,7 @@ class TableService(metaclass=Singleton):
         """
         return self.tables.get(id_table)
 
-    def rejoindre_table(self, joueur, id_table):
+    def rejoindre_table(self, pseudo: str, id_table: int):
         """
         Permet à un joueur de rejoindre une table si elle existe et qu'il y reste de la place
 
@@ -41,10 +45,12 @@ class TableService(metaclass=Singleton):
             3 pour
             4 pour la table n'existe pas
         """
+        solde = JoueurDao().valeur_portefeuille(pseudo)
+        joueur_partie = Joueur(pseudo, solde)
         table = self.get_table(id_table)
         if not table:
             return 4
-        return table.ajouter_joueur(joueur)
+        return table.ajouter_joueur(joueur_partie)
 
     def lister_tables(self):
         """
@@ -57,8 +63,7 @@ class TableService(metaclass=Singleton):
             {
                 "id": t.id,
                 "nb_joueurs": len(t.joueurs),
-                "blind": t.blind,
-                "en_cours": t.en_cours
+                "blind": t.blind
             }
             for t in self.tables.values()
         ]

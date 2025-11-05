@@ -2,24 +2,24 @@ from InquirerPy import inquirer
 
 from view.vue_abstraite import VueAbstraite
 from view.session import Session
+from view.menu_joueur_vue import MenuJoueurVue
 
 from service.joueur_service import JoueurService
+from service.table_service import TableService
 
 
 class MenuTableVue(VueAbstraite):
-    """Vue du menu du joueur pendant une partie
-
-    Attributes
-    ----------
-    message=''
-        str
-
-    Returns
-    ------
-    view
-        retourne la prochaine vue, celle qui est choisie par l'utilisateur
+    """
+    Vue du menu du joueur pendant une partie
     """
 
+    def __init__(self, titre, tables):
+        super().__init__(titre)
+        self.tables = tables
+
     def choisir_menu(self):
-        # on la codera plus tard (quand on aura notre partie)
-        pass
+        table = self.tables.lister_tables()
+        print(table)
+        input("Appuyez sur Entrée pour revenir au menu précédent.")
+        message = "retour au menu joueur"
+        return MenuJoueurVue(message, self.tables)
