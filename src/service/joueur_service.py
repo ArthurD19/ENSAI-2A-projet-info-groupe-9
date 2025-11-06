@@ -7,6 +7,7 @@ from business_object.joueurs import Joueur
 from dao.joueur_dao import JoueurDao
 from utils.genere_code_parrainage import GenerateurDeCode
 
+from view.session import Session
 
 
 class JoueurService:
@@ -19,8 +20,10 @@ class JoueurService:
         nouveau_joueur = {
             "pseudo": pseudo_joueur,
             "mdp": hash_password(mdp, pseudo_joueur),
-            "portefeuille": 1000, 
-            "code_parrainage": None}
+            "portefeuille": 1000,
+            "code_parrainage": None,
+            # la colonne 'connecte' a une valeur par défaut en base (FALSE)
+        }
 
         if JoueurDao().creer(nouveau_joueur):
             if code_parrain:
@@ -32,9 +35,9 @@ class JoueurService:
                     modif_parrain = JoueurDao().modifier(parrain)
                     if modif_nouveau_joueur and modif_parrain:
                         return nouveau_joueur
-                return nouveau_joueur 
-        else: 
-            None
+                return nouveau_joueur
+        else:
+            return None
 
     @log
     def creer_sans_code_parrainage(self, pseudo_joueur, mdp) -> Joueur:
@@ -43,13 +46,14 @@ class JoueurService:
         nouveau_joueur = {
             "pseudo": pseudo_joueur,
             "mdp": hash_password(mdp, pseudo_joueur),
-            "portefeuille": 1000, 
-            "code_parrainage": None}
+            "portefeuille": 1000,
+            "code_parrainage": None,
+        }
 
         if JoueurDao().creer(nouveau_joueur):
-            return nouveau_joueur 
-        else: 
-            None
+            return nouveau_joueur
+        else:
+            return None
 
     @log
     def lister_tous(self, inclure_mdp=False) -> list[Joueur]:
@@ -60,17 +64,20 @@ class JoueurService:
         joueurs = JoueurDao().lister_tous()
         if not inclure_mdp:
             for j in joueurs:
-                j.mdp = None
+                # si j est un dict (issue du DAO), on met la clé mdp à None
+                try:
+                    j["mdp"] = None
+                except Exception:
+                    # si j est un business object Joueur
+                    try:
+                        j.mdp = None
+                    except Exception:
+                        pass
         return joueurs
 
     @log
     def trouver_par_id(self, id_joueur) -> Joueur:
         """Trouver un joueur à partir de son id
-        
-        Parameters
-        ----------
-        id_joueur: str
-            identifiant du joueur que l'on chercher
         """
         return JoueurDao().trouver_par_id(id_joueur)
 
@@ -78,7 +85,15 @@ class JoueurService:
     def modifier(self, joueur) -> Joueur:
         """Modification d'un joueur"""
 
-        joueur.mdp = hash_password(joueur.mdp, joueur.pseudo)
+        # si joueur est un dict ou un objet, on récupère le pseudo et le mdp
+        try:
+            pseudo = joueur["pseudo"]
+            mdp = joueur["mdp"]
+            joueur["mdp"] = hash_password(mdp, pseudo)
+        except Exception:
+            # objet business
+            joueur.mdp = hash_password(joueur.mdp, joueur.pseudo)
+
         return joueur if JoueurDao().modifier(joueur) else None
 
     @log
@@ -95,11 +110,22 @@ class JoueurService:
 
         joueurs = JoueurDao().lister_tous()
 
-        for j in joueurs:
-            if j.pseudo == "admin":
-                joueurs.remove(j)
+        # On tente d'enlever l'admin si présent
+        for j in list(joueurs):
+            try:
+                if (isinstance(j, dict) and j.get("pseudo") == "admin") or getattr(j, "pseudo", None) == "admin":
+                    joueurs.remove(j)
+            except Exception:
+                pass
 
-        joueurs_as_list = [j.as_list() for j in joueurs]
+        joueurs_as_list = []
+        for j in joueurs:
+            try:
+                # si business object
+                joueurs_as_list.append(j.as_list())
+            except Exception:
+                # s'il s'agit d'un dict depuis le DAO
+                joueurs_as_list.append([j.get("pseudo"), j.get("mdp"), j.get("portefeuille"), j.get("code_parrainage")])
 
         str_joueurs = "-" * 100
         str_joueurs += "\nListe des joueurs \n"
@@ -116,13 +142,37 @@ class JoueurService:
         return str_joueurs
 
     @log
-    def se_connecter(self, pseudo, mdp) -> Joueur:
-        """Se connecter à partir de pseudo et mdp"""
-        joueur = JoueurDao().se_connecter(pseudo, hash_password(mdp, pseudo))
+    def se_connecter(self, pseudo, mdp) -> dict | bool:
+        """
+        Se connecter à partir de pseudo et mdp.
+        - Hash du mdp côté service.
+        - Appel à JoueurDao().se_connecter() qui effectue l'UPDATE atomique (connecte = TRUE)
+          et RETURNING quand la connexion est autorisée.
+        - Si succès : on enregistre la session (Session().connexion) et on renvoie le dict joueur.
+        - Si échec : renvoie False.
+        """
+        hashed = hash_password(mdp, pseudo)
+        joueur = JoueurDao().se_connecter(pseudo, hashed)
         if joueur:
+            # Enregistrer le pseudo en session (le reste des infos peut être conservé ailleurs si besoin)
+            Session().connexion(joueur["pseudo"])
             return joueur
         else:
             return False
+
+    @log
+    def se_deconnecter(self, pseudo) -> bool:
+        """
+        Déconnecte le joueur : met connecte = FALSE en base et vide la session locale.
+        Retourne True si la déconnexion a bien été appliquée en base.
+        """
+        result = JoueurDao().deconnecter(pseudo)
+        if result:
+            try:
+                Session().deconnexion()
+            except Exception:
+                pass
+        return result
 
     @log
     def pseudo_deja_utilise(self, pseudo) -> bool:
@@ -141,6 +191,8 @@ class JoueurService:
     @log
     def generer_code_parrainage(self, pseudo):
         joueur = JoueurDao().trouver_par_pseudo(pseudo)
+        if not joueur:
+            return None
         if not joueur.get('code_parrainage') or str(joueur['code_parrainage']).strip() == "":
             code = GenerateurDeCode().generate_unique_code()
             maj_ok = JoueurDao().mettre_a_jour_code_de_parrainage(pseudo, code)
@@ -151,7 +203,7 @@ class JoueurService:
         else:
             return joueur['code_parrainage']
 
-    @log 
+    @log
     def code_valide(self, code_parrainage):
         return JoueurDao().code_de_parrainage_existe(code_parrainage)
 

@@ -9,7 +9,8 @@ CREATE TABLE joueurs (
     pseudo VARCHAR(50) PRIMARY KEY,
     mdp TEXT NOT NULL,
     portefeuille INT,
-    code_parrainage VARCHAR(5) UNIQUE
+    code_parrainage VARCHAR(5) UNIQUE,
+    connecte BOOLEAN DEFAULT FALSE
 );
 
 -- Table des statistiques

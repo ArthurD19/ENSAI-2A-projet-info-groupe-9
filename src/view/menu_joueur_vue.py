@@ -17,14 +17,7 @@ class MenuJoueurVue(VueAbstraite):
         self.tables = tables
 
     def choisir_menu(self):
-        """Choix du menu suivant de l'utilisateur
-
-        Return
-        ------
-        vue
-            Retourne la vue choisie par l'utilisateur dans le terminal
-        """
-
+        """Choix du menu suivant de l'utilisateur"""
         print("\n" + "-" * 50 + "\nMenu Joueur\n" + "-" * 50 + "\n")
 
         choix = inquirer.select(
@@ -33,16 +26,22 @@ class MenuJoueurVue(VueAbstraite):
                 "Rejoindre une table",
                 "Afficher la valeur du portefeuille",
                 "Afficher le classement",
-                "Afficher les statistiques", 
+                "Afficher les statistiques",
                 "Générer ou voir mon code de parrainage",
                 "Se déconnecter",
             ],
         ).execute()
 
-        pseudo = Session().joueur
+        pseudo = Session().joueur  # doit être une chaîne (le pseudo)
 
         match choix:
             case "Se déconnecter":
+                # Appeler le service pour mettre connecte = FALSE en base
+                try:
+                    JoueurService().se_deconnecter(pseudo)
+                except Exception:
+                    # on ignore l'erreur et on poursuit la déconnexion locale
+                    pass
                 Session().deconnexion()
                 from view.accueil.accueil_vue import AccueilVue
                 message = "Vous êtes maintenant déconnecté."
@@ -60,19 +59,19 @@ class MenuJoueurVue(VueAbstraite):
                 print("\nClassement des joueurs :")
                 print("-" * 40)
 
-                # Trouver la longueur maximale des pseudos pour aligner proprement
-                max_pseudo_len = max(len(j["pseudo"]) for j in classement_joueur)
-                max_credit_len = max(len(str(j["portefeuille"])) for j in classement_joueur)
+                if not classement_joueur:
+                    print("Aucun joueur trouvé.")
+                else:
+                    max_pseudo_len = max(len(j["pseudo"]) for j in classement_joueur)
+                    max_credit_len = max(len(str(j["portefeuille"])) for j in classement_joueur)
 
-                for i, joueur in enumerate(classement_joueur, start=1):
-                    pseudo_joueur = joueur["pseudo"]
-                    portefeuille = joueur["portefeuille"]
-
-                    # Formatage avec alignement à droite des crédits
-                    if pseudo_joueur == pseudo:
-                        print(f">>> {i:>2}. {pseudo_joueur:<{max_pseudo_len}}   {portefeuille:>{max_credit_len}} crédits (vous)")
-                    else:
-                        print(f"    {i:>2}. {pseudo_joueur:<{max_pseudo_len}}   {portefeuille:>{max_credit_len}} crédits")
+                    for i, joueur in enumerate(classement_joueur, start=1):
+                        pseudo_joueur = joueur["pseudo"]
+                        portefeuille = joueur["portefeuille"]
+                        if pseudo_joueur == pseudo:
+                            print(f">>> {i:>2}. {pseudo_joueur:<{max_pseudo_len}}   {portefeuille:>{max_credit_len}} crédits (vous)")
+                        else:
+                            print(f"    {i:>2}. {pseudo_joueur:<{max_pseudo_len}}   {portefeuille:>{max_credit_len}} crédits")
 
                 print("-" * 40)
                 input("\nAppuyez sur Entrée pour revenir au menu précédent.")
@@ -82,8 +81,16 @@ class MenuJoueurVue(VueAbstraite):
                 stats = StatistiqueService().afficher_statistiques_joueur(pseudo)
                 print("\nVos statistiques :")
                 print("-" * 50)
-                for champ, valeur in stats.items():
-                    print(f"{champ:<30} : {valeur}")
+                if not stats:
+                    print("Aucune statistique disponible.")
+                else:
+                    # j'affiche clef prettifiée et la valeur ; j'ignore les valeurs None
+                    for champ, valeur in stats.items():
+                        if valeur is None:
+                            continue
+                        # remplacer _ par espace et mettre en minuscule puis capitaliser
+                        label = champ.replace("_", " ").capitalize()
+                        print(f"{label:<30} : {valeur}")
                 print("-" * 50)
                 input("\nAppuyez sur Entrée pour revenir au menu précédent.")
                 return MenuJoueurVue("", self.tables)
