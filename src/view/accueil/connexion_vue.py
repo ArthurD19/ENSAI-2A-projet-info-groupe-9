@@ -18,18 +18,17 @@ class ConnexionVue(VueAbstraite):
         pseudo = inquirer.text(message="Entrez votre pseudo : ").execute()
         mdp = inquirer.secret(message="Entrez votre mot de passe :").execute()
 
-        # Appel du service pour trouver le joueur
-        joueur = JoueurService().se_connecter(pseudo, mdp)
+        # Appel du service pour se connecter
+        connecte, res = JoueurService().se_connecter(pseudo, mdp)
 
-        # Si le joueur a été trouvé à partir des ses identifiants de connexion
-        if joueur:
-            message = f"Vous êtes connecté sous le pseudo {pseudo}"
-            Session().connexion(joueur["pseudo"])  # stocke le pseudo uniquement
+        if connecte:
+            # Connexion réussie
             from view.menu_joueur_vue import MenuJoueurVue
-
+            Session().connexion(res["pseudo"])  # stocke le pseudo
+            message = f"Vous êtes connecté sous le pseudo {pseudo}"
             return MenuJoueurVue(message, self.tables)
-
-        message = "Erreur de connexion (pseudo ou mot de passe invalide)"
-        from view.accueil.accueil_vue import AccueilVue
-
-        return AccueilVue(message, self.tables)
+        else:
+            # Connexion échouée (pseudo/mot de passe invalide ou déjà connecté)
+            from view.accueil.accueil_vue import AccueilVue
+            # res contient déjà le message d'erreur fourni par le service
+            return AccueilVue(res, self.tables)

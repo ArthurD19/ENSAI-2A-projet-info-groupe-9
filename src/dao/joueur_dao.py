@@ -122,29 +122,56 @@ class JoueurDao(metaclass=Singleton):
     # --------------------------------------------------------------------------
 
     @log
-    def se_connecter(self, pseudo: str, mdp: str) -> dict | None:
+    def se_connecter(self, pseudo: str, mdp: str) -> dict | str:
         """
-        Vérifie si un joueur existe avec ce pseudo et ce mot de passe exact.
-        Retourne un dict avec pseudo, mdp, portefeuille, code_parrainage
-        ou None si aucun joueur trouvé.
+        Vérifie le pseudo/mdp et que le joueur n'est pas déjà connecté.
+        - Si le joueur est déjà connecté, renvoie 'DEJA_CONNECTE'
+        - Sinon, met connecte = TRUE et retourne le joueur
         """
         try:
             with DBConnection().connection as connection:
                 with connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+                    # Tentative atomique : WHERE connecte = FALSE
                     cursor.execute(
                         """
-                        SELECT pseudo, mdp, portefeuille, code_parrainage
-                        FROM joueurs
-                        WHERE pseudo = %(pseudo)s
-                          AND mdp = %(mdp)s;
+                        UPDATE joueurs
+                        SET connecte = TRUE
+                        WHERE pseudo = %(pseudo)s AND mdp = %(mdp)s AND (connecte IS FALSE OR connecte IS NULL)
+                        RETURNING pseudo, mdp, portefeuille, code_parrainage;
                         """,
                         {"pseudo": pseudo, "mdp": mdp},
                     )
-                    res = cursor.fetchone()
-                    return dict(res) if res else None
+                    joueur = cursor.fetchone()
+                    if joueur:
+                        return dict(joueur)
+                    else:
+                        # vérifier si le joueur existe mais est déjà connecté
+                        cursor.execute(
+                            "SELECT 1 FROM joueurs WHERE pseudo = %(pseudo)s AND mdp = %(mdp)s AND connecte = TRUE;",
+                            {"pseudo": pseudo, "mdp": mdp}
+                        )
+                        if cursor.fetchone():
+                            return "DEJA_CONNECTE"
+                        return None
         except Exception as e:
             logging.exception(e)
             return None
+
+
+    @log
+    def deconnecter(self, pseudo: str) -> bool:
+        """Met connecte = FALSE pour le joueur"""
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "UPDATE joueurs SET connecte = FALSE WHERE pseudo = %(pseudo)s;",
+                        {"pseudo": pseudo},
+                    )
+                    return cursor.rowcount == 1
+        except Exception as e:
+            logging.exception(e)
+            return False
 
 
     # --------------------------------------------------------------------------

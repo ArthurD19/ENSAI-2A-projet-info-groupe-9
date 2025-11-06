@@ -142,23 +142,17 @@ class JoueurService:
         return str_joueurs
 
     @log
-    def se_connecter(self, pseudo, mdp) -> dict | bool:
-        """
-        Se connecter à partir de pseudo et mdp.
-        - Hash du mdp côté service.
-        - Appel à JoueurDao().se_connecter() qui effectue l'UPDATE atomique (connecte = TRUE)
-          et RETURNING quand la connexion est autorisée.
-        - Si succès : on enregistre la session (Session().connexion) et on renvoie le dict joueur.
-        - Si échec : renvoie False.
-        """
+    def se_connecter(self, pseudo, mdp) -> tuple[bool, str | dict]:
         hashed = hash_password(mdp, pseudo)
         joueur = JoueurDao().se_connecter(pseudo, hashed)
-        if joueur:
-            # Enregistrer le pseudo en session (le reste des infos peut être conservé ailleurs si besoin)
+        if joueur == "DEJA_CONNECTE":
+            return False, "Vous êtes déjà connecté avec ce pseudo."
+        elif joueur:
             Session().connexion(joueur["pseudo"])
-            return joueur
+            return True, joueur
         else:
-            return False
+            return False, "Pseudo ou mot de passe invalide."
+
 
     @log
     def se_deconnecter(self, pseudo) -> bool:
