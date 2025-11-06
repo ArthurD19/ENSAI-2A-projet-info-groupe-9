@@ -204,13 +204,17 @@ def test_demarrer_partie_complet(monkeypatch, capsys):
     inputs = iter(["suivre"] * 20 + ["non", "non"])
     monkeypatch.setattr("builtins.input", lambda x: next(inputs))
 
-    result = partie.demarrer_partie()
+    # Appel de la partie
+    partie.demarrer_partie()  # pas de retour attendu
+
     captured = capsys.readouterr()
 
-    assert result is False  # moins de 2 joueurs après refus de rejouer
+    # Vérifications sur la sortie
     assert "=== Début de la partie" in captured.out
     assert "Tour actuel : preflop" in captured.out
     assert "Pot principal" in captured.out
+    assert "Pas assez de joueurs pour continuer" in captured.out  # indique que la partie s'arrête
+
 
 """
 def test_actions_joueurs_joueur_solde_zero(monkeypatch, capsys):
@@ -242,3 +246,26 @@ def test_actions_joueurs_joueur_solde_zero(monkeypatch, capsys):
     assert bob.mise == 10
     assert bob.actif is True
 """
+
+def test_actions_joueurs_un_seul_actif():
+    # Table avec 2 joueurs
+    table = Table(id=1)
+    alice = Joueur("Alice", 1000)
+    bob = Joueur("Bob", 1000)
+    table.ajouter_joueur(alice)
+    table.ajouter_joueur(bob)
+
+    # Bob est couché, donc un seul joueur actif
+    bob.se_coucher()
+
+    partie = Partie(1, table)
+    partie.mise_max = 0
+
+    # Appel direct de la fonction, elle doit break sur ligne 103
+    partie.actions_joueurs()
+
+    # Alice reste active
+    assert alice.actif is True
+    # Bob est couché
+    assert bob.actif is False
+
