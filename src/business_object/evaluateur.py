@@ -2,13 +2,13 @@ from business_object.cartes import Carte, combinaisons, valeurs
 from collections import Counter
 
 class ResultatMain:
-    def __init__(self, combinaison, tiebreaker_cards):
+    def __init__(self, combinaison, tiebreaker_cards)->None:
         self.combinaison = combinaison
         # tiebreaker_cards contient désormais des enums valeurs.* directement
         self.tiebreaker_cards = tiebreaker_cards
 
     @property
-    def value(self):
+    def value(self)->int:
         return self.combinaison.value
 
 
@@ -21,19 +21,19 @@ class EvaluateurMain:
         valeurs.AS: 14
     }
 
-    def __init__(self, cartes: list[Carte]):
+    def __init__(self, cartes: list[Carte])->None:
         if len(cartes) < 5 or len(cartes) > 7:
             raise ValueError("Il faut entre 5 et 7 cartes pour évaluer une main.")
         self.cartes = cartes
 
-    def _valeurs_numeriques(self):
+    def _valeurs_numeriques(self)->List[int]:
         return sorted([self.valeur_order[c.valeur] for c in self.cartes], reverse=True)
 
-    def _compter_occurrences(self):
+    def _compter_occurrences(self)->Counter[int]:
         counts = Counter(self._valeurs_numeriques())
         return counts
 
-    def _is_flush(self):
+    def _is_flush(self)->Tuple[bool, List[valeurs]]:
         couleurs_count = Counter(c.couleur for c in self.cartes)
         for couleur, count in couleurs_count.items():
             if count >= 5:
@@ -41,7 +41,7 @@ class EvaluateurMain:
                 return True, flush_vals
         return False, []
 
-    def _is_straight(self, valeurs):
+    def _is_straight(self, valeurs)->Tuple[bool, List[int]]:
         vals = sorted(set(valeurs))
         for i in range(len(vals) - 4):
             if vals[i + 4] - vals[i] == 4:
@@ -55,14 +55,14 @@ class EvaluateurMain:
                     return True, [v if v != 1 else 14 for v in low_vals[i:i + 5]]
         return False, []
 
-    def _numerique_to_enum(self, valeur_num):
-        """Convertit une valeur numérique en enum valeurs.*"""
+    def _numerique_to_enum(self, valeur_num)-> Optional[valeurs]:
+        """Convertit une valeur numérique en enum valeurs."""
         for enum_val, num in self.valeur_order.items():
             if num == valeur_num:
                 return enum_val
-        return None  # ne devrait jamais arriver
+        return None 
 
-    def evalue_main(self):
+    def evalue_main(self)->ResultatMain:
         counts = self._compter_occurrences()
         valeurs_list = self._valeurs_numeriques()
         is_flush, flush_vals = self._is_flush()
@@ -147,7 +147,7 @@ class EvaluateurMain:
         )
 
     @staticmethod
-    def comparer_mains(main1, main2):
+    def comparer_mains(main1, main2)->int:
         if main1.value > main2.value:
             return 1
         elif main1.value < main2.value:
@@ -160,3 +160,10 @@ class EvaluateurMain:
                 elif EvaluateurMain.valeur_order[c1] < EvaluateurMain.valeur_order[c2]:
                     return -1
             return 0
+
+"""
+class ComparaisonMain(enum):
+    PlusForte,
+    Moins,
+    Egale
+"""
