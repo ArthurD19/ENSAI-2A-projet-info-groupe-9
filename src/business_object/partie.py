@@ -137,6 +137,10 @@ class Partie:
                 if montant < grosse_blind:
                     print(f"Vous ne pouvez pas miser moins que la grosse blind ({grosse_blind}).")
                     continue
+                elif montant > grosse_blind and montant < 2 * grosse_blind:
+                    print(f"Vous devez miser soit exactement la grosse blind ({grosse_blind}), soit au moins {2*grosse_blind}.")
+                    continue
+
                 if montant + joueur.mise <= self.mise_max:
                     print("Vous devez relancer au-dessus de la mise actuelle.")
                     continue
