@@ -161,12 +161,10 @@ class JoueurService:
         Retourne True si la déconnexion a bien été appliquée en base.
         """
         result = JoueurDao().deconnecter(pseudo)
-        if result:
-            try:
-                Session().deconnexion()
-            except Exception:
-                pass
+        Session().deconnexion()  # ← Toujours nettoyer la session locale
         return result
+
+
 
     @log
     def pseudo_deja_utilise(self, pseudo) -> bool:

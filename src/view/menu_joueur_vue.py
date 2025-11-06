@@ -43,10 +43,12 @@ class MenuJoueurVue(VueAbstraite):
 
         match choix:
             case "Se déconnecter":
-                Session().deconnexion()
+                # Appel du service pour mettre connecte = FALSE en base
+                success = JoueurService().se_deconnecter(pseudo)
                 from view.accueil.accueil_vue import AccueilVue
-                message = "Vous êtes maintenant déconnecté."
+                message = "Vous êtes maintenant déconnecté." if success else "Erreur lors de la déconnexion."
                 return AccueilVue(message, self.tables)
+
 
             case "Afficher la valeur du portefeuille":
                 portefeuille = JoueurService().afficher_valeur_portefeuille(pseudo)

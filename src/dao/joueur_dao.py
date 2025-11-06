@@ -131,7 +131,6 @@ class JoueurDao(metaclass=Singleton):
         try:
             with DBConnection().connection as connection:
                 with connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
-                    # Tentative atomique : WHERE connecte = FALSE
                     cursor.execute(
                         """
                         UPDATE joueurs
@@ -160,7 +159,7 @@ class JoueurDao(metaclass=Singleton):
 
     @log
     def deconnecter(self, pseudo: str) -> bool:
-        """Met connecte = FALSE pour le joueur"""
+        """Met connecte = FALSE pour le joueur et commit immédiatement."""
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
@@ -168,10 +167,13 @@ class JoueurDao(metaclass=Singleton):
                         "UPDATE joueurs SET connecte = FALSE WHERE pseudo = %(pseudo)s;",
                         {"pseudo": pseudo},
                     )
+                    connection.commit()  # ← Assure la persistance
                     return cursor.rowcount == 1
         except Exception as e:
             logging.exception(e)
             return False
+
+
 
 
     # --------------------------------------------------------------------------
