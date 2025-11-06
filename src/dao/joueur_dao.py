@@ -124,22 +124,19 @@ class JoueurDao(metaclass=Singleton):
     @log
     def se_connecter(self, pseudo: str, mdp: str) -> dict | None:
         """
-        Se connecter : vérifie pseudo + mdp et que le joueur n'est pas déjà connecté.
-        Si tout est OK, marque connecte = true et renvoie le joueur (dict).
-        Sinon renvoie None.
+        Vérifie si un joueur existe avec ce pseudo et ce mot de passe exact.
+        Retourne un dict avec pseudo, mdp, portefeuille, code_parrainage
+        ou None si aucun joueur trouvé.
         """
         try:
             with DBConnection().connection as connection:
                 with connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
-                    # atomic : on set connecte = true uniquement si mdp correct ET connecte est false/NULL
                     cursor.execute(
                         """
-                        UPDATE joueurs
-                           SET connecte = TRUE
-                         WHERE pseudo = %(pseudo)s
-                           AND mdp = %(mdp)s
-                           AND (connecte IS NULL OR connecte = FALSE)
-                     RETURNING pseudo, mdp, portefeuille, code_parrainage;
+                        SELECT pseudo, mdp, portefeuille, code_parrainage
+                        FROM joueurs
+                        WHERE pseudo = %(pseudo)s
+                          AND mdp = %(mdp)s;
                         """,
                         {"pseudo": pseudo, "mdp": mdp},
                     )
@@ -148,31 +145,6 @@ class JoueurDao(metaclass=Singleton):
         except Exception as e:
             logging.exception(e)
             return None
-
-
-    @log
-    def deconnecter(self, pseudo: str) -> bool:
-        """
-        Déconnecte le joueur (set connecte = false).
-        Retourne True si la ligne a été modifiée.
-        """
-        try:
-            with DBConnection().connection as connection:
-                with connection.cursor() as cursor:
-                    cursor.execute(
-                        """
-                        UPDATE joueurs
-                           SET connecte = FALSE
-                         WHERE pseudo = %(pseudo)s
-                           AND (connecte IS NOT NULL AND connecte = TRUE);
-                        """,
-                        {"pseudo": pseudo},
-                    )
-                    return cursor.rowcount == 1
-        except Exception as e:
-            logging.exception(e)
-            return False
-
 
 
     # --------------------------------------------------------------------------

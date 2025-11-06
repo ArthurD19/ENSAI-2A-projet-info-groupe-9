@@ -145,38 +145,19 @@ class JoueurService:
     def se_connecter(self, pseudo, mdp) -> dict | bool:
         """
         Se connecter à partir de pseudo et mdp.
-        - Vérifie d'abord si le joueur existe et s'il est déjà connecté.
         - Hash du mdp côté service.
         - Appel à JoueurDao().se_connecter() qui effectue l'UPDATE atomique (connecte = TRUE)
           et RETURNING quand la connexion est autorisée.
         - Si succès : on enregistre la session (Session().connexion) et on renvoie le dict joueur.
         - Si échec : renvoie False.
         """
-        dao = JoueurDao()
-
-        # 1) existe-t-il un joueur avec ce pseudo ?
-        joueur_existant = dao.trouver_par_pseudo(pseudo)
-        if not joueur_existant:
-            # pseudo inexistant -> message générique (sécurité)
-            print("\n❌ Pseudo ou mot de passe incorrect.\n")
-            return False
-
-        # 2) est-il déjà connecté ?
-        # on considère que 'connecte' est un bool dans la ligne retournée par le DAO
-        if joueur_existant.get("connecte") is True:
-            # affichage demandé
-            print("\n⚠️ Vous êtes déjà connecté avec ce pseudo.\n")
-            return False
-
-        # 3) on hash le mdp et on appelle le DAO pour tenter la connexion
         hashed = hash_password(mdp, pseudo)
-        joueur = dao.se_connecter(pseudo, hashed)
+        joueur = JoueurDao().se_connecter(pseudo, hashed)
         if joueur:
             # Enregistrer le pseudo en session (le reste des infos peut être conservé ailleurs si besoin)
             Session().connexion(joueur["pseudo"])
             return joueur
         else:
-            print("\n❌ Pseudo ou mot de passe incorrect.\n")
             return False
 
     @log
