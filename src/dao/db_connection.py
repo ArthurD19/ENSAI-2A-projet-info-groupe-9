@@ -25,6 +25,7 @@ class DBConnection(metaclass=Singleton):
             options=f"-c search_path={os.environ['POSTGRES_SCHEMA']}",
             cursor_factory=RealDictCursor,
         )
+        self.connection.autocommit = True
 
     @property
     def connection(self):
