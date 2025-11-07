@@ -61,3 +61,30 @@ def test_sequence_complete(distrib):
     assert distrib.turn is not None
     assert distrib.river is not None
     assert distrib.tour_actuel == "river"
+
+def test_distribuer_flop_un_joueur():
+    joueur = Joueur("Solo", 1000)
+    d = Distrib([joueur])
+    d.distribuer_mains()
+    d.distribuer_flop()
+    # Comme un seul joueur, le flop ne doit pas être distribué
+    assert d.flop == []
+    assert d.tour_actuel == "preflop"
+
+def test_distribuer_turn_un_joueur():
+    joueur = Joueur("Solo", 1000)
+    d = Distrib([joueur])
+    d.distribuer_mains()
+    d.distribuer_turn()
+    # Le turn ne doit pas être distribué
+    assert d.turn is None
+    assert d.tour_actuel == "preflop"
+
+def test_distribuer_river_un_joueur():
+    joueur = Joueur("Solo", 1000)
+    d = Distrib([joueur])
+    d.distribuer_mains()
+    d.distribuer_river()
+    # La river ne doit pas être distribuée
+    assert d.river is None
+    assert d.tour_actuel == "preflop"

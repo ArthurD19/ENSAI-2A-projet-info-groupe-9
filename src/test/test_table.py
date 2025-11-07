@@ -56,3 +56,10 @@ def test_repr(table_vide, joueurs):
     assert f"Table {table_vide.id}" in rep
     for j in joueurs[:3]:
         assert j.pseudo in rep
+
+def test_supprimer_joueur_inexistant():
+    table = Table(id=1)
+    joueur = Joueur("Alice", 1000)
+    # On ne l'ajoute pas à la table, donc supprimer doit lever ValueError
+    with pytest.raises(ValueError, match="Ce joueur n'est pas à la table."):
+        table.supprimer_joueur(joueur)

@@ -10,13 +10,12 @@ from dao.statistique_dao import StatistiqueDao
 class Partie:
     """Gestion complète d'une partie de poker Texas Hold'em."""
 
-    GROSSE_BLIND = 20  # constante globale pour la grosse blind
-
-    def __init__(self, id: int, table): 
+    GROSSE_BLIND = 20 
+    def __init__(self, id: int, table)->None: 
         self.id = id
         self.table = table
         self.distrib = Distrib(self.table.joueurs)
-        self.comptage = Comptage()
+        self.comptage = Comptage()  
         self.tour_actuel = "preflop"
         self.mise_max = 0
         self.indice_joueur_courant = 0
