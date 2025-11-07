@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.api.joueur_router import router as joueur_router
@@ -6,7 +7,8 @@ from src.api.joueur_router import router as joueur_router
 app = FastAPI(
     title="API Joueurs",
     description="API pour la gestion des joueurs, connexion, inscription, stats et portefeuille",
-    version="1.0.0"
+    version="1.0.0",
+    root_path="/proxy/8000"
 )
 
 # Middleware CORS si tu comptes faire des requêtes depuis un front
