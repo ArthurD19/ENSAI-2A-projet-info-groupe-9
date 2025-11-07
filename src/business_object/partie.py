@@ -17,6 +17,8 @@ class EtatPartie:
         self.pots_secondaires: dict = {}
         self.mise_max: int = 0
         self.joueur_courant: str | None = None
+        self.finie: bool = False                # True si la partie est terminée
+        self.resultats: list[dict] = []        # liste des gagnants avec info sur leur main et kickers
 
 
 class Partie:
@@ -140,13 +142,20 @@ class Partie:
         mises_actifs = [j.mise for j in actifs]
         return len(set(mises_actifs)) == 1
 
-    def annoncer_resultats(self):
+    def annoncer_resultats(self) -> EtatPartie:
         joueurs_en_jeu = [j for j in self.table.joueurs if j.actif or j.mise > 0]
+        
         if len(joueurs_en_jeu) <= 1:
             if joueurs_en_jeu:
                 gagnant = joueurs_en_jeu[0]
                 gagnant.solde += self.comptage.pot
+                self.etat.resultats = [{
+                    "pseudo": gagnant.pseudo,
+                    "main": [str(c) for c in gagnant.main],
+                    "description": "Gagne car les autres se sont couchés"
+                }]
             self.comptage.pot = 0
+            self.etat.finie = True
             self._mettre_a_jour_etat()
             return self.etat
 
@@ -165,21 +174,50 @@ class Partie:
             elif cmp == 0:
                 gagnants.append(j)
 
+        self.etat.resultats = []
         if self.comptage.pot > 0:
             part = self.comptage.pot // len(gagnants)
             for j in gagnants:
                 j.solde += part
+                self.etat.resultats.append({
+                    "pseudo": j.pseudo,
+                    "main": [str(c) for c in j.main],
+                    "description": f"Gagne {part} jetons avec {scores[j]['nom_main']} et kickers {scores[j]['kickers']}"
+                })
             self.comptage.pot = 0
 
+        self.etat.finie = True
         self._mettre_a_jour_etat()
         return self.etat
 
-    def gestion_rejouer(self, reponses: dict[str, bool]) -> bool:
-        for j in self.table.joueurs[:]:
-            if j.solde < 20 or reponses.get(j.pseudo) is False:
-                self.table.supprimer_joueur(j)
+    def gestion_rejouer(self) -> bool:
+        """
+        Prépare la partie pour une nouvelle main, réinitialise tout l'état.
+        Si au moins 2 joueurs actifs, la partie relance automatiquement.
+        """
+        # Supprimer les joueurs hors-solde
+        self.table.joueurs = [j for j in self.table.joueurs if j.solde >= Partie.GROSSE_BLIND]
 
-        if len(self.table.joueurs) < 2:
-            print("Pas assez de joueurs pour continuer. La simulation s'arrête.")
-            return False
-        return True
+        # Réinitialiser tous les joueurs restants
+        for j in self.table.joueurs:
+            j.mise = 0
+            j.actif = True
+            j.main = []
+
+        # Réinitialiser pot, board et comptage
+        self.table.board = []
+        self.comptage = Comptage()
+        self.distrib = Distrib(self.table.joueurs)
+        self.tour_actuel = "preflop"
+        self.mise_max = 0
+        self.indice_joueur_courant = 0
+        self.etat.finie = False
+        self._mettre_a_jour_etat()
+
+        # Relancer automatiquement si possible
+        if len(self.table.joueurs) >= 2:
+            self.initialiser_blinds()
+            self._mettre_a_jour_etat()
+            return True  # Partie relancée
+        return False  # Pas assez de joueurs, partie reste en pause
+
