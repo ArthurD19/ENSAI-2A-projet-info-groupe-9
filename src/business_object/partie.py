@@ -193,7 +193,8 @@ class Partie:
     def gestion_rejouer(self) -> bool:
         """
         Prépare la partie pour une nouvelle main, réinitialise tout l'état.
-        Si au moins 2 joueurs actifs, la partie relance automatiquement.
+        Intègre automatiquement les joueurs de la liste d'attente.
+        Retourne True si la partie pourrait être relancée (>=2 joueurs), sinon False.
         """
         # Supprimer les joueurs hors-solde
         self.table.joueurs = [j for j in self.table.joueurs if j.solde >= Partie.GROSSE_BLIND]
@@ -204,6 +205,14 @@ class Partie:
             j.actif = True
             j.main = []
 
+        # Intégrer les joueurs de la liste d'attente
+        for j in self.etat.liste_attente:
+            joueur = Joueur(pseudo=j['pseudo'], solde=j['solde'])
+            self.table.ajouter_joueur(joueur)
+            joueur.actif = True
+        # Vider la liste d'attente
+        self.etat.liste_attente.clear()
+
         # Réinitialiser pot, board et comptage
         self.table.board = []
         self.comptage = Comptage()
@@ -211,15 +220,17 @@ class Partie:
         self.tour_actuel = "preflop"
         self.mise_max = 0
         self.indice_joueur_courant = 0
-        self.etat.finie = False
+        self.etat.finie = True
         self._mettre_a_jour_etat()
 
-        # Relancer automatiquement si possible
         if len(self.table.joueurs) >= 2:
             self.initialiser_blinds()
+            self.etat.finie = False  # La partie repart
             self._mettre_a_jour_etat()
             return True  # Partie relancée
+
         return False  # Pas assez de joueurs, partie reste en pause
+
 
     def integrer_attente(self):
         """

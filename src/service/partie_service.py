@@ -63,22 +63,35 @@ class PartieService:
 
     def rejoindre_partie(self, joueur: Joueur) -> tuple[bool, str]:
         """
-        Permet à un nouveau joueur de rejoindre la partie.
-        Pas besoin de vérifier son solde.
-        Si la partie peut repartir, elle se relance automatiquement.
+        Permet à un joueur de rejoindre la partie.
+        Vérifie :
+        - qu'il n'est pas déjà dans la table ou la liste d'attente
+        - que son solde est >= grosse blind
+        - que le nombre total joueurs + liste d'attente <= 5
+        Intègre les joueurs en liste d'attente automatiquement lors de gestion_rejouer.
         """
-        # Vérifier que le joueur n'est pas déjà à la table
-        if any(j.pseudo == joueur.pseudo for j in self.partie.table.joueurs):
-            return False, f"Le joueur '{joueur.pseudo}' est déjà à la table."
+        # Vérifier le solde
+        if joueur.solde < Partie.GROSSE_BLIND:
+            return False, f"{joueur.pseudo} n'a pas assez de jetons pour jouer (minimum {Partie.GROSSE_BLIND})."
 
-        # Ajouter le joueur
-        self.partie.table.ajouter_joueur(joueur)
+        # Vérifier qu'il n'est pas déjà dans la table ou la liste d'attente
+        deja_present = any(j.pseudo == joueur.pseudo for j in self.partie.table.joueurs)
+        deja_en_attente = any(j['pseudo'] == joueur.pseudo for j in self.partie.etat.liste_attente)
+        if deja_present or deja_en_attente:
+            return False, f"{joueur.pseudo} est déjà dans la table ou en liste d'attente."
 
-        # Appeler gestion_rejouer pour réinitialiser l'état et éventuellement relancer la partie
-        partie_relancee = self.partie.gestion_rejouer()
+        # Vérifier la limite totale (table + liste d'attente <= 5)
+        total_joueurs = len(self.partie.table.joueurs) + len(self.partie.etat.liste_attente)
+        if total_joueurs >= 5:
+            return False, "La table et la liste d'attente sont pleines."
+
+        # Ajouter le joueur à la liste d'attente
+        self.partie.ajouter_a_liste_attente(joueur)
+
+        if self.partie.etat.finie:
+            self.partie.gestion_rejouer()
 
         if partie_relancee:
-            return True, "Nouvelle main lancée."
+            return True, f"{joueur.pseudo} ajouté à la liste d'attente. Nouvelle main lancée."
         else:
-            return False, "Pas encore assez de joueurs pour relancer la partie."
-
+            return True, f"{joueur.pseudo} ajouté à la liste d'attente. Pas encore assez de joueurs pour relancer la partie."
