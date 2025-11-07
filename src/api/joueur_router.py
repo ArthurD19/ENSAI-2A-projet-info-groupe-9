@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from src.dao.joueur_dao import JoueurDao 
-from src.dao.statistique_dao import StatistiqueDao
 from src.utils.securite import hash_password
 from src.service.joueur_service import JoueurService
 
@@ -31,6 +30,8 @@ class JoueurInscription(BaseModel):
 # Modèle de sortie (réponse renvoyée)
 class JoueurConnecte(BaseModel):
     pseudo: str
+    portefeuille: int
+    code_parrainage: str
 
 
 # Endpoint POST /joueurs/login
@@ -50,14 +51,14 @@ def connexion_joueur(payload: JoueurConnexion):
 
     # Vérifie le mot de passe haché
     hashed_input = hash_password(payload.mdp, payload.pseudo)
-    if joueur.mdp != hashed_input:
+    if joueur["mdp"] != hashed_input:
         raise HTTPException(status_code=401, detail="Mot de passe incorrect")
 
     # Cas où la connexion réussie
     return JoueurSortie(
-        pseudo=joueur.pseudo,
-        code_parrainage=joueur.code_parrainage,
-        portefeuille=joueur.portefeuille
+        pseudo=joueur["pseudo"],
+        code_parrainage=joueur["code_parrainage"],
+        portefeuille=joueur["portefeuille"]
     )
 
 
@@ -76,70 +77,7 @@ def inscription_joueur(payload: JoueurInscription):
     else:
         joueur = JoueurService().creer(payload.pseudo, payload.mdp, payload.code_parrainage)
     return JoueurSortie(
-        pseudo=joueur.pseudo,
-        code_parrainage=joueur.code_parrainage,
-        portefeuille=joueur.portefeuille
+        pseudo=joueur["pseudo"],
+        code_parrainage=joueur["code_parrainage"],
+        portefeuille=joueur["portefeuille"]
     )
-
-
-# Endpoint GET /joueurs/code_parrainage
-@router.get("/code_parrainage", response_model=str)
-def code_parrainage_joueur(pseudo: str):
-    """
-    Endpoint de récupération de son code de parrainage par un joueur.
-    Vérifie si un code de parrainage existe dans la base SQL, le renvoie dans ce cas et sinon crée
-    le code de parrainage.
-    """
-
-    joueur = JoueurDao().trouver_par_pseudo(pseudo)
-    
-    if not joueur:
-        raise HTTPException(status_code=401, detail="Pseudo inconnu")
-    if joueur.code_parrainage is not None:
-        code = JoueurService().generer_code_parrainage(pseudo)
-        return code
-    else:
-        return joueur.code_parrainage
-
-
-# Endpoint GET /joueurs/stats
-@router.get("/stats", response_model=dict)
-def stats_joueur(pseudo: str):
-    """
-    Endpoint de récupération de ses statistiques par un joueur.
-    """
-
-    statistiques = StatistiqueDao().trouver_statistiques_par_id(pseudo)
-    
-    if statistiques == {}:
-        raise HTTPException(status_code=401, detail="Joueur inconnu ou n'ayant pas de statistiques")
-    else:
-        return statistiques
-
-
-# Endpoint GET /joueurs/valeur_portefeuille
-@router.get("/valeur_portefeuille", response_model=int)
-def portefeuille_joueur(pseudo: str):
-    """
-    Endpoint de récupération de la valeur de son portefeuille par un joueur.
-    """
-
-    valeur = JoueurDao().valeur_portefeuille(pseudo)
-    
-    if valeur is not None:
-        return valeur
-    else:
-        raise HTTPException(status_code=401, detail="Pseudo inconnu")
-
-
-# Endpoint GET /joueurs/voir_classement
-@router.get("/voir_classement", response_model=dict)
-def voir_classement_joueur():
-    """
-    Endpoint de récupération de la valeur de son portefeuille par un joueur.
-    """
-
-    classement = JoueurDao().classement_par_portefeuille(limit=None)
-    return classement
-
-# Faire tous les autres

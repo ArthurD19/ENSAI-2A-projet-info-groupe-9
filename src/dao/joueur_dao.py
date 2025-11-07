@@ -4,6 +4,7 @@ import psycopg2.extras
 from utils.singleton import Singleton
 from utils.log_decorator import log
 from dao.db_connection import DBConnection
+from dao.statistique_dao import StatistiqueDao
 
 
 class JoueurDao(metaclass=Singleton):
@@ -35,6 +36,7 @@ class JoueurDao(metaclass=Singleton):
                         """,
                         joueur,
                     )
+            StatistiqueDao().creer_statistiques_pour_joueur(joueur["pseudo"])
             return True
         except Exception as e:
             logging.exception(e)

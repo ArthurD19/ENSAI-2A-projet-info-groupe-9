@@ -2,6 +2,8 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.api.joueur_router import router as joueur_router
+from src.api.joueur_connecte_router import router as joueur_connecte_router
+from src.api.joueur_en_jeu_router import router as joueur_en_jeu_router
 
 # Création de l'application FastAPI
 app = FastAPI(
@@ -28,6 +30,8 @@ app.add_middleware(
 
 # Inclusion du router joueur
 app.include_router(joueur_router)
+app.include_router(joueur_connecte_router)
+app.include_router(joueur_en_jeu_router)
 
 # Endpoint racine pour tester si le serveur fonctionne
 @app.get("/")
