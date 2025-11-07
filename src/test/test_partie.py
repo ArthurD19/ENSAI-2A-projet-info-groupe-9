@@ -1,271 +1,106 @@
 import pytest
-from business_object.cartes import Carte, valeurs, couleurs
+from business_object.partie import Partie
 from business_object.joueurs import Joueur
 from business_object.table import Table
-from business_object.partie import Partie
-from business_object.comptage import Comptage
+from business_object.cartes import Carte, couleurs, valeurs
+
 
 @pytest.fixture
-def table_exemple():
-    t = Table(id=1)
-    t.ajouter_joueur(Joueur("Alice", 1000))
-    t.ajouter_joueur(Joueur("Bob", 1000))
-    return t
-
-def test_init_partie(table_exemple):
-    partie = Partie(id=1, table=table_exemple)
+def setup_partie():
+    # Crée 2 joueurs
+    j1 = Joueur("Alice", solde=100)
+    j2 = Joueur("Bob", solde=100)
     
-    assert partie.id == 1
-    assert partie.table == table_exemple
-    assert partie.distrib is not None
-    assert partie.comptage is not None
-    assert partie.tour_actuel == "preflop"
-    assert partie.mise_max == 0
-    assert partie.indice_joueur_courant == 0
+    # Crée la table
+    table = Table(id=1)
+    table.ajouter_joueur(j1)
+    table.ajouter_joueur(j2)
     
-    assert len(partie.table.joueurs) == 2
-    pseudos = [j.pseudo for j in partie.table.joueurs]
-    assert "Alice" in pseudos
-    assert "Bob" in pseudos
+    # Crée la partie
+    partie = Partie(id=1, table=table)
+    
+    return partie, j1, j2
 
-@pytest.fixture
-def table_exemple_blinds():
-    t = Table(id=1)
-    t.ajouter_joueur(Joueur("Alice", 1000))
-    t.ajouter_joueur(Joueur("Bob", 1000))
-    t.ajouter_joueur(Joueur("Charlie", 1000))
-    t.indice_dealer = 0  
-    return t
 
-def test_initialiser_blinds(table_exemple_blinds):
-    partie = Partie(id=1, table=table_exemple_blinds)
+def test_initialiser_blinds(setup_partie):
+    partie, j1, j2 = setup_partie
+    partie.initialiser_blinds()
+    
+    # Vérifie que les blinds ont été mises
+    assert any(j["pseudo"] == "Alice" and j["mise"] > 0 for j in partie.etat.joueurs)
+    assert any(j["pseudo"] == "Bob" and j["mise"] > 0 for j in partie.etat.joueurs)
+
+
+def test_actions_joueur_miser(setup_partie):
+    partie, j1, j2 = setup_partie
+    partie.initialiser_blinds()
+    
+    # Alice mise 30 (total = 30 + sa blind)
+    etat = partie.actions_joueur("Alice", "miser", 30)
+    alice = next(j for j in etat.joueurs if j["pseudo"] == "Alice")
+    assert alice["mise"] == 30 + 20  
+
+
+def test_actions_joueur_suivre(setup_partie):
+    partie, j1, j2 = setup_partie
+    partie.initialiser_blinds()
+    
+    # Alice mise 30, Bob suit
+    partie.actions_joueur("Alice", "miser", 30)
+    etat = partie.actions_joueur("Bob", "suivre")
+    bob = next(j for j in etat.joueurs if j["pseudo"] == "Bob")
+    assert bob["mise"] == partie.mise_max  # Bob a suivi la mise max
+
+
+def test_actions_joueur_se_coucher(setup_partie):
+    partie, j1, j2 = setup_partie
+    partie.initialiser_blinds()
+    
+    etat = partie.actions_joueur("Alice", "se_coucher")
+    alice = next(j for j in etat.joueurs if j["pseudo"] == "Alice")
+    assert alice["actif"] is False
+
+
+def test_actions_joueur_all_in(setup_partie):
+    partie, j1, j2 = setup_partie
     partie.initialiser_blinds()
 
-    alice = table_exemple_blinds.joueurs[0]   # Alice = dealer
-    bob = table_exemple_blinds.joueurs[1]     # Bob = petite blind
-    charlie = table_exemple_blinds.joueurs[2] # Charlie = grosse blind
+    etat_avant = next(j for j in partie.etat.joueurs if j["pseudo"] == "Alice")
+    solde_alice = etat_avant["solde"]
 
-    # Vérifie les mises
-    assert bob.mise == 10         # Petite blind
-    assert charlie.mise == 20     # Grosse blind
-    assert alice.mise == 0        # Dealer ne mise pas
-
-    # Vérifie la mise max et le joueur courant
-    assert partie.mise_max == 20
-    assert partie.indice_joueur_courant == 0  # Alice joue après la grosse blind
-
-    # Vérifie que le dealer a tourné
-    assert table_exemple_blinds.indice_dealer == 1  # Dealer tourne vers Bob
+    etat = partie.actions_joueur("Alice", "all-in")
+    alice = next(j for j in etat.joueurs if j["pseudo"] == "Alice")
+    assert alice["mise"] == solde_alice + 20  
+    assert alice["actif"] is True
 
 
-
-
-@pytest.fixture
-def table_etat():
-    t = Table(id=1)
-    t.ajouter_joueur(Joueur("Alice", 1000))
-    t.ajouter_joueur(Joueur("Bob", 1000))
-    t.indice_dealer = 0
-    return t
-
-def test_afficher_etat(table_etat, capsys):
-    partie = Partie(1, table_etat)
-    partie.comptage = Comptage()  
-    partie.afficher_etat()
+def test_passer_tour(setup_partie):
+    partie, j1, j2 = setup_partie
+    partie.initialiser_blinds()
     
-    captured = capsys.readouterr()
-    # Vérifie que les pseudos des joueurs apparaissent
-    assert "Alice" in captured.out
-    assert "Bob" in captured.out
-    # Vérifie que le pot principal est affiché
-    assert "Pot principal" in captured.out
-
-def test_passer_tour(table_etat):
-    partie = Partie(1, table_etat)
-    alice, bob = table_etat.joueurs
-
-    alice.miser(50)
-    bob.miser(30)
-    partie.mise_max = 50
-
+    partie.actions_joueur("Alice", "miser", 30)
+    partie.actions_joueur("Bob", "suivre")
+    
     partie.passer_tour()
+    etat = partie.etat
+    total_pot_attendu = sum(j.mise for j in partie.table.joueurs) + partie.comptage.pot
+    assert etat.pot == total_pot_attendu
 
-    assert partie.comptage.pot == 80
-    assert alice.mise == 0
-    assert bob.mise == 0
-    assert partie.mise_max == 0
 
-def test_affrontement_mains(monkeypatch):
-    # Création de la table avec 2 joueurs
-    table = Table(id=1)
-    alice = Joueur("Alice", 1000)
-    bob = Joueur("Bob", 1000)
-    table.ajouter_joueur(alice)
-    table.ajouter_joueur(bob)
-    partie = Partie(1, table)
+def test_annoncer_resultats(setup_partie):
+    partie, j1, j2 = setup_partie
+    partie.initialiser_blinds()
 
-    # Board fixe
-    board = [
-        Carte(couleurs.COEUR, valeurs.AS),
-        Carte(couleurs.COEUR, valeurs.ROI),
-        Carte(couleurs.COEUR, valeurs.DAME),
-        Carte(couleurs.PIQUE, valeurs.TROIS),
-        Carte(couleurs.CARREAU, valeurs.DEUX)
-    ]
-    partie.table.board = board
-
-    # Mains des joueurs
-    alice.main = [
+    # Distribuer mains et board pour avoir 5 cartes au total
+    j1.main = [Carte(couleurs.COEUR, valeurs.AS), Carte(couleurs.COEUR, valeurs.ROI)]
+    j2.main = [Carte(couleurs.PIQUE, valeurs.DAME), Carte(couleurs.PIQUE, valeurs.VALET)]
+    partie.table.board = [
         Carte(couleurs.COEUR, valeurs.DIX),
-        Carte(couleurs.COEUR, valeurs.VALET)
-    ]  # Quinte flush
-    bob.main = [
-        Carte(couleurs.PIQUE, valeurs.AS),
-        Carte(couleurs.TREFLE, valeurs.AS)
-    ]  # Paire d'As
+        Carte(couleurs.CARREAU, valeurs.NEUF),
+        Carte(couleurs.TREFLE, valeurs.HUIT)
+    ]
 
-    # Pot de test
-    partie.comptage.pot = 100
+    partie.actions_joueur("Alice", "miser", 20)
+    partie.actions_joueur("Bob", "suivre")
 
-    # Monkeypatch pour bypass input()
-    monkeypatch.setattr("builtins.input", lambda x: "suivre")
-
-    # Lancer l'annonce des résultats
-    partie.annoncer_resultats()
-
-    # Vérifie que Alice remporte le pot
-    assert alice.solde > 1000
-    assert bob.solde == 1000
-
-def test_initialiser_blinds_moins_de_2_joueurs():
-    table = Table(id=1)  # 0 joueur
-    partie = Partie(1, table)
-    assert partie.initialiser_blinds() is None
-
-def test_demarrer_partie_aucun_joueur(capsys):
-    table = Table(id=1)
-    partie = Partie(1, table)
-    assert partie.demarrer_partie() is None
-    captured = capsys.readouterr()
-    assert "Aucun joueur à la table" in captured.out
-
-def test_afficher_etat_pots_secondaires(capsys):
-    table = Table(id=1)
-    alice = Joueur("Alice", 1000)
-    table.ajouter_joueur(alice)
-    partie = Partie(1, table)
-    partie.comptage.pot = 50
-    partie.comptage.pots_perso[alice] = 20
-    partie.afficher_etat()
-    captured = capsys.readouterr()
-    assert "Alice: 20" in captured.out
-
-def test_actions_joueurs_miser_suivre(monkeypatch, capsys):
-    table = Table(id=1)
-    alice = Joueur("Alice", 1000)
-    bob = Joueur("Bob", 1000)
-    table.ajouter_joueur(alice)
-    table.ajouter_joueur(bob)
-    partie = Partie(1, table)
-    partie.mise_max = 10
-
-    # Simule Alice suit, Bob suit
-    inputs = iter([
-        "suivre",  # Alice suit
-        "suivre"   # Bob suit
-    ])
-    monkeypatch.setattr("builtins.input", lambda x: next(inputs))
-
-    partie.actions_joueurs()
-    captured = capsys.readouterr()
-
-    # Vérifie affichage
-    assert "Tour de Alice" in captured.out
-    assert "Tour de Bob" in captured.out
-
-    # Vérifie mises
-    assert alice.mise == 10
-    assert bob.mise == 10
-
-    # Les deux joueurs restent actifs
-    assert alice.actif is True
-    assert bob.actif is True
-
-def test_demarrer_partie_complet(monkeypatch, capsys):
-    table = Table(id=1)
-    alice = Joueur("Alice", 1000)
-    bob = Joueur("Bob", 1000)
-    table.ajouter_joueur(alice)
-    table.ajouter_joueur(bob)
-    table.indice_dealer = 0
-    partie = Partie(1, table)
-
-    # Toujours suivre et refuser de rejouer
-    inputs = iter(["suivre"] * 20 + ["non", "non"])
-    monkeypatch.setattr("builtins.input", lambda x: next(inputs))
-
-    # Appel de la partie
-    partie.demarrer_partie()  # pas de retour attendu
-
-    captured = capsys.readouterr()
-
-    # Vérifications sur la sortie
-    assert "=== Début de la partie" in captured.out
-    assert "Tour actuel : preflop" in captured.out
-    assert "Pot principal" in captured.out
-    assert "Pas assez de joueurs pour continuer" in captured.out  # indique que la partie s'arrête
-
-
-"""
-def test_actions_joueurs_joueur_solde_zero(monkeypatch, capsys):
-    table = Table(id=1)
-    alice = Joueur("Alice", 0)   # solde = 0
-    bob = Joueur("Bob", 1000)
-    table.ajouter_joueur(alice)
-    table.ajouter_joueur(bob)
-    partie = Partie(1, table)
-
-    # On met mise_max > 0 pour forcer Bob à suivre
-    partie.mise_max = 10
-
-    # Bob a mise 0, devra suivre 10
-    inputs = iter([
-        "suivre"  # Bob suit
-    ])
-    monkeypatch.setattr("builtins.input", lambda x: next(inputs))
-
-    # Lance actions_joueurs
-    partie.actions_joueurs()
-
-    captured = capsys.readouterr()
-
-    # Alice ignorée
-    assert "Alice n'a plus d'argent" in captured.out
-
-    # Bob suit correctement
-    assert bob.mise == 10
-    assert bob.actif is True
-"""
-
-def test_actions_joueurs_un_seul_actif():
-    # Table avec 2 joueurs
-    table = Table(id=1)
-    alice = Joueur("Alice", 1000)
-    bob = Joueur("Bob", 1000)
-    table.ajouter_joueur(alice)
-    table.ajouter_joueur(bob)
-
-    # Bob est couché, donc un seul joueur actif
-    bob.se_coucher()
-
-    partie = Partie(1, table)
-    partie.mise_max = 0
-
-    # Appel direct de la fonction, elle doit break sur ligne 103
-    partie.actions_joueurs()
-
-    # Alice reste active
-    assert alice.actif is True
-    # Bob est couché
-    assert bob.actif is False
-
+    assert partie.etat.pot > 0

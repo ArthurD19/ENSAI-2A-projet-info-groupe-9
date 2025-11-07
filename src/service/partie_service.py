@@ -1,58 +1,55 @@
-from business_object.partie import Partie
-from business_object.joueurs import Joueur
-from business_object.table import Table
+class PartieService:
+    """Service pour gérer les interactions avec une Partie via API."""
 
-from dao.joueur_dao import JoueurDao
+    def __init__(self, partie: Partie):
+        self.partie = partie
 
-from utils.singleton import Singleton
-from utils.log_decorator import log
+    def voir_etat_partie(self) -> EtatPartie:
+        """Retourne l'état actuel de la partie."""
+        self.partie._mettre_a_jour_etat()
+        return self.partie.etat
 
-class PartieService(metaclass=Singleton):
-    def __init__(self):
-        self.parties = {}
+    def miser(self, pseudo: str, montant: int) -> EtatPartie:
+        """Le joueur mise un montant."""
+        joueur = next((j for j in self.partie.table.joueurs if j.pseudo == pseudo), None)
+        if not joueur or not joueur.actif:
+            return self.partie.etat  # action impossible
 
-    @log
-    def creer_partie(self, table: Table):
-        """
-        Crée une partie pour une table donnée à partir des joueurs déjà présents.
-        """
-        if not table.joueurs or len(table.joueurs) < 2:
-            raise ValueError("Il faut au moins 2 joueurs pour créer une partie")
-        
-        partie = Partie(id=table.id, table=table)
-        self.parties[table.id] = partie
-        return partie
+        if montant <= 0 or montant + joueur.mise < self.partie.mise_max:
+            return self.partie.etat  # montant invalide
 
-    @log
-    def rejoindre_partie(self, pseudo: str, table: Table):
-        """
-        Permet à un joueur web de rejoindre une table et de devenir un joueur poker.
-        """
-        solde = JoueurDao().valeur_portefeuille(pseudo)
-        joueur = Joueur(pseudo=pseudo, solde=solde)
-        
-        # Ajout à la table
-        ajout = table.ajouter_joueur(joueur)
-        if ajout != 1:
-            return ajout  # retourne le code d'erreur de table (2= déjà présent, 3= pleine)
-        
-        return 1
+        return self.partie.actions_joueur(pseudo, "miser", montant)
 
-    @log
-    def lancer_tour(self, id_table: int):
-        """
-        Lance la partie sur la table donnée.
-        """
-        partie = self.parties.get(id_table)
-        if not partie:
-            raise ValueError("Aucune partie sur cette table")
-        
-        partie.demarrer_partie()
-        return partie
+    def suivre(self, pseudo: str) -> EtatPartie:
+        """Le joueur suit la mise actuelle."""
+        joueur = next((j for j in self.partie.table.joueurs if j.pseudo == pseudo), None)
+        if not joueur or not joueur.actif:
+            return self.partie.etat
+        return self.partie.actions_joueur(pseudo, "suivre")
 
-    @log
-    def recuperer_partie(self, id_table: int):
-        """
-        Renvoie la partie en cours pour une table.
-        """
-        return self.parties.get(id_table)
+    def se_coucher(self, pseudo: str) -> EtatPartie:
+        """Le joueur se couche."""
+        joueur = next((j for j in self.partie.table.joueurs if j.pseudo == pseudo), None)
+        if not joueur or not joueur.actif:
+            return self.partie.etat
+        return self.partie.actions_joueur(pseudo, "se_coucher")
+
+    def all_in(self, pseudo: str) -> EtatPartie:
+        """Le joueur fait all-in."""
+        joueur = next((j for j in self.partie.table.joueurs if j.pseudo == pseudo), None)
+        if not joueur or not joueur.actif:
+            return self.partie.etat
+        return self.partie.actions_joueur(pseudo, "all-in")
+
+    def passer_tour(self) -> EtatPartie:
+        """Passe au tour suivant (flop, turn, river)."""
+        self.partie.passer_tour()
+        return self.partie.etat
+
+    def annoncer_resultats(self) -> EtatPartie:
+        """Annonce les résultats de la main et met à jour l'état."""
+        return self.partie.annoncer_resultats()
+
+    def gestion_rejouer(self, reponses: dict[str, bool]) -> bool:
+        """Met à jour la table selon qui veut rejouer et renvoie si la partie peut continuer."""
+        return self.partie.gestion_rejouer(reponses)
