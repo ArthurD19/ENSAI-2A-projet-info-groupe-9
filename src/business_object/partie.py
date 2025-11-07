@@ -300,3 +300,4 @@ class Partie:
             print("Pas assez de joueurs pour continuer. La simulation s'arrête.")
             return False
         return True
+
