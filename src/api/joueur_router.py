@@ -41,8 +41,8 @@ def connexion_joueur(payload: JoueurConnexion):
     Vérifie le pseudo et le mot de passe dans la base SQL.
     """
 
-    dao = JoueurDAO()
-    joueur = dao.find_by_pseudo(payload.pseudo)
+    dao = JoueurDao()
+    joueur = dao.trouver_par_pseudo(payload.pseudo)
 
     # Cas où le joueur est inconnu
     if not joueur:
@@ -54,7 +54,7 @@ def connexion_joueur(payload: JoueurConnexion):
         raise HTTPException(status_code=401, detail="Mot de passe incorrect")
 
     # Cas où la connexion réussie
-    return JoueurOut(
+    return JoueurSortie(
         pseudo=joueur.pseudo,
         code_parrainage=joueur.code_parrainage,
         portefeuille=joueur.portefeuille
@@ -68,8 +68,6 @@ def inscription_joueur(payload: JoueurInscription):
     Endpoint d'inscription d'un joueur.
     Crée le joueur dans la base de données SQL à partir des informations rentrées par le joueur.
     """
-
-    dao = JoueurDAO()
     code_parrainage = payload.code_parrainage
     if code_parrainage is None or code_parrainage == "":
         joueur = JoueurService().creer_sans_code_parrainage(payload.pseudo, payload.mdp)
@@ -77,7 +75,7 @@ def inscription_joueur(payload: JoueurInscription):
         raise HTTPException(status_code=401, detail="Code de parrainage non valide")
     else:
         joueur = JoueurService().creer(payload.pseudo, payload.mdp, payload.code_parrainage)
-    return JoueurOut(
+    return JoueurSortie(
         pseudo=joueur.pseudo,
         code_parrainage=joueur.code_parrainage,
         portefeuille=joueur.portefeuille
@@ -86,19 +84,19 @@ def inscription_joueur(payload: JoueurInscription):
 
 # Endpoint GET /joueurs/code_parrainage
 @router.get("/code_parrainage", response_model=str)
-def code_parrainage_joueur(payload: JoueurConnecte):
+def code_parrainage_joueur(pseudo: str):
     """
     Endpoint de récupération de son code de parrainage par un joueur.
     Vérifie si un code de parrainage existe dans la base SQL, le renvoie dans ce cas et sinon crée
     le code de parrainage.
     """
 
-    joueur = JoueurDao().trouver_par_pseudo(payload.pseudo)
+    joueur = JoueurDao().trouver_par_pseudo(pseudo)
     
     if not joueur:
         raise HTTPException(status_code=401, detail="Pseudo inconnu")
     if joueur.code_parrainage is not None:
-        code = JoueurService().generer_code_parrainage(payload.pseudo)
+        code = JoueurService().generer_code_parrainage(pseudo)
         return code
     else:
         return joueur.code_parrainage
@@ -106,12 +104,12 @@ def code_parrainage_joueur(payload: JoueurConnecte):
 
 # Endpoint GET /joueurs/stats
 @router.get("/stats", response_model=dict)
-def stats_joueur(payload: JoueurConnecte):
+def stats_joueur(pseudo: str):
     """
     Endpoint de récupération de ses statistiques par un joueur.
     """
 
-    statistiques = StatistiqueDao().trouver_statistiques_par_id(payload.pseudo)
+    statistiques = StatistiqueDao().trouver_statistiques_par_id(pseudo)
     
     if statistiques == {}:
         raise HTTPException(status_code=401, detail="Joueur inconnu ou n'ayant pas de statistiques")
@@ -121,12 +119,12 @@ def stats_joueur(payload: JoueurConnecte):
 
 # Endpoint GET /joueurs/valeur_portefeuille
 @router.get("/valeur_portefeuille", response_model=int)
-def portefeuille_joueur(payload: JoueurConnecte):
+def portefeuille_joueur(pseudo: str):
     """
     Endpoint de récupération de la valeur de son portefeuille par un joueur.
     """
 
-    valeur = JoueurDao().valeur_portefeuille(payload.pseudo)
+    valeur = JoueurDao().valeur_portefeuille(pseudo)
     
     if valeur is not None:
         return valeur
@@ -136,7 +134,7 @@ def portefeuille_joueur(payload: JoueurConnecte):
 
 # Endpoint GET /joueurs/voir_classement
 @router.get("/voir_classement", response_model=dict)
-def voir_classement_joueur(payload: JoueurConnecte):
+def voir_classement_joueur():
     """
     Endpoint de récupération de la valeur de son portefeuille par un joueur.
     """
