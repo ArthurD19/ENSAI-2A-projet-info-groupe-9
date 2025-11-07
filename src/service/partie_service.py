@@ -11,20 +11,20 @@ class PartieService:
     def voir_etat_partie(self) -> tuple[bool, str]:
         """Retourne si la requête est valide (toujours True ici)."""
         self.partie._mettre_a_jour_etat()
-        return True, ""
+        return True, self.partie.etat, ""
 
     def miser(self, pseudo: str, montant: int) -> tuple[bool, str]:
         joueur = next((j for j in self.partie.table.joueurs if j.pseudo == pseudo), None)
         if not joueur:
-            return False, f"Le joueur '{pseudo}' n'existe pas."
+            return False, self.partie.etat, f"Le joueur '{pseudo}' n'existe pas."
         if not joueur.actif:
-            return False, f"Le joueur '{pseudo}' n'est pas actif."
+            return False, self.partie.etat, f"Le joueur '{pseudo}' n'est pas actif."
         if montant <= 0:
-            return False, "Le montant doit être positif."
+            return False, self.partie.etat, "Le montant doit être positif."
         if montant + joueur.mise < self.partie.mise_max:
-            return False, f"Le montant doit au moins égaler la mise maximale ({self.partie.mise_max})."
+            return False, self.partie.etat, f"Le montant doit au moins égaler la mise maximale ({self.partie.mise_max})."
         if montant > joueur.solde:
-            return False, f"Montant {montant} supérieur au solde de {joueur.solde}, tu peux all-in"
+            return False, self.partie.etat, f"Montant {montant} supérieur au solde de {joueur.solde}, tu peux all-in"
 
         self.partie.actions_joueur(pseudo, "miser", montant)
         return True, ""
@@ -44,19 +44,19 @@ class PartieService:
     def se_coucher(self, pseudo: str) -> tuple[bool, str]:
         joueur = next((j for j in self.partie.table.joueurs if j.pseudo == pseudo), None)
         if not joueur:
-            return False, f"Le joueur '{pseudo}' n'existe pas."
+            return False, self.partie.etat, f"Le joueur '{pseudo}' n'existe pas."
         if not joueur.actif:
-            return False, f"Le joueur '{pseudo}' n'est pas actif."
+            return False, self.partie.etat, f"Le joueur '{pseudo}' n'est pas actif."
 
         self.partie.actions_joueur(pseudo, "se_coucher")
-        return True, ""
+        return True, self.partie.etat, ""
 
     def all_in(self, pseudo: str) -> tuple[bool, str]:
         joueur = next((j for j in self.partie.table.joueurs if j.pseudo == pseudo), None)
         if not joueur:
-            return False, f"Le joueur '{pseudo}' n'existe pas."
+            return False, self.partie.etat, f"Le joueur '{pseudo}' n'existe pas."
         if not joueur.actif:
-            return False, f"Le joueur '{pseudo}' n'est pas actif."
+            return False, self.partie.etat, f"Le joueur '{pseudo}' n'est pas actif."
 
         self.partie.actions_joueur(pseudo, "all-in")
         return True, ""
@@ -72,18 +72,18 @@ class PartieService:
         """
         # Vérifier le solde
         if joueur.solde < Partie.GROSSE_BLIND:
-            return False, f"{joueur.pseudo} n'a pas assez de jetons pour jouer (minimum {Partie.GROSSE_BLIND})."
+            return False, self.partie.etat, f"{joueur.pseudo} n'a pas assez de jetons pour jouer (minimum {Partie.GROSSE_BLIND})."
 
         # Vérifier qu'il n'est pas déjà dans la table ou la liste d'attente
         deja_present = any(j.pseudo == joueur.pseudo for j in self.partie.table.joueurs)
         deja_en_attente = any(j['pseudo'] == joueur.pseudo for j in self.partie.etat.liste_attente)
         if deja_present or deja_en_attente:
-            return False, f"{joueur.pseudo} est déjà dans la table ou en liste d'attente."
+            return False, self.partie.etat, f"{joueur.pseudo} est déjà dans la table ou en liste d'attente."
 
         # Vérifier la limite totale (table + liste d'attente <= 5)
         total_joueurs = len(self.partie.table.joueurs) + len(self.partie.etat.liste_attente)
         if total_joueurs >= 5:
-            return False, "La table et la liste d'attente sont pleines."
+            return False, self.partie.etat, "La table et la liste d'attente sont pleines."
 
         # Ajouter le joueur à la liste d'attente
         self.partie.ajouter_a_liste_attente(joueur)
@@ -92,6 +92,6 @@ class PartieService:
             self.partie.gestion_rejouer()
 
         if partie_relancee:
-            return True, f"{joueur.pseudo} ajouté à la liste d'attente. Nouvelle main lancée."
+            return True, self.partie.etat, f"{joueur.pseudo} ajouté à la liste d'attente. Nouvelle main lancée."
         else:
-            return True, f"{joueur.pseudo} ajouté à la liste d'attente. Pas encore assez de joueurs pour relancer la partie."
+            return True, self.partie.etat, f"{joueur.pseudo} ajouté à la liste d'attente. Pas encore assez de joueurs pour relancer la partie."
