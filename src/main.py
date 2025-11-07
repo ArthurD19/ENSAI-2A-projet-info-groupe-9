@@ -12,7 +12,7 @@ if __name__ == "__main__":
 
     initialiser_logs("Application")
 
-    tables = TableService(nb_tables=10, blind=20)
+    tables = TableService()
 
     vue_courante = AccueilVue("Bienvenue", tables)
     nb_erreurs = 0
