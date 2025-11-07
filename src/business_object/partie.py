@@ -221,3 +221,22 @@ class Partie:
             return True  # Partie relancée
         return False  # Pas assez de joueurs, partie reste en pause
 
+    def integrer_attente(self):
+        """
+        Intègre automatiquement tous les joueurs en liste d'attente.
+        """
+        for j in self.partie.etat.liste_attente:
+            joueur = Joueur(pseudo=j['pseudo'], solde=j['solde'])
+            self.partie.table.ajouter_joueur(joueur)
+            joueur.actif = True
+        self.partie.etat.liste_attente.clear()
+
+    def ajouter_a_liste_attente(self, joueur: 'Joueur') -> None:
+        """
+        Ajoute un joueur à la liste d'attente de la partie.
+        Pas de vérifications, juste un ajout simple.
+        """
+        self.etat.liste_attente.append({
+            "pseudo": joueur.pseudo,
+            "solde": joueur.solde
+        })

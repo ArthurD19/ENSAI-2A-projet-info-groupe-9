@@ -1,3 +1,7 @@
+from business_object.partie import Partie, EtatPartie
+from business_object.joueurs import Joueur
+
+
 class PartieService:
     """Service pour gérer les interactions avec une Partie via API."""
 
@@ -59,7 +63,7 @@ class PartieService:
 
     def rejoindre_partie(self, joueur: Joueur) -> tuple[bool, str]:
         """
-        Permet à un nouveau joueur de rejoindre la table.
+        Permet à un nouveau joueur de rejoindre la partie.
         Pas besoin de vérifier son solde.
         Si la partie peut repartir, elle se relance automatiquement.
         """
