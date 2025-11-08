@@ -1,7 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from src.dao.joueur_dao import JoueurDao 
-from src.utils.securite import hash_password
 from src.service.joueur_service import JoueurService
 
 router = APIRouter(prefix="/joueurs", tags=["joueurs"])
@@ -17,67 +15,68 @@ class JoueurConnexion(BaseModel):
 class JoueurSortie(BaseModel):
     pseudo: str
     code_parrainage: str | None = None
-    portefeuille: float
+    portefeuille: int
 
 
-# Modèle de sortie (réponse renvoyée)
+# Modèle d’entrée pour l'inscription
 class JoueurInscription(BaseModel):
     pseudo: str
     mdp: str
     code_parrainage: str | None = None
 
 
-# Modèle de sortie (réponse renvoyée)
-class JoueurConnecte(BaseModel):
-    pseudo: str
-    portefeuille: int
-    code_parrainage: str
-
-
-# Endpoint POST /joueurs/login
+# Endpoint POST /joueurs/connexion
 @router.post("/connexion", response_model=JoueurSortie)
 def connexion_joueur(payload: JoueurConnexion):
     """
     Endpoint de connexion d'un joueur.
-    Vérifie le pseudo et le mot de passe dans la base SQL.
+    Utilise JoueurService.se_connecter() qui :
+      - renvoie (True, joueur_dict) si connexion OK (et met connecte = TRUE en BDD)
+      - renvoie (False, "message") si échec (déjà connecté ou identifiants invalides)
     """
+    ok, res = JoueurService().se_connecter(payload.pseudo, payload.mdp)
 
-    dao = JoueurDao()
-    joueur = dao.trouver_par_pseudo(payload.pseudo)
+    if ok:
+        joueur = res
+        return JoueurSortie(
+            pseudo=joueur["pseudo"],
+            code_parrainage=joueur.get("code_parrainage"),
+            portefeuille=int(joueur["portefeuille"]),
+        )
 
-    # Cas où le joueur est inconnu
-    if not joueur:
-        raise HTTPException(status_code=404, detail="Joueur inconnu")
-
-    # Vérifie le mot de passe haché
-    hashed_input = hash_password(payload.mdp, payload.pseudo)
-    if joueur["mdp"] != hashed_input:
-        raise HTTPException(status_code=401, detail="Mot de passe incorrect")
-
-    # Cas où la connexion réussie
-    return JoueurSortie(
-        pseudo=joueur["pseudo"],
-        code_parrainage=joueur["code_parrainage"],
-        portefeuille=joueur["portefeuille"]
-    )
+    # res est un message d'erreur
+    message = str(res)
+    if "déjà connecté" in message.lower() or "déja connecté" in message.lower():
+        raise HTTPException(status_code=409, detail=message)
+    else:
+        raise HTTPException(status_code=401, detail=message)
 
 
 # Endpoint POST /joueurs/inscription
 @router.post("/inscription", response_model=JoueurSortie)
 def inscription_joueur(payload: JoueurInscription):
-    """
-    Endpoint d'inscription d'un joueur.
-    Crée le joueur dans la base de données SQL à partir des informations rentrées par le joueur.
-    """
     code_parrainage = payload.code_parrainage
-    if code_parrainage is None or code_parrainage == "":
-        joueur = JoueurService().creer_sans_code_parrainage(payload.pseudo, payload.mdp)
-    elif not JoueurService().code_valide(code_parrainage):
-        raise HTTPException(status_code=401, detail="Code de parrainage non valide")
+
+    # Vérifie si pseudo déjà utilisé
+    service = JoueurService()
+    if service.pseudo_deja_utilise(payload.pseudo):
+        raise HTTPException(status_code=409, detail=f"Le pseudo '{payload.pseudo}' est déjà utilisé.")
+
+    if not code_parrainage:
+        joueur = service.creer_sans_code_parrainage(payload.pseudo, payload.mdp)
+    elif not service.code_valide(code_parrainage):
+        raise HTTPException(status_code=400, detail="Code de parrainage non valide")
     else:
-        joueur = JoueurService().creer(payload.pseudo, payload.mdp, payload.code_parrainage)
+        joueur = service.creer(payload.pseudo, payload.mdp, code_parrainage)
+
+    if not joueur:
+        raise HTTPException(status_code=500, detail="Impossible de créer le joueur")
+
     return JoueurSortie(
         pseudo=joueur["pseudo"],
-        code_parrainage=joueur["code_parrainage"],
-        portefeuille=joueur["portefeuille"]
+        code_parrainage=joueur.get("code_parrainage"),
+        portefeuille=int(joueur["portefeuille"]),
     )
+
+
+

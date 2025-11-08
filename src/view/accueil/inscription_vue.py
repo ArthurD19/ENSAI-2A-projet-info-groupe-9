@@ -1,32 +1,25 @@
-import os
+# src/view/accueil/inscription_vue.py
 from InquirerPy import inquirer
 from InquirerPy.validator import PasswordValidator
-
-from service.joueur_service import JoueurService
 from view.vue_abstraite import VueAbstraite
-
+from view.session import Session
+from client.api_client import post, APIError
+from service.joueur_service import JoueurService
+import os
 
 class InscriptionVue(VueAbstraite):
-
     def __init__(self, titre, tables):
         super().__init__(titre)
         self.tables = tables
 
     def choisir_menu(self):
-        """Demande à l'utilisateur pseudo, mot de passe et code de parrainage, puis crée le joueur"""
+        """Demande pseudo, mot de passe et code de parrainage, puis crée le joueur via API"""
 
         # Récupérer la longueur de mot de passe minimale depuis l'environnement
         length = int(os.environ.get("PASSWORD_LENGTH", 8))
 
         # Demande du pseudo
-        pseudo = inquirer.text(
-            message="Entrez votre pseudo : "
-        ).execute()
-
-        # Vérifier que le pseudo n'est pas déjà utilisé
-        if JoueurService().pseudo_deja_utilise(pseudo):
-            from view.accueil.accueil_vue import AccueilVue
-            return AccueilVue(f"Le pseudo '{pseudo}' est déjà utilisé.", self.tables)
+        pseudo = inquirer.text(message="Entrez votre pseudo : ").execute()
 
         # Demande du mot de passe avec validation
         mdp = inquirer.secret(
@@ -40,25 +33,38 @@ class InscriptionVue(VueAbstraite):
         ).execute()
 
         # Demande du code de parrainage (facultatif)
-        code_de_parrainage = inquirer.text(
-            message="Entrez un code de parrainage (facultatif) : "
+        code_parrainage = inquirer.text(
+            message="Entrez un code de parrainage (optionnel) :",
+            default=""
         ).execute().strip()
 
-        # Création du joueur selon la présence ou non du code de parrainage
-        if code_de_parrainage:
-            if JoueurService().code_valide(code_de_parrainage):
-                joueur = JoueurService().creer(pseudo, mdp, code_de_parrainage)
+        payload = {
+            "pseudo": pseudo,
+            "mdp": mdp,
+            "code_parrainage": code_parrainage or None
+        }
+
+        try:
+            # Appel HTTP POST à l'API
+            res = post("/joueurs/inscription", json=payload)
+            
+            # Connexion automatique après création
+            Session().connexion(res["pseudo"])
+            JoueurService().se_connecter(res["pseudo"], mdp)
+            message = f"Compte créé et connecté sous le pseudo {res['pseudo']}"
+
+            # Passage au menu joueur
+            from view.menu_joueur_vue import MenuJoueurVue
+            return MenuJoueurVue(message, self.tables)
+
+        except APIError as e:
+            msg = str(e)
+            if "400" in msg or "Code de parrainage non valide" in msg:
+                message = "Erreur : code de parrainage invalide"
+            elif "409" in msg or "déjà utilisé" in msg.lower():
+                message = "Erreur : pseudo déjà utilisé"
             else:
-                from view.accueil.accueil_vue import AccueilVue
-                return AccueilVue("Code de parrainage non valide.", self.tables)
-        else:
-            joueur = JoueurService().creer_sans_code_parrainage(pseudo, mdp)
+                message = f"Erreur réseau/API : {msg}"
 
-        # Vérifier si le joueur a été créé
-        if joueur:
-            message = f"Votre compte '{joueur['pseudo']}' a été créé. Vous pouvez maintenant vous connecter."
-        else:
-            message = "Erreur lors de la création du compte. Vérifiez vos informations."
-
-        from view.accueil.accueil_vue import AccueilVue
-        return AccueilVue(message, self.tables)
+            from view.accueil.accueil_vue import AccueilVue
+            return AccueilVue(message, self.tables)

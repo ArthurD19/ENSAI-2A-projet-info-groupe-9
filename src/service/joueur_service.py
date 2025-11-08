@@ -43,6 +43,9 @@ class JoueurService:
     def creer_sans_code_parrainage(self, pseudo_joueur, mdp) -> Joueur:
         """Création d'un joueur à partir de ses attributs"""
 
+        if self.pseudo_deja_utilise(pseudo_joueur):
+            return None  
+
         nouveau_joueur = {
             "pseudo": pseudo_joueur,
             "mdp": hash_password(mdp, pseudo_joueur),
