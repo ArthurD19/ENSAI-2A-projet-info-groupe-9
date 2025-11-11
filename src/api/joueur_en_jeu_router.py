@@ -8,10 +8,10 @@ from src.service.partie_service import PartieService
 router = APIRouter(prefix="/joueur_en_jeu", tags=["joueur_en_jeu"])
 
 # Modèle de sortie (réponse renvoyée)
-class JoueurConnecte(BaseModel):
+class JoueurEnJeu(BaseModel):
     pseudo: str
     portefeuille: int
-    code_parrainage: str
+    partie: int
 
 
 # Endpoint POST /joueur_en_jeu/miser
@@ -85,7 +85,6 @@ def voir_etat_partie():
     Renvoie l'état de la partie.
     """
 
-    joueur = payload.pseudo
     fait, message = PartieService().voir_etat_partie()
     if fait : 
         return "Action effectuée"
