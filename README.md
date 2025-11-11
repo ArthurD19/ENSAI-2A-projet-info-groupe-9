@@ -100,7 +100,7 @@ POSTGRES_SCHEMA=public
 
 PASSWORD_LENGTH="8"
 ```
-With this login information, you will be connected to the database we use for this server. If you wish to connect to your own database, you will need to modify the first 6 lines with the login information for your database (your own Postgresql service).
+If you want to use our database, please ask us for the exact login information. If you wish to connect to your own database, you will need to modify the first 6 lines with the login information for your database (your own Postgresql service).
 
 ## Initialising the database if necessary
 
