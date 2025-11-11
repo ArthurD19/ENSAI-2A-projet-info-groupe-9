@@ -91,11 +91,11 @@ At the root of the project :
 - [ ] Paste in and complete the elements below
 
 ```default
-POSTGRES_PASSWORD=odc57qmutp8fu7zpgucn
-POSTGRES_HOST=postgresql-93096.user-id2733
+POSTGRES_PASSWORD=xxxxxxxxxxxx
+POSTGRES_HOST=postgresql-93096.user-idxxxx
 POSTGRES_PORT=5432
 POSTGRES_DATABASE=defaultdb
-POSTGRES_USER=user-id2733
+POSTGRES_USER=user-idxxxx
 POSTGRES_SCHEMA=public
 
 PASSWORD_LENGTH="8"
