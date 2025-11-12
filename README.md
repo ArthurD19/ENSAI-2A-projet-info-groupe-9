@@ -14,13 +14,18 @@ Ecrire ici une description des fonctionnalités de notre application et explique
 - A [PostgreSQL](https://www.postgresql.org/) database
 
 
-## :arrow_forward: Clone the repository
+## :arrow_forward: Access our server
+
+### Option 1: Clone the repository
 
 - [ ] Open VSCode
 - [ ] Open **Git Bash**
 - [ ] Clone the repo
   - `git clone https://github.com/ludo2ne/ENSAI-2A-projet-info-template.git`
 
+### Option 2: Use the archive folder
+
+- [ ] Download the archive file containing the project
 
 ### Open Folder
 
@@ -31,7 +36,7 @@ Ecrire ici une description des fonctionnalités de notre application et explique
   - :warning: if not the application will not launch. Retry open folder
 
 
-## Organisation des différents modules de notre serveur
+## :arrow_forward: Organisation of our server
 
 ### General information
 
@@ -67,14 +72,14 @@ The file `requirements.txt` contains the list of packages required for the serve
 
 
 
-## Settings files
+### Settings files
 
 This repository contains a large number of configuration files for setting the parameters of the various tools used.
 
 Normally, for the purposes of your project, you won't need to modify these files, except for `.env` and `requirements.txt`.
 
 
-### :arrow_forward: Install required packages (focus on the file `requirements.txt`)
+## :arrow_forward: Install required packages (focus on the file `requirements.txt`)
 
 - [ ] In Git Bash, run the following commands to:
   - install all packages from file `requirements.txt`
@@ -84,7 +89,7 @@ pip install -r requirements.txt
 ```
 
 
-### :arrow_forward: Environment variables (focus on the file `.env`)
+## :arrow_forward: Environment variables (focus on the file `.env`)
 
 At the root of the project :
 - [ ] Create a file called `.env`
@@ -102,7 +107,7 @@ PASSWORD_LENGTH="8"
 ```
 If you want to use our database, please ask us for the exact login information. If you wish to connect to your own database, you will need to modify the first 6 lines with the login information for your database (your own Postgresql service).
 
-## Initialising the database if necessary
+## :arrow_forward: Initialising the database if necessary
 
 If you wish to use our database, please do not reset it. Otherwise, please follow the instructions below to initialise or reset your database.
 
