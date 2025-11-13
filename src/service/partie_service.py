@@ -95,3 +95,11 @@ class PartieService:
             return True, self.partie.etat, f"{joueur.pseudo} ajouté à la liste d'attente. Nouvelle main lancée."
         else:
             return True, self.partie.etat, f"{joueur.pseudo} ajouté à la liste d'attente. Pas encore assez de joueurs pour relancer la partie."
+
+
+    def decision_rejouer(self, pseudo: str, veut_rejouer: bool) -> tuple[bool, EtatPartie, str]:
+        if pseudo not in self.partie.etat.rejouer:
+            return False, self.partie.etat, f"{pseudo} n'était pas dans la main précédente."
+        
+        etat = self.partie.reponse_rejouer(pseudo, veut_rejouer)
+        return True, etat, f"{pseudo} {'veut rejouer' if veut_rejouer else 'quitte la table'}."

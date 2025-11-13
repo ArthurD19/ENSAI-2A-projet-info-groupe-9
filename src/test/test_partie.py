@@ -104,3 +104,46 @@ def test_annoncer_resultats(setup_partie):
     partie.actions_joueur("Bob", "suivre")
 
     assert partie.etat.pot > 0
+
+def test_rejouer_partie(setup_partie):
+    partie, j1, j2 = setup_partie
+    partie.initialiser_blinds()  # Distribue mains + initialise blinds
+
+    # Alice se couche immédiatement
+    partie.actions_joueur("Alice", "se_coucher")
+
+
+    # La partie doit être marquée comme finie
+    assert partie.etat.finie is True
+    # Tous les joueurs doivent être en attente de réponse pour rejouer
+    assert all(v is None for v in partie.etat.rejouer.values())
+
+    # Alice décide de rejouer, Bob aussi
+    partie.reponse_rejouer("Alice", True)
+
+    partie.reponse_rejouer("Bob", True)
+
+
+    # Dès que tous ont répondu, la partie doit être relancée
+    # On peut vérifier que la partie n'est plus finie
+    assert partie.etat.finie is False
+    # Les joueurs sont bien présents
+    assert len(partie.table.joueurs) == 2
+    # Les joueurs ont bien reçu leurs nouvelles mains
+    assert all(len(j.main) == 2 for j in partie.table.joueurs)
+
+
+def test_se_coucher_apres_distribution_minimal(setup_partie):
+    partie, j1, j2 = setup_partie
+
+    # Distribuer mains + blinds
+    partie.initialiser_blinds()
+
+    # Alice se couche immédiatement
+    partie.actions_joueur("Alice", "se_coucher")
+
+    # Vérifie en un seul assert que :
+    # - Alice n'est plus active
+    # - Bob reste actif
+    assert next(j for j in partie.etat.joueurs if j["pseudo"] == "Alice")["actif"] is False and \
+           next(j for j in partie.etat.joueurs if j["pseudo"] == "Bob")["actif"] is True
