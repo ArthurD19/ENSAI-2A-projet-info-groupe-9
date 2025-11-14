@@ -122,7 +122,7 @@ This application provides a very basic graphical interface for navigating betwee
 
 ## :arrow_forward: Launch the server
 
-- [ ] `uvicorn src.api.api_main:app --reload`
+- [ ] `uvicorn src.api.api_main:app --host 0.0.0.0 --port 8000 --reload`
 
 Documentation :
 
