@@ -13,6 +13,8 @@ from view.session import Session
 class JoueurService:
     """Classe contenant les méthodes de service des Joueurs"""
 
+    MONTANT_RECHARGEMENT_AUTO = 500
+
     @log
     def creer(self, pseudo_joueur, mdp, code_parrain) -> Joueur:
         """Création d'un joueur à partir de ses attributs"""
@@ -202,7 +204,12 @@ class JoueurService:
     def code_valide(self, code_parrainage):
         return JoueurDao().code_de_parrainage_existe(code_parrainage)
 
-    @log
-    def rejoindre_table(self, pseudo: str, num_table: str):
-        # on la codera une fois qu'on saura comment gérer les tables
-        pass
+    @staticmethod
+    def credit_auto():
+        joueurs = JoueurDao.joueurs_a_crediter()
+        if not joueurs:
+            logging.info("Aucun joueur à créditer")
+        for pseudo in joueurs:
+            JoueurDao.crediter(pseudo, JoueurService().MONTANT_RECHARGEMENT_AUTO)
+            JoueurDao.maj_date_credit_auto(pseudo)
+            logging.info(f"Auto-crédut hebdo : {pseudo}, montant {JoueurService().MONTANT_RECHARGEMENT_AUTO}")

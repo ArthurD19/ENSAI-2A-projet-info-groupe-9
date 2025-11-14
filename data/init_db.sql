@@ -10,7 +10,8 @@ CREATE TABLE joueurs (
     mdp TEXT NOT NULL,
     portefeuille INT,
     code_parrainage VARCHAR(5) UNIQUE,
-    connecte BOOLEAN DEFAULT FALSE
+    connecte BOOLEAN DEFAULT FALSE,
+    date_dernier_credit_auto TIMESTAMP DEFAULT NULL
 );
 
 -- Table des statistiques
@@ -30,14 +31,3 @@ CREATE TABLE joueurs_statistiques (
     nombre_parties_dernier_mois INT DEFAULT 0,
     FOREIGN KEY (pseudo) REFERENCES joueurs(pseudo) ON DELETE CASCADE
 );
-
--- Table qui retient les joueurs présents à chaque table
-CREATE TABLE table_joueurs (
-    id INTEGER PRIMARY KEY,
-    joueur1 VARCHAR REFERENCES joueurs(pseudo) ON DELETE CASCADE,
-    joueur2 VARCHAR REFERENCES joueurs(pseudo) ON DELETE CASCADE,
-    joueur3 VARCHAR REFERENCES joueurs(pseudo) ON DELETE CASCADE,
-    joueur4 VARCHAR REFERENCES joueurs(pseudo) ON DELETE CASCADE,
-    joueur5 VARCHAR REFERENCES joueurs(pseudo) ON DELETE CASCADE
-);
-
