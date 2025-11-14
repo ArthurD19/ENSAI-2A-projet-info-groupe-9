@@ -27,19 +27,19 @@ class PartieService:
             return False, self.partie.etat, f"Montant {montant} supérieur au solde de {joueur.solde}, tu peux all-in"
 
         self.partie.actions_joueur(pseudo, "miser", montant)
-        return True, ""
+        return True, self.partie.etat, ""
 
     def suivre(self, pseudo: str) -> tuple[bool, str]:
         joueur = next((j for j in self.partie.table.joueurs if j.pseudo == pseudo), None)
         if not joueur:
-            return False, f"Le joueur '{pseudo}' n'existe pas."
+            return False, self.partie.etat, f"Le joueur '{pseudo}' n'existe pas."
         if not joueur.actif:
-            return False, f"Le joueur '{pseudo}' n'est pas actif."
+            return False, self.partie.etat, f"Le joueur '{pseudo}' n'est pas actif."
         if self.partie.mise_max > joueur.solde:
-            return False, f"Montant {montant} supérieur au solde de {joueur.solde}, tu peux all-in"
+            return False, self.partie.etat, f"Montant {self.mise_max} supérieur au solde de {joueur.solde}, tu peux all-in"
 
         self.partie.actions_joueur(pseudo, "suivre")
-        return True, ""
+        return True, self.partie.etat, ""
 
     def se_coucher(self, pseudo: str) -> tuple[bool, str]:
         joueur = next((j for j in self.partie.table.joueurs if j.pseudo == pseudo), None)
@@ -59,7 +59,7 @@ class PartieService:
             return False, self.partie.etat, f"Le joueur '{pseudo}' n'est pas actif."
 
         self.partie.actions_joueur(pseudo, "all-in")
-        return True, ""
+        return True, self.partie.etat, ""
 
     def rejoindre_partie(self, joueur: Joueur) -> tuple[bool, str]:
         """

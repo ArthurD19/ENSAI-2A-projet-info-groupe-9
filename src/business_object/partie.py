@@ -100,6 +100,7 @@ class Partie:
             self.tour_actuel = "river"
         elif self.tour_actuel == "river":
             self.tour_actuel = "fin"
+            self.annoncer_resultats()
 
         self._mettre_a_jour_etat()
 
@@ -193,7 +194,7 @@ class Partie:
                 self.etat.resultats.append({
                     "pseudo": j.pseudo,
                     "main": [str(c) for c in j.main],
-                    "description": f"Gagne {part} jetons avec {scores[j]['nom_main']} et kickers {scores[j]['kickers']}"
+                    "description": f"Gagne {part} jetons avec {scores[j].combinaison} et kickers {scores[j].tiebreaker_cards}"
                 })
             self.comptage.pot = 0
 
