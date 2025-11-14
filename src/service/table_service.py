@@ -128,3 +128,26 @@ class TableService(metaclass=Singleton):
         table = self.tables[id_table]
         table.reset_table()
         self.tables[id_table] = table
+    
+    @log
+    def etat_tables(self):
+        """
+        Renvoie la liste de toutes les tables avec les joueurs présents.
+        
+        Returns
+        -------
+        List[dict]: une liste où chaque élément contient :
+            - id : identifiant de la table
+            - blind : blind de la table
+            - joueurs : liste des pseudos des joueurs
+        """
+        etat = []
+
+        for id_table, table in self.tables.items():
+            etat.append({
+                "table": id_table,
+                "blind": table.blind,
+                "joueurs": [j.pseudo for j in table.joueurs]
+            })
+
+        return etat
