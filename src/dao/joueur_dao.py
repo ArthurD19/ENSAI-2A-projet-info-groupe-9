@@ -343,14 +343,14 @@ class JoueurDao(metaclass=Singleton):
                         "  FROM joueurs                      "
                         " WHERE portefeuille <= 50    "
                         " AND (date_dernier_credit_auto IS NULL "
-                        "      OR date_dernier_credit_auto < NOW - INTERVAL '7 days');  "
+                        "      OR date_dernier_credit_auto < NOW() - INTERVAL '7 days');  "
                     )
-                    res = cursor.fetchone()
+                    res = cursor.fetchall()
         except Exception as e:
             logging.info(e)
             raise
         if res:
-            joueurs = [row[0] for row in cur.fetchall()]
+            joueurs = [row["pseudo"] for row in res]
             return joueurs
 
     def crediter(self, pseudo: str, montant: int):

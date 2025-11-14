@@ -98,10 +98,21 @@ If you want to use our database, please ask us for the exact login information. 
 If you wish to use our database, please do not reset it. 
 Otherwise, please follow the instructions below to initialise or reset your database.
 
-- [ ] In Git Bash: `psql -U nom_utilisateur -d nom_de_la_base -f /data/init_db.sql`
+- [ ] In Git Bash: `psql -U nom_utilisateur -d nom_de_la_base`
 Ou 
 - [ ] `SET search_path TO public;`
 `\i data/init_db.sql`
+
+## :arrow_forward: Execute our tests
+
+If you want to execute all our tests.
+```bash
+pytest -v
+```
+If you just want to execute some tests.
+```bash
+python -m unittest nom_du_fichier.py
+```
 
 ## :arrow_forward: Launch the TUI application
 

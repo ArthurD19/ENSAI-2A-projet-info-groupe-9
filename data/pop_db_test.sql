@@ -27,14 +27,3 @@ INSERT INTO joueurs_statistiques (
 ('maxence', 5, 80, 10, 5, 30, 15, 10, 20, 5),
 ('lucas', 1, 120, 25, 20, 25, 35, 15, 20, 5),
 ('clemence', 4, 90, 10, 15, 15, 20, 10, 15, 5);
-
-INSERT INTO table_joueurs (
-    id,
-    joueur1, 
-    joueur2, 
-    joueur3, 
-    joueur4, 
-    joueur5
-) VALUES
-(1, 'clemence', NULL, NULL, NULL, NULL),
-(2, NULL, NULL, NULL, NULL, NULL);

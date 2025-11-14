@@ -351,5 +351,87 @@ def test_pseudo_existe_et_non_existe():
     assert JoueurDao().pseudo_existe(pseudo1) is True
     assert JoueurDao().pseudo_existe(pseudo2) is False
 
+def test_joueurs_a_crediter_ok():
+    # WHEN 
+    joueurs = JoueurDao().joueurs_a_crediter()
+
+    # THEN 
+    assert joueurs == ['pierre', 'jean']
+
+# On testera le cas où il n'y a aucun joueur à créditer après avoir tester la fonction crediter
+
+def test_crediter_ok():
+    # GIVEN 
+    pseudo = "pierre"
+    montant = 200
+
+    # WHEN 
+    portefeuille1 = JoueurDao().valeur_portefeuille("pierre")
+    JoueurDao().crediter(pseudo, montant)
+    portefeuille2 = JoueurDao().valeur_portefeuille("pierre")
+
+    # THEN 
+    assert portefeuille2 == 200 + portefeuille1
+
+def test_crediter_joueur_inexistant():
+    """Si le pseudo n'existe pas, ne plante pas mais rien n'est crédité"""
+    # GIVEN
+    pseudo = "pseudo_inexistant"
+    montant = 100
+
+    # On ne peut pas vérifier la DB, mais on vérifie que ça ne plante pas
+    try:
+        JoueurDao().crediter(pseudo, montant)
+    except Exception:
+        pytest.fail("crediter a levé une exception pour un pseudo inexistant")
+
+def test_joueurs_a_crediter_aucun_resultat():
+    """Si aucun joueur ne correspond, renvoie None ou liste vide"""
+    # GIVEN 
+    pseudo1 = 'pierre'
+    pseudo2 = 'jean'
+    montant = 600
+
+    # WHEN 
+    JoueurDao().crediter(pseudo1, montant)
+    JoueurDao().crediter(pseudo2, montant)
+    joueurs = JoueurDao.joueurs_a_crediter()
+
+    # THEN 
+    assert (joueurs is None) or (joueurs == [])
+
+def test_maj_date_ok():
+    # GIVEN
+    pseudo = "pierre"
+    import datetime
+
+    # WHEN
+    with DBConnection().connection as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT date_dernier_credit_auto FROM joueurs WHERE pseudo=%s;", (pseudo,))
+            avant = cur.fetchall()[0]['date_dernier_credit_auto']
+
+    JoueurDao().maj_date_credit_auto(pseudo)
+
+    with DBConnection().connection as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT date_dernier_credit_auto FROM joueurs WHERE pseudo=%s;", (pseudo,))
+            apres = cur.fetchall()[0]['date_dernier_credit_auto']
+    
+    # THEN
+    assert apres is not None
+    assert apres != avant
+    assert isinstance(apres, datetime.datetime)
+
+def test_maj_date_credit_auto_joueur_inexistant():
+    """Si le pseudo n'existe pas, ne plante pas"""
+    # GIVEN
+    pseudo = "pseudo_inexistant"
+
+    try:
+        JoueurDao().maj_date_credit_auto(pseudo)
+    except Exception:
+        pytest.fail("maj_date_credit_auto a levé une exception pour un pseudo inexistant")
+
 if __name__ == "__main__":
     pytest.main([__file__])
