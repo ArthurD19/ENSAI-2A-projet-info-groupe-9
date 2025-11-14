@@ -76,26 +76,30 @@ class PartieService:
 
         # Vérifier qu'il n'est pas déjà dans la table ou la liste d'attente
         deja_present = any(j.pseudo == joueur.pseudo for j in self.partie.table.joueurs)
-        deja_en_attente = any(j['pseudo'] == joueur.pseudo for j in self.partie.etat.liste_attente)
-        if deja_present or deja_en_attente:
-            return False, self.partie.etat, f"{joueur.pseudo} est déjà dans la table ou en liste d'attente."
+        #deja_en_attente = any(j.pseudo == joueur.pseudo for j in self.partie.etat.liste_attente)  
+        #print("Joueurs dans table :", [j.pseudo for j in self.partie.table.joueurs])
+        #print("Joueurs en liste d'attente :", [j.pseudo for j in self.partie.etat.liste_attente])
+        #if deja_present or deja_en_attente:
+        #    return False, self.partie.etat, f"{joueur.pseudo} est déjà dans la table ou en liste d'attente."
 
         # Vérifier la limite totale (table + liste d'attente <= 5)
         total_joueurs = len(self.partie.table.joueurs) + len(self.partie.etat.liste_attente)
         if total_joueurs >= 5:
             return False, self.partie.etat, "La table et la liste d'attente sont pleines."
 
+        """
         # Ajouter le joueur à la liste d'attente
         self.partie.ajouter_a_liste_attente(joueur)
-
+        partie_relancee = False
         if self.partie.etat.finie:
-            self.partie.gestion_rejouer()
+            partie_relancee = self.partie.gestion_rejouer()
 
         if partie_relancee:
             return True, self.partie.etat, f"{joueur.pseudo} ajouté à la liste d'attente. Nouvelle main lancée."
         else:
             return True, self.partie.etat, f"{joueur.pseudo} ajouté à la liste d'attente. Pas encore assez de joueurs pour relancer la partie."
-
+        """
+        return True, self.partie.etat, f"{joueur.pseudo} ajouté à la liste d'attente. Nouvelle main lancée."
 
     def decision_rejouer(self, pseudo: str, veut_rejouer: bool) -> tuple[bool, EtatPartie, str]:
         if pseudo not in self.partie.etat.rejouer:
