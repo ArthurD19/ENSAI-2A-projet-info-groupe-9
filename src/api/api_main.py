@@ -4,6 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.api.joueur_router import router as joueur_router
 from src.api.joueur_connecte_router import router as joueur_connecte_router
 from src.api.joueur_en_jeu_router import router as joueur_en_jeu_router
+from service.table_service import TableService
+from service.partie_service import PartieService
+from business_object.partie import  Partie
 
 # Création de l'application FastAPI
 app = FastAPI(
@@ -12,6 +15,19 @@ app = FastAPI(
     version="1.0.0",
     root_path="/proxy/8000"
 )
+
+tables_service = TableService()  # singleton crée toutes les tables et parties
+
+@app.on_event("startup")
+def init_tables_et_parties():
+    global tables
+    print("Initialisation des tables et parties...")
+
+    tables = TableService()
+
+    for id_table, partie in tables.parties.items():
+        print(f"Table {id_table} créée avec partie associée: {partie is not None}")
+
 
 # Middleware CORS si tu comptes faire des requêtes depuis un front
 origins = [

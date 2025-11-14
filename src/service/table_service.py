@@ -1,5 +1,8 @@
 from business_object.table import Table
 from business_object.joueurs import Joueur
+from service.partie_service import PartieService
+from business_object.partie import  Partie
+
 
 from utils.singleton import Singleton
 from utils.log_decorator import log
@@ -13,8 +16,10 @@ class TableService(metaclass=Singleton):
         Initialise les tables avec un nombre de tables et un blind par défaut
         """
         self.tables = {}
+        self.parties = {}
         for i in range(1, nb_tables + 1):
             self.tables[i] = Table(id=i, blind=blind)
+            self.parties[i] = Partie(id=i, table=self.tables[i])
 
     @log
     def get_table(self, id_table: int):
@@ -35,29 +40,47 @@ class TableService(metaclass=Singleton):
     @log
     def rejoindre_table(self, pseudo: str, id_table: int):
         """
-        Permet à un joueur de rejoindre une table si elle existe et qu'il y reste de la place
+        Permet à un joueur de rejoindre une table si elle existe et qu'il y reste de la place.
+        Ajoute automatiquement le joueur à la partie associée à la table.
 
         Parameters
         ----------
-        joueur: Joueur
-            Joueur (business_object qui veut rejoindre une table
+        pseudo: str
+            Pseudo du joueur qui veut rejoindre
         id_table: int
             Identifiant de la table que le joueur veut rejoindre
 
         Returns
         -------
-        int 
-            1 pour 
-            2 pour 
-            3 pour
-            4 pour la table n'existe pas
+        tuple[bool, EtatPartie, str]
+            bool: True si le joueur a pu rejoindre (ou a été mis en attente)
+            EtatPartie: état actuel de la partie
+            str: message d'information
         """
+        # Récupérer le solde depuis la DAO
         solde = JoueurDao().valeur_portefeuille(pseudo)
-        joueur_partie = Joueur(pseudo, solde)
+        joueur = Joueur(pseudo, solde)
+
+        # Récupérer la table
         table = self.get_table(id_table)
         if not table:
-            return 4
-        return table.ajouter_joueur(joueur_partie)
+            return False, None, f"La table {id_table} n'existe pas."
+
+        # Ajouter le joueur à la table
+        code_table = table.ajouter_joueur(joueur)  # 1=ok, 2=table pleine, etc.
+        if code_table != 1:
+            return False, None, "Impossible de rejoindre la table (pleine ou erreur)."
+
+        # Ajouter le joueur à la partie associée
+        partie = self.parties.get(id_table)
+
+        if partie is None:
+            return True, None, f"{pseudo} ajouté à la table {id_table}, mais aucune partie n'est définie."
+
+        # Appeler rejoindre_partie sur la partie
+        success, etat, msg = partie.rejoindre_partie(joueur)
+        return success, etat, msg
+
 
     @log
     def lister_tables(self):
