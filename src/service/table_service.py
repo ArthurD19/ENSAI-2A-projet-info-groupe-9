@@ -78,7 +78,7 @@ class TableService(metaclass=Singleton):
             return True, None, f"{pseudo} ajouté à la table {id_table}, mais aucune partie n'est définie."
 
         # Appeler rejoindre_partie sur la partie
-        success, etat, msg = PartieService.rejoindre_partie(joueur)
+        success, etat, msg = PartieService.rejoindre_partie(joueur,id_table)
         return success, etat, msg
 
 
