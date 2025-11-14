@@ -4,6 +4,7 @@ from src.dao.joueur_dao import JoueurDao
 from src.dao.statistique_dao import StatistiqueDao
 from src.service.joueur_service import JoueurService
 from src.service.partie_service import PartieService
+from src.service.table_service import TableService
 
 router = APIRouter(prefix="/joueur_connecte", tags=["joueur_connecte"])
 
@@ -69,11 +70,11 @@ def voir_classement_joueur():
     return classement
 
 # Endpoint GET /joueur_connecte/rejoindre_table
-@router.get("/rejoindre_table", response_model=dict)
+@router.get("/rejoindre_table", response_model=str)
 def rejoindre_table_joueur(pseudo: str, id_table: int):
     """
     Endpoint de récupération de la valeur de son portefeuille par un joueur.
     """
-
-    pass
+    succes, etat, message = TableService().rejoindre_table(pseudo, id_table)
+    return message
 
