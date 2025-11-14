@@ -10,31 +10,7 @@ Ecrire ici une description des fonctionnalités de notre application et explique
 
 - [Visual Studio Code](https://code.visualstudio.com/)
 - [Python 3.13](https://www.python.org/)
-- [Git](https://git-scm.com/)
 - A [PostgreSQL](https://www.postgresql.org/) database
-
-
-## :arrow_forward: Access our server
-
-### Option 1: Clone the repository
-
-- [ ] Open VSCode
-- [ ] Open **Git Bash**
-- [ ] Clone the repo
-  - `git clone https://github.com/ludo2ne/ENSAI-2A-projet-info-template.git`
-
-### Option 2: Use the archive folder
-
-- [ ] Download the archive file containing the project
-
-### Open Folder
-
-- [ ] Open **Visual Studio Code**
-- [ ] File > Open Folder
-- [ ] Select folder *ENSAI-2A-projet-info-template*
-  - *ENSAI-2A-projet-info-template* should be the root of your Explorer
-  - :warning: if not the application will not launch. Retry open folder
-
 
 ## :arrow_forward: Organisation of our server
 
@@ -79,6 +55,15 @@ This repository contains a large number of configuration files for setting the p
 Normally, for the purposes of your project, you won't need to modify these files, except for `.env` and `requirements.txt`.
 
 
+## :arrow_forward: Access our server
+
+- [ ] Download the archive file containing the project
+- [ ] Open VSCode
+- [ ] File > Open Folder
+- [ ] Select folder *ENSAI-2A-projet-info-template*
+  - *ENSAI-2A-projet-info-template* should be the root of your Explorer
+
+
 ## :arrow_forward: Install required packages (focus on the file `requirements.txt`)
 
 - [ ] In Git Bash, run the following commands to:
@@ -105,11 +90,13 @@ POSTGRES_SCHEMA=public
 
 PASSWORD_LENGTH="8"
 ```
+
 If you want to use our database, please ask us for the exact login information. If you wish to connect to your own database, you will need to modify the first 6 lines with the login information for your database (your own Postgresql service).
 
 ## :arrow_forward: Initialising the database if necessary
 
-If you wish to use our database, please do not reset it. Otherwise, please follow the instructions below to initialise or reset your database.
+If you wish to use our database, please do not reset it. 
+Otherwise, please follow the instructions below to initialise or reset your database.
 
 - [ ] In Git Bash: `psql -U nom_utilisateur -d nom_de_la_base -f /data/init_db.sql`
 Ou 
@@ -122,9 +109,7 @@ This application provides a very basic graphical interface for navigating betwee
 
 - [ ] In Git Bash: `python src/main.py`
 
-
-
-## :arrow_forward: Launch the swagger
+## :arrow_forward: Launch the server
 
 - [ ] `uvicorn src.api.api_main:app --reload`
 
