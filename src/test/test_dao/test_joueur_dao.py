@@ -17,9 +17,6 @@ def setup_test_environment():
         yield
 
 
-# --------------------------------------------------------------------------
-# TESTS
-# --------------------------------------------------------------------------
 def test_verifier_joueurs_existent():
     """Vérifie que la table players contient bien les joueurs attendus"""
     
@@ -188,6 +185,8 @@ def test_supprimer_ko():
 
 
 def test_se_connecter_ok():
+    """Connexion d'un joueur"""
+    # GIVEN
     pseudo = "arthur"
     mdp = "5e5273fdb85dc5d8ed9b10759ffcde9c82936ef8333b67ccc2a3aa0be58e7b7c"
     from dao.db_connection import DBConnection
@@ -208,19 +207,24 @@ def test_se_connecter_ok():
 
 def test_se_connecter_mauvais_mdp():
     """Connexion échoue si le mot de passe est incorrect"""
-    joueur = JoueurDao().se_connecter("arthur", "mauvais_mdp")
+    # GIVEN 
+    pseudo = "arthur"
+    mdp = "mauvais_mdp"
+    # WHEN 
+    joueur = JoueurDao().se_connecter(pseudo, mdp)
+    # THEN 
     assert joueur is None
 
 
 def test_se_connecter_inconnu():
     """Connexion échoue si le pseudo n'existe pas"""
-    joueur = JoueurDao().se_connecter("inconnu", "hash_mdp_0000")
+    # GIVEN 
+    pseudo = "inconnu"
+    mdp = "hash_mdp_0000"
+    # WHEN 
+    joueur = JoueurDao().se_connecter(pseudo, mdp)
+    # THEN 
     assert joueur is None
-
-
-
-
-
 
 
 def test_se_connecter_ko():
@@ -321,6 +325,7 @@ def test_mettre_a_jour_code_de_parrainage():
     assert JoueurDao().code_de_parrainage_existe("VVV11") is False
 
 def test_trouver_par_code_parrainage_ok():
+    """Trouve le joueur correspondant au code de parrainage."""
     #GIVEN
     code_a_chercher = 'DDD44'
 
@@ -332,6 +337,7 @@ def test_trouver_par_code_parrainage_ok():
     assert joueur["code_parrainage"] == code_a_chercher
 
 def test_trouver_par_code_parrainage_ko():
+    """Echec de trouver le joueur correspondant au code de parrainage car le code n'existe pas."""
     #GIVEN
     code_a_chercher = 'DDD45'
 
@@ -352,6 +358,8 @@ def test_pseudo_existe_et_non_existe():
     assert JoueurDao().pseudo_existe(pseudo2) is False
 
 def test_joueurs_a_crediter_ok():
+    """Trouver la liste des joueurs qui n'ont pas été crédité depuis plus de 7 jours et ont une
+    une valeur de portefeuille inférieure à 500."""
     # WHEN 
     joueurs = JoueurDao().joueurs_a_crediter()
 
@@ -361,6 +369,7 @@ def test_joueurs_a_crediter_ok():
 # On testera le cas où il n'y a aucun joueur à créditer après avoir tester la fonction crediter
 
 def test_crediter_ok():
+    """Crédite un joueur du montant voulu."""
     # GIVEN 
     pseudo = "pierre"
     montant = 200
@@ -374,7 +383,7 @@ def test_crediter_ok():
     assert portefeuille2 == 200 + portefeuille1
 
 def test_crediter_joueur_inexistant():
-    """Si le pseudo n'existe pas, ne plante pas mais rien n'est crédité"""
+    """Ne plante pas si le joueur n'existe pas."""
     # GIVEN
     pseudo = "pseudo_inexistant"
     montant = 100
@@ -401,6 +410,7 @@ def test_joueurs_a_crediter_aucun_resultat():
     assert (joueurs is None) or (joueurs == [])
 
 def test_maj_date_ok():
+    """Mise à jour de la date de dernier credit auto."""
     # GIVEN
     pseudo = "pierre"
     import datetime
@@ -424,7 +434,7 @@ def test_maj_date_ok():
     assert isinstance(apres, datetime.datetime)
 
 def test_maj_date_credit_auto_joueur_inexistant():
-    """Si le pseudo n'existe pas, ne plante pas"""
+    """Si le pseudo n'existe pas, la mise à jour ne plante pas mais juste ne se fait pas."""
     # GIVEN
     pseudo = "pseudo_inexistant"
 

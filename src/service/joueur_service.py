@@ -148,6 +148,17 @@ class JoueurService:
 
     @log
     def se_connecter(self, pseudo, mdp) -> tuple[bool, str | dict]:
+        """
+        Connexion d'un joueur à notre serveur par vérification des informations de connexion 
+        dans la base de données à l'aide de la dao.
+
+        Parameters
+        ----------
+        pseudo: str
+            pseudo du joueur qui veut se connecter
+        mdp: str 
+            mot de passe saisi par le joueur voulant se connecter
+        """
         hashed = hash_password(mdp, pseudo)
         joueur = JoueurDao().se_connecter(pseudo, hashed)
         if joueur == "DEJA_CONNECTE":
@@ -179,14 +190,34 @@ class JoueurService:
 
     @log
     def afficher_valeur_portefeuille(self, pseudo):
+        """
+        Récupère la valeur du portefeuille et la renvoie.
+
+        Parameters
+        ----------
+        pseudo: str
+            pseudo du joueur donc on cherche la valeur du portefeuille.
+        """
         return JoueurDao().valeur_portefeuille(pseudo)
 
     @log
-    def afficher_classement_joueur(self, pseudo):
+    def afficher_classement_joueur(self):
+        """
+        Récupère le classement des joueurs selon la valeur de leur portefeuille.
+        """
         return JoueurDao().classement_par_portefeuille()
 
     @log
     def generer_code_parrainage(self, pseudo):
+        """
+        Vérifie si un joueur à déjà générer un code de parrainage et en génère un si le joueur n'en 
+        possède pas déjà un et renvoie le code de parrainage créé ou le code déjà existant.
+
+        Parameters
+        ----------
+        pseudo: str
+            pseudo du joueur pour lequel on veut générer un code de parrainage
+        """
         joueur = JoueurDao().trouver_par_pseudo(pseudo)
         if not joueur:
             return None
@@ -202,10 +233,21 @@ class JoueurService:
 
     @log
     def code_valide(self, code_parrainage):
+        """
+        Vérifie si un code de parrainage appartient à un joueur.
+
+        Parameters
+        ----------
+        code_parrainage: str
+            code dont on veut vérifier l'existence
+        """
         return JoueurDao().code_de_parrainage_existe(code_parrainage)
 
     @staticmethod
     def credit_auto():
+        """
+        Fonction de mise à jour "auto" des portefeuilles.
+        """
         joueurs = JoueurDao.joueurs_a_crediter()
         if not joueurs:
             logging.info("Aucun joueur à créditer")

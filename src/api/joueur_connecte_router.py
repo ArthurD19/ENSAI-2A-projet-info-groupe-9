@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from src.dao.joueur_dao import JoueurDao 
 from src.dao.statistique_dao import StatistiqueDao
@@ -8,6 +8,7 @@ from src.service.table_service import TableService
 
 router = APIRouter(prefix="/joueur_connecte", tags=["joueur_connecte"])
 
+# Modèle de sortie pour voir une table
 class TableSortie(BaseModel):
     id: int
     nombre_joueurs: int
@@ -15,9 +16,6 @@ class TableSortie(BaseModel):
     pot: int
     indice_dealer: int
     board: list
-    model_config = {
-        "arbitrary_types_allowed": True
-    }
 
 # Endpoint GET /joueur_connecte/code_parrainage
 @router.get("/code_parrainage", response_model=str)
@@ -73,26 +71,26 @@ def portefeuille_joueur(pseudo: str):
 @router.get("/voir_classement", response_model=list[dict])
 def voir_classement_joueur():
     """
-    Endpoint de récupération de la valeur de son portefeuille par un joueur.
+    Endpoint permettant à un joueur de voir le classement.
     """
     classement_raw = JoueurDao().classement_par_portefeuille(limit=None)
     classement = [dict(row) for row in classement_raw]
     return classement
 
-# Endpoint GET /joueur_connecte/rejoindre_table
-@router.get("/rejoindre_table", response_model=str)
+# Endpoint POST /joueur_connecte/rejoindre_table
+@router.post("/rejoindre_table", response_model=str)
 def rejoindre_table_joueur(pseudo: str, id_table: int):
     """
-    Endpoint de récupération de la valeur de son portefeuille par un joueur.
+    Endpoint permettant à un joueur de rejoindre une table.
     """
     succes, etat, message = TableService().rejoindre_table(pseudo, id_table)
     return message
 
-# Endpoint GET /joueur_connecte/rejoindre_table
-@router.get("/voir_tables", response_model=TableSortie)
+# Endpoint GET /joueur_connecte/voir_table
+@router.get("/voir_table", response_model=TableSortie)
 def voir_table(id_table: int):
     """
-    Endpoint pour que le joueur puisse voir toutes les tables.
+    Endpoint pour voir une table (ses joueurs ...).
     """
     table = TableService().get_table(id_table)
     table_sortie = TableSortie(
@@ -105,3 +103,12 @@ def voir_table(id_table: int):
         board = table.board
     )
     return table_sortie
+
+# Endpoint POST /joueur_connecte/deconnexion
+@router.post("/deconnexion", status_code=status.HTTP_204_NO_CONTENT)
+def deconnexion(pseudo: str):
+    """
+    Déconnecte un joueur en mettant à jour son état dans la base.
+    """
+    JoueurService().se_deconnecter(pseudo)
+    return  # 204 No Content

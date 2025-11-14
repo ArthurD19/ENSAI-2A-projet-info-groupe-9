@@ -5,13 +5,13 @@ from src.service.joueur_service import JoueurService
 router = APIRouter(prefix="/joueurs", tags=["joueurs"])
 
 
-# Modèle d’entrée (JSON reçu du client)
+# Modèle d’entrée pour la connexion (JSON reçu du client)
 class JoueurConnexion(BaseModel):
     pseudo: str
     mdp: str
 
 
-# Modèle de sortie (réponse renvoyée)
+# Modèle de sortie le joueur une fois inscrit ou connecté (réponse renvoyée)
 class JoueurSortie(BaseModel):
     pseudo: str
     code_parrainage: str | None = None
@@ -55,6 +55,9 @@ def connexion_joueur(payload: JoueurConnexion):
 # Endpoint POST /joueurs/inscription
 @router.post("/inscription", response_model=JoueurSortie)
 def inscription_joueur(payload: JoueurInscription):
+    """
+    Endpoint de l'inscription d'un joueur sur le serveur.
+    """
     code_parrainage = payload.code_parrainage
 
     # Vérifie si pseudo déjà utilisé

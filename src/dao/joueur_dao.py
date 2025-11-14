@@ -335,6 +335,13 @@ class JoueurDao(metaclass=Singleton):
 
     @staticmethod
     def joueurs_a_crediter():
+        """Cherche les joueurs qui ont un portefeuille <= 50 et qui n'ont pas été crédité depuis 7
+        jours ou plus.
+        
+        Returns
+        -------
+        joueurs: list
+            liste des pseudos des joueurs vérifiant les critères."""
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
@@ -354,7 +361,14 @@ class JoueurDao(metaclass=Singleton):
             return joueurs
 
     def crediter(self, pseudo: str, montant: int):
-        """credite portefeuille"""
+        """Crédite portefeuille d'un joueur en lui ajoutant un montant.
+        
+        Parameters
+        ----------
+        pseudo: str
+            pseudo du joueur que l'on veut créditer
+        montant: int 
+            valeur dont on veut augmenter la valeur du portefeuille du joueur"""
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
@@ -366,6 +380,14 @@ class JoueurDao(metaclass=Singleton):
 
     @staticmethod
     def maj_date_credit_auto(pseudo: str):
+        """
+        Mise à jour de la date où le joueur a été crédité pour la dernière fois.
+
+        Parameters
+        ----------
+        pseudo: str
+            pseudo du joueur dont on veut modifier la date de mise à jour du dernier crédit auto.
+        """
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
