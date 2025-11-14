@@ -78,3 +78,11 @@ def rejoindre_table_joueur(pseudo: str, id_table: int):
     succes, etat, message = TableService().rejoindre_table(pseudo, id_table)
     return message
 
+# Endpoint GET /joueur_connecte/rejoindre_table
+@router.get("/rejoindre_table", response_model=str)
+def rejoindre_table_joueur(pseudo: str, id_table: int):
+    """
+    Endpoint de récupération de la valeur de son portefeuille par un joueur.
+    """
+    succes, etat, message = TableService().rejoindre_table(pseudo, id_table)
+    return message
