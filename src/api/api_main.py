@@ -29,6 +29,21 @@ def init_tables_et_parties():
     for id_table, partie in tables.parties.items():
         print(f"Table {id_table} créée avec partie associée: {partie is not None}")
 
+scheduler = None
+
+@app.on_event("startup")
+def demarrer_scheduler():
+    global scheduler
+    print("[SCHEDULER] Démarrage du créditage automatique")
+    scheduler = lancer_auto_credit()
+
+@app.on_event("shutdown")
+def arreter_scheduler():
+    global scheduler
+    if scheduler:
+        print("[SCHEDULER] Arrêt du scheduler")
+        scheduler.shutdown()
+
 
 # Middleware CORS si tu comptes faire des requêtes depuis un front
 origins = [

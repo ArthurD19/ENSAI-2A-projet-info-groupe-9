@@ -8,6 +8,16 @@ from src.service.table_service import TableService
 
 router = APIRouter(prefix="/joueur_connecte", tags=["joueur_connecte"])
 
+class TableSortie(BaseModel):
+    id: int
+    nombre_joueurs: int
+    blind: int
+    pot: int
+    indice_dealer: int
+    board: list
+    model_config = {
+        "arbitrary_types_allowed": True
+    }
 
 # Endpoint GET /joueur_connecte/code_parrainage
 @router.get("/code_parrainage", response_model=str)
@@ -79,10 +89,19 @@ def rejoindre_table_joueur(pseudo: str, id_table: int):
     return message
 
 # Endpoint GET /joueur_connecte/rejoindre_table
-@router.get("/voir_tables", response_model=str)
-def voir_tables():
+@router.get("/voir_tables", response_model=TableSortie)
+def voir_table(id_table: int):
     """
     Endpoint pour que le joueur puisse voir toutes les tables.
     """
-    succes, etat, message = TableService().rejoindre_table(pseudo, id_table)
-    return message
+    table = TableService().get_table(id_table)
+    table_sortie = TableSortie(
+        id = table.id,
+        nombre_joueurs = len(table.joueurs),
+        blind = table.blind,
+        pot = table.pot,
+        indice_dealer = table.indice_dealer,
+        deck = table.deck,
+        board = table.board
+    )
+    return table_sortie
