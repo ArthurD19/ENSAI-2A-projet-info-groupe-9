@@ -7,6 +7,7 @@ from src.api.joueur_en_jeu_router import router as joueur_en_jeu_router
 from service.table_service import TableService
 from service.partie_service import PartieService
 from business_object.partie import  Partie
+from src.scheduler.auto_credit import lancer_auto_credit
 
 # Création de l'application FastAPI
 app = FastAPI(

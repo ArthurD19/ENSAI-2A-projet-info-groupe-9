@@ -332,3 +332,45 @@ class JoueurDao(metaclass=Singleton):
         except Exception as e:
             logging.exception(e)
             return False
+
+    @staticmethod
+    def joueurs_a_crediter():
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT pseudo                          "
+                        "  FROM joueurs                      "
+                        " WHERE portefeuille <= 50    "
+                        " AND (date_dernier_credit_auto IS NULL "
+                        "      OR date_dernier_credit_auto < NOW - INTERVAL '7 days');  "
+                    )
+                    res = cursor.fetchone()
+        except Exception as e:
+            logging.info(e)
+            raise
+        if res:
+            joueurs = [row[0] for row in cur.fetchall()]
+            return joueurs
+
+    def crediter(self, pseudo: str, montant: int):
+        """credite portefeuille"""
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    query = f"UPDATE joueurs SET portefeuille = portefeuille + %(montant)s WHERE pseudo = %(pseudo)s;"
+                    cursor.execute(query, {"montant": montant, "pseudo": pseudo})
+        except Exception as e:
+            logging.info(e)
+            raise
+
+    @staticmethod
+    def maj_date_credit_auto(pseudo: str):
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    query = f"UPDATE joueurs SET date_dernier_credit_auto = NOW() WHERE pseudo = %(pseudo)s;"
+                    cursor.execute(query, {"pseudo": pseudo})
+        except Exception as e:
+            logging.info(e)
+            raise    
