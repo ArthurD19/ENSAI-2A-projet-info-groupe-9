@@ -38,16 +38,30 @@ def test_rejoindre_partie_solde_insuffisant(partie_service):
     assert success is False
     assert "pas assez de jetons" in msg
 
+def test_rejoindre_partie_liste_attente(partie_service):
+    # Simuler une partie en cours
+    partie_service.partie.etat.finie = False
 
-"""
-def test_limite_joueurs(partie_service):
-    # Créer 5 joueurs pour remplir la table et la liste d'attente
-    joueurs = [Joueur(f"j{i}", solde=100) for i in range(5)]
-    for j in joueurs:
-        partie_service.rejoindre_partie(j)
-    # Ajouter un joueur supplémentaire
-    joueur_extra = Joueur("extra", solde=100)
-    success, etat, msg = partie_service.rejoindre_partie(joueur_extra)
-    assert success is False
-    assert "pleines" in msg
-"""
+    # Ajouter 2 joueurs dans la table (déjà en cours)
+    joueur1 = Joueur("Alice", 100)
+    joueur2 = Joueur("Bob", 100)
+    partie_service.partie.table.ajouter_joueur(joueur1)
+    partie_service.partie.table.ajouter_joueur(joueur2)
+
+    # Joueur qui arrive pendant la partie en cours
+    joueur3 = Joueur("Charlie", 100)
+    success, etat, msg = partie_service.rejoindre_partie(joueur3)
+
+    # Vérifier que la réponse est correcte
+    assert success is True
+    assert "liste d'attente" in msg
+    assert any(j["pseudo"] == "Charlie" for j in etat.liste_attente)
+
+    # Vérifier qu'on ne l'a pas ajouté directement à la table
+    assert all(j.pseudo != "Charlie" for j in partie_service.partie.table.joueurs)
+
+
+
+
+
+

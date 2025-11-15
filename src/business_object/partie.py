@@ -17,7 +17,7 @@ class EtatPartie:
         self.pots_secondaires: dict = {}
         self.mise_max: int = 0
         self.joueur_courant: str | None = None
-        self.finie: bool = False                # True si la partie est terminée
+        self.finie: bool = True                # True si la partie est terminée
         self.resultats: list[dict] = []        # liste des gagnants avec info sur leur main et kickers
         self.rejouer: dict[str, bool | None] = {}
         self.liste_attente: list[dict] = []
@@ -39,6 +39,7 @@ class Partie:
         self.stats_dao = StatistiqueDao()
         self.etat = EtatPartie()
         self.etat.id_partie = id
+        self.joueurs_ayant_joue: dict[str, bool] = {}
 
     def _mettre_a_jour_etat(self):
         self.etat.tour_actuel = self.tour_actuel
@@ -102,12 +103,16 @@ class Partie:
             self.tour_actuel = "fin"
             self.annoncer_resultats()
 
+        self.joueurs_ayant_joue = {j.pseudo: False for j in self.table.joueurs if j.actif}
+        
         self._mettre_a_jour_etat()
 
     def actions_joueur(self, pseudo: str, action: str, montant: int | None = None):
         joueur = next((j for j in self.table.joueurs if j.pseudo == pseudo), None)
         if not joueur or not joueur.actif:
             return self.etat
+
+        self.joueurs_ayant_joue[joueur.pseudo] = True
 
         if action == "miser" and montant is not None:
             joueur.miser(montant)
@@ -151,7 +156,12 @@ class Partie:
             return True
 
         mises_actifs = [j.mise for j in actifs]
-        return len(set(mises_actifs)) == 1
+        mises_equivalentes = len(set(mises_actifs)) == 1
+
+        # Vérifie que tous les joueurs actifs ont joué au moins une fois
+        tous_ont_joue = all(self.joueurs_ayant_joue.get(j.pseudo, False) for j in actifs)
+
+        return mises_equivalentes and tous_ont_joue
 
     def annoncer_resultats(self) -> EtatPartie:
         joueurs_en_jeu = [j for j in self.table.joueurs if j.actif or j.mise > 0]
