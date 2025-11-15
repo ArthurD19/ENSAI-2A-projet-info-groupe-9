@@ -73,6 +73,7 @@ class TableService(metaclass=Singleton):
 
         # Ajouter le joueur à la partie associée
         partie = self.parties.get(id_table)
+        partie.table = table
 
         if partie is None:
             return True, None, f"{pseudo} ajouté à la table {id_table}, mais aucune partie n'est définie."
@@ -80,6 +81,8 @@ class TableService(metaclass=Singleton):
         # Appeler rejoindre_partie sur la partie
         partie_service = PartieService(partie)
         success, etat, msg = partie_service.rejoindre_partie(joueur)
+        partie = partie_service.partie
+        self.parties[id_table] = partie
         return success, etat, msg
 
 
