@@ -4,6 +4,7 @@ from business_object.table import Table
 from business_object.partie import Partie, EtatPartie
 from business_object.joueurs import Joueur
 from service.partie_service import PartieService
+from service.table_service import TableService
 
 @pytest.fixture
 def table_exemple():
@@ -60,8 +61,46 @@ def test_rejoindre_partie_liste_attente(partie_service):
     # Vérifier qu'on ne l'a pas ajouté directement à la table
     assert all(j.pseudo != "Charlie" for j in partie_service.partie.table.joueurs)
 
+class FakeJoueurDao:
+    def valeur_portefeuille(self, pseudo):
+        return 100
 
+@pytest.fixture(autouse=True)
+def patch_joueur_dao(monkeypatch):
+    monkeypatch.setattr("dao.joueur_dao.JoueurDao", FakeJoueurDao)
+    return FakeJoueurDao()
 
+@pytest.fixture
+def service():
+    return TableService(nb_tables=1, blind=20)
 
+def test_rejoindre_table_ajoute_bien_le_joueur_dans_la_table(service):
+    """Test 1 : vérifier uniquement que le joueur est dans la table."""
+    pseudo = "lucas"
 
+    success, etat, msg = service.rejoindre_table(pseudo, 1)
 
+    table = service.get_table(1)
+
+    assert any(j.pseudo == pseudo for j in table.joueurs)
+
+def test_rejoindre_table_ajoute_joueur_a_la_partie(service):
+    """Test 2 : le joueur doit apparaître soit dans les joueurs de la partie,
+    soit dans la liste d’attente selon l’état de la partie."""
+    
+    pseudo = "lucas"
+
+    success, etat, msg = service.rejoindre_table(pseudo, 1)
+    partie = service.parties[1]
+
+    # Vérifie si le joueur est dans la table active
+    est_dans_partie = any(j.pseudo == pseudo for j in partie.table.joueurs)
+
+    # Vérifie si le joueur est en liste d’attente
+    est_en_attente = any(
+        (j["pseudo"] if isinstance(j, dict) else j.pseudo) == pseudo 
+        for j in partie.etat.liste_attente
+    )
+
+    assert est_dans_partie or est_en_attente, \
+        f"{pseudo} n'est ni dans la partie ni dans la liste d'attente."

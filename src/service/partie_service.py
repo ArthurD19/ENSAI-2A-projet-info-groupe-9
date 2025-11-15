@@ -97,7 +97,8 @@ class PartieService:
         # -------------------------
 
         # Déjà en liste d'attente ?
-        if any(j.pseudo == joueur.pseudo for j in etat.liste_attente):
+        if any(j["pseudo"] == joueur.pseudo for j in etat.liste_attente):
+
             return True, etat, f"{joueur.pseudo} est déjà en liste d'attente."
 
         # Ajouter en liste d'attente

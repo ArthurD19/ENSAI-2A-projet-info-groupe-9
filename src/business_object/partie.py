@@ -272,14 +272,11 @@ class Partie:
             joueur.actif = True
         self.partie.etat.liste_attente.clear()
 
-    def ajouter_a_liste_attente(self, joueur: 'Joueur') -> None:
-        """
-        Ajoute un joueur à la liste d'attente de la partie.
-        Pas de vérifications, juste un ajout simple.
-        """
+    def ajouter_a_liste_attente(self, joueur: Joueur):
         self.etat.liste_attente.append({
             "pseudo": joueur.pseudo,
-            "solde": joueur.solde
+            "solde": joueur.solde,
+            "jeton": joueur.jeton if hasattr(joueur, "jeton") else None
         })
 
     def reponse_rejouer(self, pseudo: str, veut_rejouer: bool) -> EtatPartie:

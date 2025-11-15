@@ -1,3 +1,4 @@
+"""
 from business_object.joueurs import Joueur
 from business_object.table import Table
 from business_object.partie import Partie
@@ -88,3 +89,36 @@ for resultat in etat.resultats:
 print("\n--- Solde final des joueurs ---")
 for j in partie.table.joueurs:
     print(f"{j.pseudo}: {j.solde} jetons")
+"""
+
+# fichier : test_rejoindre_table_terminal.py
+
+from service.table_service import TableService
+from dao.joueur_dao import JoueurDao
+
+# Simuler la DAO pour donner un solde fixe à tous les joueurs
+JoueurDao().valeur_portefeuille = lambda pseudo: 100
+
+# Initialisation du service avec 1 table
+service = TableService(nb_tables=1, blind=20)
+
+# Joueurs à ajouter
+pseudos = ["lucas", "marie", "alice"]
+
+for pseudo in pseudos:
+    success, etat, msg = service.rejoindre_table(pseudo, 1)
+    print(f"\nJoueur '{pseudo}' rejoint la table : {success}, message : {msg}")
+
+    # Affichage de l'état de la table
+    table = service.get_table(1)
+    print("Joueurs à la table :")
+    for j in table.joueurs:
+        print(f" - {j.pseudo}, solde: {j.solde}, actif: {j.actif}, mise: {j.mise}")
+
+    # Affichage de l'état de la partie
+    partie = service.parties[1]
+    print("État de la partie :")
+    print(f" - Partie terminée ? {etat.finie}")
+    print(f" - Pot actuel : {etat.pot}")
+    print(f" - Joueurs actifs dans la partie : {[j.pseudo for j in partie.table.joueurs if j.actif]}")
+    print(f" - Liste d'attente : {[j['pseudo'] for j in etat.liste_attente]}")
