@@ -8,6 +8,8 @@ from service.table_service import TableService
 from service.partie_service import PartieService
 from business_object.partie import  Partie
 from src.scheduler.auto_credit import lancer_auto_credit
+from src.api.var_utiles import tables_service, scheduler
+
 
 # Création de l'application FastAPI
 app = FastAPI(
@@ -17,8 +19,6 @@ app = FastAPI(
     root_path="/proxy/8000"
 )
 
-tables_service = TableService()  # singleton crée toutes les tables et parties
-
 @app.on_event("startup")
 def init_tables_et_parties():
     """
@@ -27,12 +27,8 @@ def init_tables_et_parties():
     global tables
     print("Initialisation des tables et parties...")
 
-    tables = TableService()
-
-    for id_table, partie in tables.parties.items():
+    for id_table, partie in tables_service.parties.items():
         print(f"Table {id_table} créée avec partie associée: {partie is not None}")
-
-scheduler = None
 
 @app.on_event("startup")
 def demarrer_scheduler():

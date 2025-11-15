@@ -6,6 +6,7 @@ from src.service.joueur_service import JoueurService
 from src.service.partie_service import PartieService
 from src.business_object.partie import EtatPartie
 from src.service.table_service import TableService
+from src.api.var_utiles import tables_service
 
 router = APIRouter(prefix="/joueur_en_jeu", tags=["joueur_en_jeu"])
 
@@ -41,8 +42,9 @@ def miser_joueur(payload: JoueurEnJeu, montant: int, partie: int):
     """
 
     joueur = payload.pseudo
-    partie_jouee = "Partie"+f"{partie}"
-    fait, etat_partie, message = PartieService(partie_jouee).miser(joueur, montant)
+    partie_jouee = tables_service.parties[partie]
+    partie_jouee_service = PartieService(partie_jouee)
+    fait, etat_partie, message = partie_jouee_service.miser(joueur, montant)
     if fait : 
         message = "Action effectuée"
         partie_retour = RetourPartie(
@@ -88,8 +90,9 @@ def se_coucher_joueur(payload: JoueurEnJeu, partie: int):
     """
 
     joueur = payload.pseudo
-    partie_jouee = "Partie"+f"{partie}"
-    fait, etat_partie, message = PartieService(partie_jouee).se_coucher(joueur)
+    partie_jouee = tables_service.parties[partie]
+    partie_jouee_service = PartieService(partie_jouee)
+    fait, etat_partie, message = partie_jouee_service.se_coucher(joueur)
     if fait : 
         message = "Action effectuée"
         partie_retour = RetourPartie(
@@ -135,8 +138,9 @@ def suivre_joueur(payload: JoueurEnJeu, partie: int):
     """
 
     joueur = payload.pseudo
-    partie_jouee = "Partie"+f"{partie}"
-    fait, etat_partie, message = PartieService(partie_jouee).suivre(joueur)
+    partie_jouee = tables_service.parties[partie]
+    partie_jouee_service = PartieService(partie_jouee)
+    fait, etat_partie, message = partie_jouee_service.suivre(joueur)
     if fait : 
         message = "Action effectuée"
         partie_retour = RetourPartie(
@@ -183,8 +187,9 @@ def all_in_joueur(payload: JoueurEnJeu, partie: int):
     """
 
     joueur = payload.pseudo
-    partie_jouee = "Partie"+f"{partie}"
-    fait, etat_partie, message = PartieService(partie_jouee).all_in(joueur)
+    partie_jouee = tables_service.parties[partie]
+    partie_jouee_service = PartieService(partie_jouee)
+    fait, etat_partie, message = partie_jouee_service.all_in(joueur)
     if fait : 
         message = "Action effectuée"
         partie_retour = RetourPartie(
@@ -229,9 +234,9 @@ def voir_etat_partie(partie: int):
     Endpoint de l'action voir état de la partie pour un joueur.
     Renvoie l'état de la partie.
     """
-
-    partie_jouee = "Partie"+f"{partie}"
-    fait, etat_partie, message = PartieService(partie_jouee).voir_etat_partie()
+    partie_jouee = tables_service.parties[partie]
+    partie_jouee_service = PartieService(partie_jouee)
+    fait, etat_partie, message = partie_jouee_service.voir_etat_partie()
     if fait : 
         message = "Action effectuée"
         partie_retour = RetourPartie(
