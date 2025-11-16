@@ -1,15 +1,17 @@
 import os
 from fastapi import FastAPI, status, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
-from src.api.joueur_router import router as joueur_router
-from src.api.joueur_connecte_router import router as joueur_connecte_router
-from src.api.joueur_en_jeu_router import router as joueur_en_jeu_router
+from api.joueur_router import router as joueur_router
+from api.joueur_connecte_router import router as joueur_connecte_router
+from api.joueur_en_jeu_router import router as joueur_en_jeu_router
 from service.table_service import TableService
 from service.partie_service import PartieService
 from business_object.partie import  Partie
-from src.scheduler.auto_credit import lancer_auto_credit
-from src.api.var_utiles import tables_service, scheduler
+from scheduler.auto_credit import lancer_auto_credit
+from api.var_utiles import tables_service, scheduler
 
+import logging
+from utils.log_init import initialiser_logs
 
 # Création de l'application FastAPI
 app = FastAPI(
@@ -79,7 +81,7 @@ def root():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
-        "main:app",
+        "api_main:app",
         host="0.0.0.0",   # indispensable pour Onyxia
         port=8000,        # port exposé et forwardé
         reload=True       # uniquement en dev

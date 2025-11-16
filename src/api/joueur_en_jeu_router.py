@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from src.dao.joueur_dao import JoueurDao 
-from src.dao.statistique_dao import StatistiqueDao
-from src.service.joueur_service import JoueurService
-from src.service.partie_service import PartieService
-from src.business_object.partie import EtatPartie
-from src.business_object.cartes import Carte
-from src.service.table_service import TableService
-from src.api.var_utiles import tables_service
+from dao.joueur_dao import JoueurDao 
+from dao.statistique_dao import StatistiqueDao
+from service.joueur_service import JoueurService
+from service.partie_service import PartieService
+from business_object.partie import EtatPartie
+from business_object.cartes import Carte
+from service.table_service import TableService
+from api.var_utiles import tables_service
 
 router = APIRouter(prefix="/joueur_en_jeu", tags=["joueur_en_jeu"])
 

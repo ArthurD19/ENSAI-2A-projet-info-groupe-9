@@ -9,6 +9,8 @@ from utils.genere_code_parrainage import GenerateurDeCode
 
 from view.session import Session
 
+import logging
+
 
 class JoueurService:
     """Classe contenant les méthodes de service des Joueurs"""
@@ -248,10 +250,11 @@ class JoueurService:
         """
         Fonction de mise à jour "auto" des portefeuilles.
         """
-        joueurs = JoueurDao.joueurs_a_crediter()
+        joueurs = JoueurDao().joueurs_a_crediter()
         if not joueurs:
             logging.info("Aucun joueur à créditer")
-        for pseudo in joueurs:
-            JoueurDao.crediter(pseudo, JoueurService().MONTANT_RECHARGEMENT_AUTO)
-            JoueurDao.maj_date_credit_auto(pseudo)
-            logging.info(f"Auto-crédut hebdo : {pseudo}, montant {JoueurService().MONTANT_RECHARGEMENT_AUTO}")
+        if joueurs is not None:
+            for pseudo in joueurs:
+                JoueurDao.crediter(pseudo, JoueurService().MONTANT_RECHARGEMENT_AUTO)
+                JoueurDao.maj_date_credit_auto(pseudo)
+                logging.info(f"Auto-crédut hebdo : {pseudo}, montant {JoueurService().MONTANT_RECHARGEMENT_AUTO}")
