@@ -404,7 +404,7 @@ def test_joueurs_a_crediter_aucun_resultat():
     # WHEN 
     JoueurDao().crediter(pseudo1, montant)
     JoueurDao().crediter(pseudo2, montant)
-    joueurs = JoueurDao.joueurs_a_crediter()
+    joueurs = JoueurDao().joueurs_a_crediter()
 
     # THEN 
     assert (joueurs is None) or (joueurs == [])
