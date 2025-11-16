@@ -5,6 +5,7 @@ from src.dao.statistique_dao import StatistiqueDao
 from src.service.joueur_service import JoueurService
 from src.service.partie_service import PartieService
 from src.business_object.partie import EtatPartie
+from src.business_object.cartes import Carte
 from src.service.table_service import TableService
 from src.api.var_utiles import tables_service
 
@@ -190,6 +191,7 @@ def all_in_joueur(payload: JoueurEnJeu, partie: int):
     partie_jouee = tables_service.parties[partie]
     partie_jouee_service = PartieService(partie_jouee)
     fait, etat_partie, message = partie_jouee_service.all_in(joueur)
+    partie_jouee.etat = etat_partie
     if fait : 
         message = "Action effectuée"
         partie_retour = RetourPartie(
@@ -273,13 +275,29 @@ def voir_etat_partie(partie: int):
         )
         return partie_retour
 
+# Endpoint GET /joueur_en_jeu/voir_mes_cartes
+@router.get("/voir_mes_cartes", response_model=str)
+def voir_mes_cartes(partie: int, pseudo: str):
+    """
+    Endpoint pour que le joueur puisse voir ses cartes.
+    Renvoie la liste des cartes du joueur.
+    """
+    table = tables_service.tables[partie]
+    for j in table.joueurs:
+        if j.pseudo == pseudo:
+            liste_cartes = [str(c) for c in j.main]
+            main = liste_cartes[0] + liste_cartes[1]
+            return main
+    return "Le joueur n'a pas été trouvé à la table"
+
+
 # Endpoint POST /joueur_en_jeu/quitter_table
 @router.post("/quitter_table", response_model=str)
 def quitter_table_joueur(pseudo: str, id_table: int):
     """
     Endpoint permettant à un joueur de quitter une table.
     """
-    quitter = TableService().quitter_table(pseudo, id_table)
+    quitter = tables_service.quitter_table(pseudo, id_table)
     if quitter == 1: 
         return "Table quittée"
     else:

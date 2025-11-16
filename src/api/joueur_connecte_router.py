@@ -5,6 +5,7 @@ from src.dao.statistique_dao import StatistiqueDao
 from src.service.joueur_service import JoueurService
 from src.service.partie_service import PartieService
 from src.service.table_service import TableService
+from src.api.var_utiles import tables_service, scheduler
 
 router = APIRouter(prefix="/joueur_connecte", tags=["joueur_connecte"])
 
@@ -15,7 +16,6 @@ class TableSortie(BaseModel):
     blind: int
     pot: int
     indice_dealer: int
-    board: list
 
 # Endpoint GET /joueur_connecte/code_parrainage
 @router.get("/code_parrainage", response_model=str)
@@ -83,7 +83,7 @@ def rejoindre_table_joueur(pseudo: str, id_table: int):
     """
     Endpoint permettant à un joueur de rejoindre une table.
     """
-    succes, etat, message = TableService().rejoindre_table(pseudo, id_table)
+    succes, etat, message = tables_service.rejoindre_table(pseudo, id_table)
     return message
 
 # Endpoint GET /joueur_connecte/voir_table
@@ -92,15 +92,13 @@ def voir_table(id_table: int):
     """
     Endpoint pour voir une table (ses joueurs ...).
     """
-    table = TableService().get_table(id_table)
+    table = tables_service.get_table(id_table)
     table_sortie = TableSortie(
         id = table.id,
         nombre_joueurs = len(table.joueurs),
         blind = table.blind,
         pot = table.pot,
         indice_dealer = table.indice_dealer,
-        deck = table.deck,
-        board = table.board
     )
     return table_sortie
 
