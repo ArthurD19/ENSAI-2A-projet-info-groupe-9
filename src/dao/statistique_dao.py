@@ -22,6 +22,7 @@ class StatistiqueDao(metaclass=Singleton):
         "nombre_checks"
     }
 
+    @log
     def creer_statistiques_pour_joueur(self, pseudo: str):
         """Crée une nouvelle ligne de statistiques pour un joueur dans la base de données.
         
@@ -104,7 +105,7 @@ class StatistiqueDao(metaclass=Singleton):
                 statistiques["taux_victoire_abattage"] = 0
         return statistiques
 
-    
+    @log
     def mettre_a_jour_statistique(self, pseudo: str, stat_a_mettre_a_jour: str, valeur: int):
         """Met à jour une statistique spécifique d'un joueur, si le champ est valide.
         
@@ -129,6 +130,7 @@ class StatistiqueDao(metaclass=Singleton):
             logging.info(e)
             raise
 
+    @log
     def incrementer_statistique(self, pseudo: str, stat_a_incrementer: str, valeur: int = 1):
         """Incrémente une statistique (par exemple +1 main jouée).
         
@@ -151,7 +153,7 @@ class StatistiqueDao(metaclass=Singleton):
             logging.info(e)
             raise
 
-    
+    @log
     def recuperer_top_joueurs(self, limite: int = 10) -> list[dict]:
         """Renvoie la liste des meilleurs joueurs selon leur meilleur classement.
         

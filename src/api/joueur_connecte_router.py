@@ -1,10 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+
 from pydantic import BaseModel
+
 from dao.joueur_dao import JoueurDao 
 from dao.statistique_dao import StatistiqueDao
+
 from service.joueur_service import JoueurService
 from service.partie_service import PartieService
 from service.table_service import TableService
+
 from api.var_utiles import tables_service, scheduler
 
 router = APIRouter(prefix="/joueur_connecte", tags=["joueur_connecte"])

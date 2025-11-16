@@ -1,8 +1,10 @@
 import logging
 import psycopg2
 import psycopg2.extras
+
 from utils.singleton import Singleton
 from utils.log_decorator import log
+
 from dao.db_connection import DBConnection
 from dao.statistique_dao import StatistiqueDao
 
@@ -333,8 +335,8 @@ class JoueurDao(metaclass=Singleton):
             logging.exception(e)
             return False
 
-    @staticmethod
-    def joueurs_a_crediter():
+    @log
+    def joueurs_a_crediter(self):
         """Cherche les joueurs qui ont un portefeuille <= 50 et qui n'ont pas été crédité depuis 7
         jours ou plus.
         
@@ -360,6 +362,7 @@ class JoueurDao(metaclass=Singleton):
             joueurs = [row["pseudo"] for row in res]
             return joueurs
 
+    @log
     def crediter(self, pseudo: str, montant: int):
         """Crédite portefeuille d'un joueur en lui ajoutant un montant.
         
@@ -378,8 +381,8 @@ class JoueurDao(metaclass=Singleton):
             logging.info(e)
             raise
 
-    @staticmethod
-    def maj_date_credit_auto(pseudo: str):
+    @log
+    def maj_date_credit_auto(self, pseudo: str):
         """
         Mise à jour de la date où le joueur a été crédité pour la dernière fois.
 

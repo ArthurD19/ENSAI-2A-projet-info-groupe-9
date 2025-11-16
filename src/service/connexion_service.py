@@ -1,6 +1,8 @@
 from utils.log_decorator import log
 from utils.securite import hash_password
+
 from dao.joueur_dao import JoueurDao
+
 from view.session import Session
 
 class ConnexionService:

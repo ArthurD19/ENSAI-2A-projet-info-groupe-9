@@ -1,9 +1,11 @@
 import random
+
 from business_object.cartes import Carte
 from business_object.joueurs import Joueur
 from business_object.distrib import Distrib
 from business_object.comptage import Comptage
 from business_object.evaluateur import EvaluateurMain
+
 from dao.statistique_dao import StatistiqueDao
 
 

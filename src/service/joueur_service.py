@@ -245,8 +245,8 @@ class JoueurService:
         """
         return JoueurDao().code_de_parrainage_existe(code_parrainage)
 
-    @staticmethod
-    def credit_auto():
+    @log
+    def credit_auto(self):
         """
         Fonction de mise à jour "auto" des portefeuilles.
         """

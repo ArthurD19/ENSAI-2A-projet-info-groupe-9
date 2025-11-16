@@ -18,6 +18,7 @@ class TableDao(metaclass=Singleton):
         "joueur5"
     }
 
+    @log
     def obtenir_joueurs_tables(self, id: int):
         """Récupère les joueurs qui sont présents à une table.
         
@@ -40,6 +41,7 @@ class TableDao(metaclass=Singleton):
             logging.info(e)
             raise
 
+    @log
     def ajouter_joueur_table(self, pseudo: str, id: int):
         """Ajoute le joueur à la table.
         

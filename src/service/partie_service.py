@@ -1,3 +1,5 @@
+from utils.log_decorator import log
+
 from business_object.partie import Partie, EtatPartie
 from business_object.joueurs import Joueur
 
@@ -5,14 +7,17 @@ from business_object.joueurs import Joueur
 class PartieService:
     """Service pour gérer les interactions avec une Partie via API."""
 
+    @log
     def __init__(self, partie: Partie):
         self.partie = partie
 
+    @log
     def voir_etat_partie(self) -> tuple[bool, str]:
         """Retourne si la requête est valide (toujours True ici)."""
         self.partie._mettre_a_jour_etat()
         return True, self.partie.etat, ""
 
+    @log
     def miser(self, pseudo: str, montant: int) -> tuple[bool, str]:
         joueur = next((j for j in self.partie.table.joueurs if j.pseudo == pseudo), None)
         if not joueur:
@@ -29,6 +34,7 @@ class PartieService:
         self.partie.actions_joueur(pseudo, "miser", montant)
         return True, self.partie.etat, ""
 
+    @log
     def suivre(self, pseudo: str) -> tuple[bool, str]:
         joueur = next((j for j in self.partie.table.joueurs if j.pseudo == pseudo), None)
         if not joueur:
@@ -41,6 +47,7 @@ class PartieService:
         self.partie.actions_joueur(pseudo, "suivre")
         return True, self.partie.etat, ""
 
+    @log
     def se_coucher(self, pseudo: str) -> tuple[bool, str]:
         joueur = next((j for j in self.partie.table.joueurs if j.pseudo == pseudo), None)
         if not joueur:
@@ -51,6 +58,7 @@ class PartieService:
         self.partie.actions_joueur(pseudo, "se_coucher")
         return True, self.partie.etat, ""
 
+    @log
     def all_in(self, pseudo: str) -> tuple[bool, str]:
         joueur = next((j for j in self.partie.table.joueurs if j.pseudo == pseudo), None)
         if not joueur:
@@ -61,6 +69,7 @@ class PartieService:
         self.partie.actions_joueur(pseudo, "all-in")
         return True, self.partie.etat, ""
 
+    @log
     def rejoindre_partie(self, joueur: Joueur) -> tuple[bool, EtatPartie, str]:
         """
         Le joueur est déjà dans la table (ajouté via rejoindre_table).
@@ -109,6 +118,7 @@ class PartieService:
             "et rejoindra la prochaine main."
         )
 
+    @log
     def decision_rejouer(self, pseudo: str, veut_rejouer: bool) -> tuple[bool, EtatPartie, str]:
         if pseudo not in self.partie.etat.rejouer:
             return False, self.partie.etat, f"{pseudo} n'était pas dans la main précédente."

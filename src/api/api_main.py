@@ -1,17 +1,24 @@
 import os
+import logging
+
+from utils.log_init import initialiser_logs
+
 from fastapi import FastAPI, status, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
+
 from api.joueur_router import router as joueur_router
 from api.joueur_connecte_router import router as joueur_connecte_router
 from api.joueur_en_jeu_router import router as joueur_en_jeu_router
-from service.table_service import TableService
-from service.partie_service import PartieService
-from business_object.partie import  Partie
-from scheduler.auto_credit import lancer_auto_credit
 from api.var_utiles import tables_service, scheduler
 
-import logging
-from utils.log_init import initialiser_logs
+from service.table_service import TableService
+from service.partie_service import PartieService
+
+from business_object.partie import  Partie
+
+from scheduler.auto_credit import lancer_auto_credit
+
+
 
 # Création de l'application FastAPI
 app = FastAPI(

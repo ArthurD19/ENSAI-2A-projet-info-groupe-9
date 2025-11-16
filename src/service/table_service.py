@@ -1,8 +1,8 @@
 from business_object.table import Table
 from business_object.joueurs import Joueur
-from service.partie_service import PartieService
 from business_object.partie import  Partie
 
+from service.partie_service import PartieService
 
 from utils.singleton import Singleton
 from utils.log_decorator import log
