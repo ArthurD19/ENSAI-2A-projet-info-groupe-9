@@ -291,7 +291,7 @@ def voir_mes_cartes(partie: int, pseudo: str):
     for j in table.joueurs:
         if j.pseudo == pseudo:
             liste_cartes = [str(c) for c in j.main]
-            main = liste_cartes[0] + liste_cartes[1]
+            main = liste_cartes[0] + ", " + liste_cartes[1]
             return main
     return "Le joueur n'a pas été trouvé à la table"
 
