@@ -106,6 +106,21 @@ def voir_table(id_table: int):
     )
     return table_sortie
 
+# Endpoint GET /joueur_connecte/voir_tables
+@router.get("/voir_tables", response_model=list[dict])
+def voir_tables():
+    """
+    Renvoie la liste de toutes les tables avec leur nombre de joueurs et blind
+    """
+    etat = []
+    for table in tables_service.lister_tables():
+        etat.append({
+            "id": table["id"],
+            "nb_joueurs": table["nb_joueurs"],
+            "blind": table["blind"]
+        })
+    return etat
+
 # Endpoint POST /joueur_connecte/deconnexion
 @router.post("/deconnexion", status_code=status.HTTP_204_NO_CONTENT)
 def deconnexion(pseudo: str):
