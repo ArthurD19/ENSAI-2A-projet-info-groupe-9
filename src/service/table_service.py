@@ -59,12 +59,19 @@ class TableService(metaclass=Singleton):
         """
         # Récupérer le solde depuis la DAO
         solde = JoueurDao().valeur_portefeuille(pseudo)
+        if solde == None:
+            solde = 1000
         joueur = Joueur(pseudo, solde)
-
         # Récupérer la table
         table = self.get_table(id_table)
+
         if not table:
             return False, None, f"La table {id_table} n'existe pas."
+        print("good")
+        
+        if any(j.pseudo == pseudo for j in table.joueurs):
+            partie = self.parties.get(id_table)
+            return False, partie.etat, f"{pseudo} est déjà à la table {id_table}."
 
         # Ajouter le joueur à la table
         code_table = table.ajouter_joueur(joueur)  # 1=ok, 2=table pleine, etc.

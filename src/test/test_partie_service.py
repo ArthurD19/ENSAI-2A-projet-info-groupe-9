@@ -82,6 +82,7 @@ def test_rejoindre_table_ajoute_bien_le_joueur_dans_la_table(service):
 
     table = service.get_table(1)
 
+    assert success is True
     assert any(j.pseudo == pseudo for j in table.joueurs)
 
 def test_rejoindre_table_ajoute_joueur_a_la_partie(service):
@@ -104,3 +105,19 @@ def test_rejoindre_table_ajoute_joueur_a_la_partie(service):
 
     assert est_dans_partie or est_en_attente, \
         f"{pseudo} n'est ni dans la partie ni dans la liste d'attente."
+
+def test_rejoindre_table_interdit_deux_fois(service):
+    """On ne doit pas pouvoir rejoindre deux fois la même table avec le même joueur."""
+    
+    pseudo = "enzo"
+
+    # Premier appel : OK
+    success1, etat1, msg1 = service.rejoindre_table(pseudo, 1)
+    assert success1 is True
+
+    # Deuxième appel : doit être refusé
+    success2, etat2, msg2 = service.rejoindre_table(pseudo, 1)
+
+    assert success2 is False, "Le même joueur ne doit pas pouvoir rejoindre la table deux fois."
+    assert "déjà" in msg2.lower() or "existe" in msg2.lower(), \
+    f"Le message devrait indiquer que le joueur est déjà présent. Reçu : {msg2}"
