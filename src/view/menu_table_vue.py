@@ -86,7 +86,7 @@ class MenuTableVue(VueAbstraite):
                         "partie": self.id_table,
                         "montant": montant
                     },
-                    params={"partie": self.id_table}
+                    params={"partie": self.id_table, "montant": montant}
                 )
                 print(f"\n{res.get('message_retour', 'Mise effectuée')}\n")
 
