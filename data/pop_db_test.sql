@@ -20,10 +20,9 @@ INSERT INTO joueurs_statistiques (
     nombre_folds,
     nombre_mises,
     nombre_relances,
-    nombre_suivis,
-    nombre_checks
+    nombre_suivis
 ) VALUES
-('arthur', 2, 100, 15, 10, 20, 30, 10, 20, 10),
-('maxence', 5, 80, 10, 5, 30, 15, 10, 20, 5),
-('lucas', 1, 120, 25, 20, 25, 35, 15, 20, 5),
-('clemence', 4, 90, 10, 15, 15, 20, 10, 15, 5);
+('arthur', 2, 100, 15, 10, 20, 30, 10, 20),
+('maxence', 5, 80, 10, 5, 30, 15, 10, 20),
+('lucas', 1, 120, 25, 20, 25, 35, 15, 20),
+('clemence', 4, 90, 10, 15, 15, 20, 10, 15);

@@ -19,7 +19,7 @@ class StatistiqueDao(metaclass=Singleton):
         "nombre_mises",
         "nombre_relances",
         "nombre_suivis",
-        "nombre_checks"
+        "nombre_victoire_abattage"
     }
 
     @log
@@ -76,33 +76,39 @@ class StatistiqueDao(metaclass=Singleton):
         statistiques = {}
         if res:
             statistiques = res
-            if statistiques["nombre_total_mains_jouees"] != 0:
-                statistiques["taux_main_all_in"] = statistiques["nombre_all_in"]/statistiques["nombre_total_mains_jouees"]
-                statistiques["taux_main_fold"] = statistiques["nombre_folds"]/statistiques["nombre_total_mains_jouees"]
-                # il reste type_joueur_selon_frequence_jeux
-                statistiques["agression_factor"] = (statistiques["nombre_mises"] + statistiques["nombre_relances"])/statistiques["nombre_suivis"]
-                statistiques["agression_frequency"] = (statistiques["nombre_mises"] + statistiques["nombre_relances"])/(statistiques["nombre_suivis"] + statistiques["nombre_checks"] + statistiques["nombre_folds"] + statistiques["nombre_relances"] + statistiques["nombre_mises"])
-                if statistiques["taux_main_all_in"] > 0.3:
-                    statistiques["badge"] = "Le mitrailleur"
-                elif statistiques["taux_main_fold"] > 0.45:
-                    statistiques["badge"] = "Gérard j'ai pas les bonnes cartes"
-                elif statistiques["agression_factor"] >= 3.5 and statistiques["agression_frequency"] >= 0.55:
-                    statistiques["bagde"] = "Bluffeur fou"
-                elif 2 <= statistiques["agression_factor"] < 3.5 and 0.3 <= statistiques["agression_frequency"] < 0.55:
-                    statistiques["bagde"] = "Agressif"
-                elif statistiques["agression_factor"] < 2 and statistiques["agression_frequency"] < 0.3:
-                    statistiques["badge"] = "Poule mouillée"
-                else:
-                    statistiques["badge"] = "Sans badge"
+
+            # Valeurs par défaut pour éviter les erreurs
+            nombre_total_mains_jouees = statistiques.get("nombre_total_mains_jouees", 0)
+            nombre_mises = statistiques.get("nombre_mises", 0)
+            nombre_relances = statistiques.get("nombre_relances", 0)
+            nombre_suivis = statistiques.get("nombre_suivis", 0)
+            nombre_folds = statistiques.get("nombre_folds", 0)
+            nombre_all_in = statistiques.get("nombre_all_in", 0)
+            nombre_victoire_abattage = statistiques.get("nombre_victoire_abattage", 0)
+            nombre_fois_abattage = statistiques.get("nombre_fois_abattage", 0)
+
+            # Ratios sécurisés
+            statistiques["taux_main_all_in"] = nombre_all_in / nombre_total_mains_jouees if nombre_total_mains_jouees > 0 else 0
+            statistiques["taux_main_fold"] = nombre_folds / nombre_total_mains_jouees if nombre_total_mains_jouees > 0 else 0
+            statistiques["agression_factor"] = (nombre_mises + nombre_relances) / nombre_suivis if nombre_suivis > 0 else 0
+            total_actions = nombre_mises + nombre_relances + nombre_suivis + nombre_folds
+            statistiques["agression_frequency"] = (nombre_mises + nombre_relances) / total_actions if total_actions > 0 else 0
+            statistiques["taux_victoire_abattage"] = nombre_victoire_abattage / nombre_fois_abattage if nombre_fois_abattage > 0 else 0
+
+            # Calcul du badge
+            if statistiques["taux_main_all_in"] > 0.3:
+                statistiques["badge"] = "Le mitrailleur"
+            elif statistiques["taux_main_fold"] > 0.45:
+                statistiques["badge"] = "Gérard j'ai pas les bonnes cartes"
+            elif statistiques["agression_factor"] >= 3.5 and statistiques["agression_frequency"] >= 0.55:
+                statistiques["badge"] = "Bluffeur fou"
+            elif 2 <= statistiques["agression_factor"] < 3.5 and 0.3 <= statistiques["agression_frequency"] < 0.55:
+                statistiques["badge"] = "Agressif"
+            elif statistiques["agression_factor"] < 2 and statistiques["agression_frequency"] < 0.3:
+                statistiques["badge"] = "Poule mouillée"
             else:
-                statistiques["taux_main_all_in"] = 0
-                statistiques["taux_main_fold"] = 0
-                statistiques["agression_factor"] = 0
-                statistiques["agression_frequency"] = 0
-            if statistiques["nombre_fois_abattage"] != 0:
-                statistiques["taux_victoire_abattage"] = statistiques["nombre_victoire_abattage"]/statistiques["nombre_fois_abattage"]
-            else:
-                statistiques["taux_victoire_abattage"] = 0
+                statistiques["badge"] = "Sans badge"
+
         return statistiques
 
     @log

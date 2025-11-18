@@ -8,11 +8,9 @@ INSERT INTO joueurs_statistiques (
     nombre_mises,
     nombre_relances,
     nombre_suivis,
-    nombre_checks,
     nombre_victoire_abattage,
-    nombre_fois_abattage,
-    nombre_parties_dernier_mois
-)
+    nombre_fois_abattage
+    )
 VALUES
 (
     'arthur1',
@@ -24,10 +22,8 @@ VALUES
     120,    -- nombre_mises
     40,     -- nombre_relances
     180,    -- nombre_suivis
-    30,     -- nombre_checks
     10,     -- nombre_victoire_abattage
     20,     -- nombre_fois_abattage
-    8       -- nombre_parties_dernier_mois
 )
 ON CONFLICT (pseudo) DO UPDATE
 SET
@@ -39,11 +35,8 @@ SET
     nombre_mises = EXCLUDED.nombre_mises,
     nombre_relances = EXCLUDED.nombre_relances,
     nombre_suivis = EXCLUDED.nombre_suivis,
-    nombre_checks = EXCLUDED.nombre_checks,
     nombre_victoire_abattage = EXCLUDED.nombre_victoire_abattage,
-    nombre_fois_abattage = EXCLUDED.nombre_fois_abattage,
-    nombre_parties_dernier_mois = EXCLUDED.nombre_parties_dernier_mois;
-
+    nombre_fois_abattage = EXCLUDED.nombre_fois_abattage;
 
 INSERT INTO table_joueurs (id, joueur1, joueur2, joueur3, joueur4, joueur5) VALUES
 (1, NULL, NULL, NULL, NULL, NULL),

@@ -223,6 +223,7 @@ class Partie:
         elif action == "all-in":
             # mise le reste du solde
             joueur.miser(joueur.solde)
+            self.stats_dao.incrementer_statistique(joueur.pseudo, "nombre_all_in")
             # mise_max doit devenir le max entre l'ancienne et la mise du joueur
             self.mise_max = max(self.mise_max, joueur.mise)
 
@@ -349,6 +350,11 @@ class Partie:
     # ---------------------------
     def annoncer_resultats(self) -> EtatPartie:
         self.etat.resultats = []
+
+        for j in self.table.joueurs:
+            self.stats_dao.incrementer_statistique(j.pseudo, "nombre_total_mains_jouees")
+            self.stats_dao.incrementer_statistique(j.pseudo, "nombre_mains_jouees_session")
+
         joueurs_en_jeu = [j for j in self.table.joueurs if j.actif or j.mise > 0]
 
         # Mettre à jour le portefeuille de TOUS les joueurs en base
@@ -361,11 +367,16 @@ class Partie:
                 gagnant = joueurs_en_jeu[0]
                 gagnant.solde += self.comptage.pot
                 JoueurDao().mettre_a_jour_solde(gagnant.pseudo, gagnant.solde)
+
+                # Incrémenter stats de victoire pour ce joueur
+                self.stats_dao.incrementer_statistique(gagnant.pseudo, "nombre_victoire_abattage")
+
                 self.etat.resultats = [{
                     "pseudo": gagnant.pseudo,
                     "main": [str(c) for c in gagnant.main],
                     "description": "Gagne car les autres se sont couchés."
                 }]
+
             self.comptage.pot = 0
             self.etat.finie = True
             self.indice_joueur_courant = -1
@@ -394,10 +405,15 @@ class Partie:
             for j in gagnants:
                 j.solde += part
                 JoueurDao().mettre_a_jour_solde(j.pseudo, j.solde)
+
+                # Incrémenter stats de victoire pour le gagnant
+                self.stats_dao.incrementer_statistique(j.pseudo, "nombre_victoire_abattage")
+
                 self.etat.resultats.append({
                     "pseudo": j.pseudo,
                     "main": [str(c) for c in j.main],
-                    "description": "Gagne parce qu'il avait une meilleure combinaison"})
+                    "description": "Gagne parce qu'il avait une meilleure combinaison"
+                })
             self.comptage.pot = 0
 
         # Marquer fin et préparer rejouer
@@ -406,6 +422,7 @@ class Partie:
         self.etat.rejouer = {j.pseudo: None for j in self.table.joueurs}
         self._mettre_a_jour_etat()
         return self.etat
+    
 
     # ---------------------------
     # Gestion du relancement / nouvelle main
