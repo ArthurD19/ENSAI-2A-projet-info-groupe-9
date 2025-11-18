@@ -3,6 +3,7 @@ from src.view.vue_abstraite import VueAbstraite
 from src.view.session import Session
 from src.view.menu_joueur_vue import MenuJoueurVue
 from src.client.api_client import get, post, APIError
+from src.business_object.partie import Partie
 
 
 class MenuTableVue(VueAbstraite):

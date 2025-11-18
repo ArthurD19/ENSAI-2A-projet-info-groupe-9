@@ -361,7 +361,11 @@ class Partie:
                 gagnant = joueurs_en_jeu[0]
                 gagnant.solde += self.comptage.pot
                 JoueurDao().mettre_a_jour_solde(gagnant.pseudo, gagnant.solde)
-                self.etat.resultats = [...]
+                self.etat.resultats = [{
+                    "pseudo": gagnant.pseudo,
+                    "main": [str(c) for c in gagnant.main],
+                    "description": "Gagne car les autres se sont couchés."
+                }]
             self.comptage.pot = 0
             self.etat.finie = True
             self.indice_joueur_courant = -1
@@ -385,13 +389,14 @@ class Partie:
             elif cmp == 0:
                 gagnants.append(j)
 
-        self.etat.resultats = []
         if self.comptage.pot > 0:
             part = self.comptage.pot // len(gagnants)
             for j in gagnants:
                 j.solde += part
                 JoueurDao().mettre_a_jour_solde(j.pseudo, j.solde)
-                self.etat.resultats.append(...)
+                self.etat.resultats.append({
+                    "pseudo": j.pseudo,
+                    "main": [str(c) for c in j.main]})
             self.comptage.pot = 0
 
         # Marquer fin et préparer rejouer
