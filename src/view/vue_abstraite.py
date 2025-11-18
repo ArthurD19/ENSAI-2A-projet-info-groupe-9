@@ -19,8 +19,10 @@ class VueAbstraite(ABC):
         """Echappe un grand espace dans le terminal pour simuler
         le changement de page de l'application"""
         self.nettoyer_console()
-        print(self.message)
-        print()
+        # n'affiche le message que s'il s'agit d'une chaîne non vide
+        if isinstance(self.message, str) and self.message.strip():
+            print(self.message)
+            print()
 
     @abstractmethod
     def choisir_menu(self):

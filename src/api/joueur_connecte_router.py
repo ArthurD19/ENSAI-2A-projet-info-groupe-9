@@ -95,8 +95,8 @@ def rejoindre_table_joueur(pseudo: str, id_table: int):
     """
     succes_action, etat, message_action = tables_service.rejoindre_table(pseudo, id_table)
     reponse = TableRejointe(
-        succes = succes_action,
-        message = message_action
+        succes=succes_action,
+        message=message_action
     )
     return reponse
 

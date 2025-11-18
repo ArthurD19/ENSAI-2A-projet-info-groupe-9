@@ -9,6 +9,7 @@ from src.utils.log_decorator import log
 
 from src.dao.joueur_dao import JoueurDao
 
+
 class TableService(metaclass=Singleton):
 
     def __init__(self, nb_tables=10, blind=20):
