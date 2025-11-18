@@ -6,6 +6,7 @@ from src.utils.reset_database import ResetDatabase
 from src.utils.securite import hash_password
 from src.dao.joueur_dao import JoueurDao
 from src.dao.db_connection import DBConnection
+from src.dao.statistique_dao import StatistiqueDao
 
 
 
@@ -442,3 +443,16 @@ def test_maj_date_credit_auto_joueur_inexistant():
         JoueurDao().maj_date_credit_auto(pseudo)
     except Exception:
         pytest.fail("maj_date_credit_auto a levé une exception pour un pseudo inexistant")
+
+def test_deconnecter_ok():
+    pseudo = "arthur"
+    JoueurDao().se_connecter(pseudo, "5e5273fdb85dc5d8ed9b10759ffcde9c82936ef8333b67ccc2a3aa0be58e7b7c")
+    assert JoueurDao().deconnecter(pseudo) is True
+
+def test_deconnecter_inexistant():
+    pseudo = "pseudo_inexistant"
+    assert JoueurDao().deconnecter(pseudo) is False
+
+
+
+

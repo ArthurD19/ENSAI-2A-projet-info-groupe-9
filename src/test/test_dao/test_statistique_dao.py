@@ -138,3 +138,56 @@ def test_incrementer_statistique_champ_non_autorise():
     # THEN
     with pytest.raises(ValueError):
         StatistiqueDao().incrementer_statistique(pseudo, "stat_inconnue", 1)
+
+def test_creer_statistiques_pour_joueur_inexistant():
+    """
+    Vérifie qu'une exception est levée si on tente de créer des statistiques pour un joueur qui n'existe pas
+    """
+    pseudo_inexistant = "joueur_inexistant"
+    with pytest.raises(Exception):
+        StatistiqueDao().creer_statistiques_pour_joueur(pseudo_inexistant)
+
+
+def test_recuperer_top_joueurs_limite():
+    """
+    Vérifie que la récupération des top joueurs respecte la limite
+    """
+    top_joueurs = StatistiqueDao().recuperer_top_joueurs(limite=5)
+    assert isinstance(top_joueurs, list)
+    assert len(top_joueurs) <= 5
+
+def test_mettre_a_jour_statistique_exception_db(monkeypatch):
+    """
+    Vérifie qu'une exception DB est levée si update échoue
+    """
+    pseudo = "arthur"
+    stat = "nombre_folds"
+    valeur = 10
+
+    # Patch DBConnection pour lever une exception sur l'attribut .connection
+    class FakeDB:
+        @property
+        def connection(self):
+            raise Exception("DB error")
+
+    monkeypatch.setattr("src.dao.statistique_dao.DBConnection", lambda: FakeDB())
+    with pytest.raises(Exception, match="DB error"):
+        StatistiqueDao().mettre_a_jour_statistique(pseudo, stat, valeur)
+
+
+def test_incrementer_statistique_exception_db(monkeypatch):
+    """
+    Vérifie qu'une exception DB est levée si increment échoue
+    """
+    pseudo = "maxence"
+    stat = "nombre_mises"
+
+    # Patch DBConnection pour lever une exception sur l'attribut .connection
+    class FakeDB:
+        @property
+        def connection(self):
+            raise Exception("DB error")
+
+    monkeypatch.setattr("src.dao.statistique_dao.DBConnection", lambda: FakeDB())
+    with pytest.raises(Exception, match="DB error"):
+        StatistiqueDao().incrementer_statistique(pseudo, stat)

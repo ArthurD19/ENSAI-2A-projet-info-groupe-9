@@ -106,12 +106,18 @@ def test_rejoindre_table(mock_session, mock_get, mock_post, mock_inquirer, mock_
     mock_session.return_value.joueur = "test_pseudo"
     mock_get.return_value = [{"id": 2, "nb_joueurs": 4}]
     mock_inquirer.return_value.execute.return_value = "2 (joueurs: 4)"
-    mock_post.return_value = "Vous avez rejoint la table !"
+
+    mock_post.return_value = {
+        "succes": True,
+        "message": "Vous avez rejoint la table !"
+    }
 
     result = vue_rejoindre.choisir_menu()
     captured = capsys.readouterr()
+
     assert "Vous avez rejoint la table !" in captured.out
     assert isinstance(result, MenuTableVue)
+
 
 
 # ---------------------- TESTS POUR MenuTableVue ----------------------
