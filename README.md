@@ -108,10 +108,10 @@ If you want to use our database, please ask us for the exact login information. 
 If you wish to use our database, please do not reset it. 
 Otherwise, please follow the instructions below to initialise or reset your database.
 
-- [ ] In Git Bash: `psql -U nom_utilisateur -d nom_de_la_base`
+- [ ] In Git Bash: ```bashpsql -U nom_utilisateur -d nom_de_la_base```
 Ou 
-- [ ] `SET search_path TO public;`
-`\i data/init_db.sql`
+- [ ] ```SET search_path TO public;
+\i data/init_db.sql```
 
 ## :arrow_forward: Execute our tests
 
