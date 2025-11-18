@@ -6,6 +6,7 @@ class Comptage:
         self.pots_perso = {}  
 
     def ajouter_pot_perso(self, joueur: Joueur, montant: int)->None:
+        "ajoute la mise au pot secondaire"""
         self.pots_perso[joueur] = self.pots_perso.get(joueur, 0) + montant
 
     def ajouter_pot(self)->None:

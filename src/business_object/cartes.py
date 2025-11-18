@@ -55,19 +55,23 @@ class Deck:
         self.cartes = []
 
     def remplir(self)->None:
+        """ rempli un deck avec toutes les cartes"""
         self.cartes = [
             Carte(couleur, valeur) for couleur in couleurs for valeur in valeurs
             ]
 
     def melanger(self)->None:
+        """ mélange le deck"""
         random.shuffle(self.cartes)
 
     def tirer(self)->Carte:
+        """tire une carte du deck"""
         if len(self.cartes) < 1:
             raise ValueError("Pas assez de cartes dans le deck.")
         return self.cartes.pop()
 
     def ajouter(self, carte: Carte)->None:
+        "ajoute une carte dans le deck"
         self.cartes.append(carte)
 
     def __len__(self)->int:

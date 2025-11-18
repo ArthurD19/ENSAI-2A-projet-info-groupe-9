@@ -15,6 +15,7 @@ class Distrib:
         self.tour_actuel = "preflop"
 
     def distribuer_mains(self)->None:
+        """distribue les mains de joueurs"""
         for j in self.joueurs:
             j.reset_main()
         for _ in range(2):
@@ -23,6 +24,7 @@ class Distrib:
         self.tour_actuel = "preflop"
 
     def distribuer_flop(self)->None:
+        """distribue les 3 première cartes"""
         if len(self.joueurs) <= 1:
             return
         self.deck.tirer()  # brulage
@@ -30,6 +32,7 @@ class Distrib:
         self.tour_actuel = "flop"
 
     def distribuer_turn(self)->None:
+        """distribue la 4eme carte"""
         if len(self.joueurs) <= 1:
             return
         self.deck.tirer() # brulage
@@ -37,6 +40,7 @@ class Distrib:
         self.tour_actuel = "turn"
 
     def distribuer_river(self)->None:
+        """distribue la 4eme carte"""
         if len(self.joueurs) <= 1:
             return
         self.deck.tirer() # brulage

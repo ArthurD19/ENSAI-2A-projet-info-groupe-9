@@ -29,13 +29,16 @@ class EvaluateurMain:
         self.cartes = cartes
 
     def _valeurs_numeriques(self)->List[int]:
+        """donne les valeurs numériques de la carte"""
         return sorted([self.valeur_order[c.valeur] for c in self.cartes], reverse=True)
 
     def _compter_occurrences(self)->Counter[int]:
+        """compte le nombre de valeurs de cartes uniques"""
         counts = Counter(self._valeurs_numeriques())
         return counts
 
     def _is_flush(self)->Tuple[bool, List[valeurs]]:
+        """retourn si la combinaison est une flush"""
         couleurs_count = Counter(c.couleur for c in self.cartes)
         for couleur, count in couleurs_count.items():
             if count >= 5:
@@ -44,6 +47,7 @@ class EvaluateurMain:
         return False, []
 
     def _is_straight(self, valeurs)->Tuple[bool, List[int]]:
+        """retourn si la combinaison est une traight"""
         vals = sorted(set(valeurs))
         for i in range(len(vals) - 4):
             if vals[i + 4] - vals[i] == 4:
@@ -65,6 +69,7 @@ class EvaluateurMain:
         return None 
 
     def evalue_main(self)->ResultatMain:
+        """donne la meilleure combinaison de la main"""
         counts = self._compter_occurrences()
         valeurs_list = self._valeurs_numeriques()
         is_flush, flush_vals = self._is_flush()
@@ -150,6 +155,7 @@ class EvaluateurMain:
 
     @staticmethod
     def comparer_mains(main1, main2)->int:
+        """donne la meilleure des mains"""
         if main1.value > main2.value:
             return 1
         elif main1.value < main2.value:
@@ -162,10 +168,3 @@ class EvaluateurMain:
                 elif EvaluateurMain.valeur_order[c1] < EvaluateurMain.valeur_order[c2]:
                     return -1
             return 0
-
-"""
-class ComparaisonMain(enum):
-    PlusForte,
-    Moins,
-    Egale
-"""
