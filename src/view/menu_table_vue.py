@@ -94,7 +94,7 @@ class MenuTableVue(VueAbstraite):
                         except APIError as e:
                             print(f"Erreur lors de la suppression de la table : {e}")
                         return MenuJoueurVue("", None)
-                    if reponse == "Non":
+                    elif reponse == "Non":
                         try:
                             post(
                                 "/joueur_en_jeu/quitter_table",
@@ -104,9 +104,9 @@ class MenuTableVue(VueAbstraite):
                         except APIError as e:
                             print(f"Erreur lors de la suppression de la table : {e}")
                         return MenuJoueurVue("", None)
-            else:
-                print("Attente des autres joueurs pour relancer la partie...")
-            input("Appuyez sur Entrée pour rafraîchir...")
+                    else:
+                        print("Attente des autres joueurs pour relancer la partie...")
+                        input("Appuyez sur Entrée pour rafraîchir...")
             return self
 
         if etat is None:
