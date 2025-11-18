@@ -107,6 +107,9 @@ class MenuTableVue(VueAbstraite):
                     else:
                         print("Attente des autres joueurs pour relancer la partie...")
                         input("Appuyez sur Entrée pour rafraîchir...")
+            else:
+                print("Attente des autres joueurs pour relancer la partie...")
+                input("Appuyez sur Entrée pour rafraîchir...")
             return self
 
         if etat is None:
