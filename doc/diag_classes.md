@@ -1,11 +1,6 @@
 
 # Diagramme de classes des objets métiers
 
-Ce diagramme est codé avec [mermaid](https://mermaid.js.org/syntax/classDiagram.html) :
-
-* avantage : facile à coder
-* inconvénient : on ne maîtrise pas bien l'affichage
-
 Pour afficher ce diagramme dans VScode :
 
 * à gauche aller dans **Extensions** (ou CTRL + SHIFT + X)
@@ -16,7 +11,7 @@ Pour afficher ce diagramme dans VScode :
 
 ```mermaid
 classDiagram
-    %% Enums
+    %% ENUMS
     class Couleur {
         <<enumeration>>
         PIQUE
@@ -56,20 +51,20 @@ classDiagram
         QUINTE_ROYALE
     }
 
-    %% Objets métiers
+    %% BUSINESS OBJECTS
     class Carte {
         +valeur : Valeur
         +couleur : Couleur
-        +__repr__() str
-        +__str__() str
+        +__repr__()
+        +__str__()
     }
 
     class Deck {
         +cartes : List~Carte~
-        +remplir() None
-        +melanger() None
+        +remplir()
+        +melanger()
         +tirer() Carte
-        +ajouter(carte : Carte) None
+        +ajouter(carte:Carte)
         +len() int
     }
 
@@ -78,9 +73,13 @@ classDiagram
         +solde : int
         +main : List~Carte~
         +mise : int
-        +miser(montant : int) None
-        +suivre() None
-        +se_coucher() None
+        +actif : bool
+        +recevoir_carte(carte)
+        +recevoir_du_deck(deck)
+        +reset_main()
+        +miser(montant)
+        +suivre(montant)
+        +se_coucher()
     }
 
     class Table {
@@ -89,100 +88,106 @@ classDiagram
         +blind : int
         +pot : int
         +indice_dealer : int
-        +paquet : Deck
+        +deck : Deck
         +board : List~Carte~
-        +ajouter_joueur(joueur : Joueur) None
-        +supprimer_joueur(joueur : Joueur) None
+        +ajouter_joueur(joueur)
+        +supprimer_joueur(joueur)
+        +reset_table()
     }
 
-    class Partie {
-        +démarrer_tour() None
-    }
-
-    class distrib {
-        +pre_flop(table : Table, indice_dealer : int) None
-        +flop(table : Table, indice_dealer : int) None
-        +turn(table : Table, indice_dealer : int) None
-        +river(table : Table, indice_dealer : int) None
-        +fin(table : Table) None
+    class Distrib {
+        +joueurs : List~Joueur~
+        +deck : Deck
+        +flop : List~Carte~
+        +turn : Carte
+        +river : Carte
+        +tour_actuel : str
+        +distribuer_mains()
+        +distribuer_flop()
+        +distribuer_turn()
+        +distribuer_river()
     }
 
     class Comptage {
         +pot : int
-        +pots_perso : List~Dict~Joueur, int~~
-        +ajouter_pot(table : Table) None
-        +ajouter_pot_perso(joueur : Joueur, montant : int) None
-        +distrib_pots(gagnants : List~Joueur~) Dict~Joueur, int~
+        +pots_perso : dict
+        +ajouter_pot_perso(joueur, montant)
+        +ajouter_pot()
+    }
+
+    class ResultatMain {
+        +combinaison : RangMain
+        +tiebreaker_cards : List~Valeur~
+        +value : int
     }
 
     class EvaluateurMain {
-        +evalue_main(main : List~Carte~, board : List~Carte~) RangMain
-        +comparer_mains(mains : Dict~Joueur, List~Carte~) Joueur
+        +cartes : List~Carte~
+        +evalue_main() ResultatMain
+        +comparer_mains(r1, r2) int
     }
 
-    %% Relations / hiérarchies
+    %% ETAT / PARTIE
+    class EtatPartie {
+        +id_partie : int
+        +tour_actuel : str
+        +joueurs : list~dict~
+        +board : list~str~
+        +pot : int
+        +pots_secondaires : dict
+        +mise_max : int
+        +joueur_courant : str
+        +finie : bool
+        +resultats : list~dict~
+        +rejouer : dict
+        +liste_attente : list~dict~
+    }
+
+    class Partie {
+        -GROSSE_BLIND : int
+        +id : int
+        +table : Table
+        +distrib : Distrib
+        +comptage : Comptage
+        +tour_actuel : str
+        +mise_max : int
+        +indice_joueur_courant : int
+        +etat : EtatPartie
+        +joueurs_ayant_joue : dict
+
+        +initialiser_blinds()
+        +passer_tour()
+        +actions_joueur(pseudo, action, montant)
+        +annoncer_resultats() EtatPartie
+        +gestion_rejouer() bool
+        +integrer_attente()
+        +ajouter_a_liste_attente(joueur)
+        +reponse_rejouer(pseudo, veut)
+    }
+
+    %% RELATIONS
     Carte *-- Valeur
     Carte *-- Couleur
-    Joueur "0..2" *-- Carte
     Deck *-- Carte
+    Joueur "0..2" *-- Carte
     Table *-- Joueur
     Table *-- Deck
-    Partie *-- distrib
+    Table *-- Carte : board
+    Distrib *-- Deck
+    Distrib *-- Joueur
+    Distrib *-- Carte
+
+    Partie *-- Table
+    Partie *-- Distrib
     Partie *-- Comptage
+    Partie *-- EtatPartie
     Partie *-- EvaluateurMain
-    Partie ..> Table
-    EvaluateurMain *-- RangMain
-```
 
+    Comptage *-- Joueur
 
-
-
-```mermaid
-gantt
-    title WIP Test Planning global – Poker Texas Hold’em
-    dateFormat  YYYY-MM-DD
-    section Étude préalable
-      Analyse des besoins       :a1, 2025-09-15, 10d
-      Cas d’utilisation        :after a1, 5d
-      Diagrammes d’analyse     :5d
-    section Conception générale
-      Diagramme de classes     :2025-10-01, 7d
-      Architecture paquetages  :7d
-      Modèle physique données  :7d
-    section Réalisation & Validation
-      Implémentation modules   :2025-10-15, 30d
-      Tests unitaires          :20d
-      Tests utilisateurs       :10d
-      Documentation pydoc      :10d
-```
-
-```mermaid
-classDiagram
-    %% Package Presentation
-    class Interface
-    class API
-
-    %% Package Metier
-    class Controleur
-    class Service
-    class EvaluateurMain
-    class GestionPartie
-
-    %% Package DAO
-    class JoueurDAO
-    class TableDAO
-
-    %% Package Persistance
-    class BaseDeDonnees
-
-    %% Relations
-    Interface --> Controleur
-    API --> Controleur
-    Controleur --> Service
-    Service --> JoueurDAO
-    Service --> TableDAO
-    JoueurDAO --> BaseDeDonnees
-    TableDAO --> BaseDeDonnees
+    EvaluateurMain *-- Carte
+    ResultatMain *-- RangMain
+    ResultatMain *-- Valeur
 
 ```
 
