@@ -1,6 +1,6 @@
 from src.business_object.table import Table
 from src.business_object.joueurs import Joueur
-from src.business_object.partie import  Partie
+from src.business_object.partie import Partie
 
 from src.service.partie_service import PartieService
 
@@ -74,6 +74,8 @@ class TableService(metaclass=Singleton):
             return False, partie.etat, f"{pseudo} est déjà à la table {id_table}."
 
         # Ajouter le joueur à la table
+        if joueur.solde < Partie.GROSSE_BLIND:
+            return False, None, f"{pseudo} n'a pas assez de jetons (minimum {Partie.GROSSE_BLIND})."
         code_table = table.ajouter_joueur(joueur)  # 1=ok, 2=table pleine, etc.
         if code_table != 1:
             return False, None, "Impossible de rejoindre la table (pleine ou erreur)."

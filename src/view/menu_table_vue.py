@@ -52,7 +52,7 @@ class MenuTableVue(VueAbstraite):
         if etat.get("finie", False):
             print("\nLa main est terminée !\n")
             solde = next((j['solde'] for j in etat['joueurs'] if j['pseudo'] == self.pseudo), 0)
-            peut_rejouer = solde >= Partie.GROSSE_BLIND  # 20 jetons minimum
+            peut_rejouer = solde >= Partie().GROSSE_BLIND  # 20 jetons minimum
 
             if self.pseudo in etat.get("rejouer", {}):
                 if etat["rejouer"][self.pseudo] is None and peut_rejouer:
