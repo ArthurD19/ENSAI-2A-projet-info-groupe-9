@@ -442,6 +442,3 @@ def test_maj_date_credit_auto_joueur_inexistant():
         JoueurDao().maj_date_credit_auto(pseudo)
     except Exception:
         pytest.fail("maj_date_credit_auto a levé une exception pour un pseudo inexistant")
-
-if __name__ == "__main__":
-    pytest.main([__file__])

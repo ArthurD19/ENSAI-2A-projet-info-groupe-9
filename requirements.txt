@@ -4,6 +4,7 @@ fastapi
 psycopg2-binary
 pylint
 pytest
+pytest-asyncio
 python-dotenv
 PyYAML
 regex
