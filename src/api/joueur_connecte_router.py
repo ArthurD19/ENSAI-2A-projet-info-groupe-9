@@ -21,6 +21,12 @@ class TableSortie(BaseModel):
     pot: int
     indice_dealer: int
 
+# Modèle de sortie pour rejoindre une table
+class TableRejointe(BaseModel):
+    succes: bool
+    message: str
+
+
 # Endpoint GET /joueur_connecte/code_parrainage
 @router.get("/code_parrainage", response_model=str)
 def code_parrainage_joueur(pseudo: str):
@@ -82,13 +88,17 @@ def voir_classement_joueur():
     return classement
 
 # Endpoint POST /joueur_connecte/rejoindre_table
-@router.post("/rejoindre_table", response_model=str)
+@router.post("/rejoindre_table", response_model=TableRejointe)
 def rejoindre_table_joueur(pseudo: str, id_table: int):
     """
     Endpoint permettant à un joueur de rejoindre une table.
     """
-    succes, etat, message = tables_service.rejoindre_table(pseudo, id_table)
-    return message
+    succes_action, etat, message_action = tables_service.rejoindre_table(pseudo, id_table)
+    reponse = TableRejointe(
+        succes = succes_action,
+        message = message_action
+    )
+    return reponse
 
 # Endpoint GET /joueur_connecte/voir_table
 @router.get("/voir_table", response_model=TableSortie)

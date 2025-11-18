@@ -45,12 +45,23 @@ class MenuRejoindreTableVue(VueAbstraite):
 
         try:
             # POST JSON pour rejoindre la table
-            message = post("/joueur_connecte/rejoindre_table", params={"pseudo": self.pseudo, "id_table": id_table})
-            print(f"\n{message}\n")
+            res = post("/joueur_connecte/rejoindre_table", params={"pseudo": self.pseudo, "id_table": id_table})
+            if res["succes"]:
+                print("")
+                print(f"{res["message"]}")
+                print("")
+                input("Appuyez sur Entrée pour continuer...")
+                return MenuTableVue(id_table=id_table)
+            else: 
+                print("")
+                print(f"{res["message"]}")
+                print("")
+                input("Appuyer sur Entrée pour revenir à la page d'accueil.")
+                return MenuJoueurVue("", None)
         except APIError as e:
             print(f"\nErreur API : {e}\n")
             input("Appuyez sur Entrée pour revenir au menu précédent...")
             return self
 
-        input("Appuyez sur Entrée pour continuer...")
-        return MenuTableVue(id_table=id_table)
+        
+        

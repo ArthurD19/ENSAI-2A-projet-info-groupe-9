@@ -50,9 +50,16 @@ class MenuTableVue(VueAbstraite):
         self.afficher()
         etat = self.afficher_etat_partie()
         if etat.get("finie", False):
+            resultats = etat.get("resultats")
+            gagnant = resultats[0]
             print("\nLa main est terminée !\n")
+            print("\n Résultats :\n")
+            print(f"\n Gagnant : {gagnant["pseudo"]}\n")
+            print(f"\n Main : {gagnant["main"]}\n")
+            print(f"\n {gagnant["description"]}\n")
+
             solde = next((j['solde'] for j in etat['joueurs'] if j['pseudo'] == self.pseudo), 0)
-            peut_rejouer = solde >= Partie().GROSSE_BLIND  # 20 jetons minimum
+            peut_rejouer = solde >= Partie.GROSSE_BLIND # 20 jetons minimum
 
             if self.pseudo in etat.get("rejouer", {}):
                 if etat["rejouer"][self.pseudo] is None and peut_rejouer:
@@ -86,7 +93,17 @@ class MenuTableVue(VueAbstraite):
                             print("Vous avez été retiré de la table.")
                         except APIError as e:
                             print(f"Erreur lors de la suppression de la table : {e}")
-                        return MenuJoueurVue()
+                        return MenuJoueurVue("", None)
+                    if reponse == "Non":
+                        try:
+                            post(
+                                "/joueur_en_jeu/quitter_table",
+                                params={"pseudo": self.pseudo, "id_table": self.id_table}
+                            )
+                            print("Vous avez été retiré de la table.")
+                        except APIError as e:
+                            print(f"Erreur lors de la suppression de la table : {e}")
+                        return MenuJoueurVue("", None)
             else:
                 print("Attente des autres joueurs pour relancer la partie...")
             input("Appuyez sur Entrée pour rafraîchir...")

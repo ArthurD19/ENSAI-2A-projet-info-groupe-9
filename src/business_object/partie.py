@@ -396,7 +396,8 @@ class Partie:
                 JoueurDao().mettre_a_jour_solde(j.pseudo, j.solde)
                 self.etat.resultats.append({
                     "pseudo": j.pseudo,
-                    "main": [str(c) for c in j.main]})
+                    "main": [str(c) for c in j.main],
+                    "description": "Gagne parce qu'il avait une meilleure combinaison"})
             self.comptage.pot = 0
 
         # Marquer fin et préparer rejouer
