@@ -1,8 +1,9 @@
 from InquirerPy import inquirer
 from src.view.vue_abstraite import VueAbstraite
 from src.view.session import Session
-from src.client.api_client import get, post, APIError
+from src.client.api_client import get, APIError
 from src.service.joueur_service import JoueurService
+
 
 class MenuJoueurVue(VueAbstraite):
     """Vue du menu du joueur via API"""
@@ -36,7 +37,6 @@ class MenuJoueurVue(VueAbstraite):
                 from src.view.accueil.accueil_vue import AccueilVue
                 message = "Vous êtes maintenant déconnecté." if success else "Erreur lors de la déconnexion."
                 return AccueilVue(message, self.tables)
-
 
             case "Afficher la valeur du portefeuille":
                 try:

@@ -3,6 +3,7 @@ from src.view.vue_abstraite import VueAbstraite
 from src.view.session import Session
 from src.client.api_client import post, APIError
 
+
 class ConnexionVue(VueAbstraite):
     def __init__(self, titre, tables):
         super().__init__(titre)

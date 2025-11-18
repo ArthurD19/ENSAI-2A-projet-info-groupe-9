@@ -8,9 +8,6 @@ class AccueilVue(VueAbstraite):
     """Vue d'accueil de l'application"""
 
     def __init__(self, titre: str = "", tables=None):
-        # On met explicitement l'attribut titre ici pour éviter les erreurs
-        # si VueAbstraite n'initialise pas self.titre ou si on instancie AccueilVue
-        # sans appeler super correctement ailleurs. Ca m'a dit de faire ca mais cest bizarre non ?
         self.titre = titre
         super().__init__(titre)
         self.tables = tables
@@ -21,7 +18,6 @@ class AccueilVue(VueAbstraite):
         print("\n" + "-" * 50)
         print("Accueil")
         print("-" * 50 + "\n")
-
 
         choix = inquirer.select(
             message="Faites votre choix :",

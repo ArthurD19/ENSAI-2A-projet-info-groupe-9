@@ -1,4 +1,3 @@
-# src/view/accueil/inscription_vue.py
 from InquirerPy import inquirer
 from InquirerPy.validator import PasswordValidator
 from src.view.vue_abstraite import VueAbstraite
@@ -6,6 +5,7 @@ from src.view.session import Session
 from src.client.api_client import post, APIError
 from src.service.joueur_service import JoueurService
 import os
+
 
 class InscriptionVue(VueAbstraite):
     def __init__(self, titre, tables):
