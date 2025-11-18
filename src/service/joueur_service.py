@@ -21,6 +21,9 @@ class JoueurService:
     def creer(self, pseudo_joueur, mdp, code_parrain) -> Joueur:
         """Création d'un joueur à partir de ses attributs"""
 
+        if not pseudo_joueur or len(pseudo_joueur.strip()) < 3:
+            return None
+
         nouveau_joueur = {
             "pseudo": pseudo_joueur,
             "mdp": hash_password(mdp, pseudo_joueur),
@@ -47,6 +50,9 @@ class JoueurService:
     def creer_sans_code_parrainage(self, pseudo_joueur, mdp) -> Joueur:
         """Création d'un joueur à partir de ses attributs"""
 
+        if not pseudo_joueur or len(pseudo_joueur.strip()) < 3:
+            return None
+            
         if self.pseudo_deja_utilise(pseudo_joueur):
             return None  
 

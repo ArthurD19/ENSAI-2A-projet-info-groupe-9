@@ -19,7 +19,11 @@ class InscriptionVue(VueAbstraite):
         length = int(os.environ.get("PASSWORD_LENGTH", 8))
 
         # Demande du pseudo
-        pseudo = inquirer.text(message="Entrez votre pseudo : ").execute()
+        pseudo = inquirer.text(message="Entrez votre pseudo :").execute().strip()
+        if len(pseudo) < 3:
+            print("Le pseudo doit contenir au moins 3 caractères.")
+            input("Appuyez sur Entrée pour réessayer...")
+            return self 
 
         # Demande du mot de passe avec validation
         mdp = inquirer.secret(

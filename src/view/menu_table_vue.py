@@ -25,16 +25,23 @@ class MenuTableVue(VueAbstraite):
 
         self.joueur_courant = etat.get("joueur_courant")
 
-        print("\n" + "-"*50)
+        print("\n" + "-" * 50)
         print(f"Table {self.id_table} | Tour actuel : {etat['tour_actuel']}")
         print(f"Pot principal : {etat['pot']} | Mise max : {etat['mise_max']}")
         print(f"Joueur courant : {self.joueur_courant}\n")
+
         print("Joueurs :")
         for j in etat["joueurs"]:
             actif = "(actif)" if j["actif"] else "(couché)"
             print(f" - {j['pseudo']:10} | Solde : {j['solde']:5} | Mise : {j['mise']:5} {actif}")
-        print("Board :", " ".join(etat["board"]) if etat["board"] else "vide")
-        print("-"*50)
+
+        # --- SÉPARATEUR DU BOARD ---
+        print("-" * 50)
+
+        # Board
+        print("Board :", " | ".join(etat["board"]) if etat["board"] else "vide")
+
+        print("-" * 50)
         return etat
 
     def voir_mes_cartes(self):
