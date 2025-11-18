@@ -4,9 +4,9 @@ import dotenv
 
 from unittest import mock
 
-from utils.log_decorator import log
-from utils.singleton import Singleton
-from dao.db_connection import DBConnection
+from src.utils.log_decorator import log
+from src.utils.singleton import Singleton
+from src.dao.db_connection import DBConnection
 
 
 class ResetDatabase(metaclass=Singleton):

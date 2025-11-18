@@ -1,5 +1,5 @@
-from business_object.cartes import Carte, Deck
-from business_object.joueurs import Joueur
+from src.business_object.cartes import Carte, Deck
+from src.business_object.joueurs import Joueur
 
 class Table:
     def __init__(self, id, blind=10)->None:

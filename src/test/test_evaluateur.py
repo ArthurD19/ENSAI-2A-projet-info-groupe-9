@@ -1,6 +1,6 @@
 import pytest
-from business_object.cartes import Carte, valeurs, couleurs, combinaisons
-from business_object.evaluateur import EvaluateurMain
+from src.business_object.cartes import Carte, valeurs, couleurs, combinaisons
+from src.business_object.evaluateur import EvaluateurMain
 
 def carte(valeur, couleur):
     """Créer une carte."""

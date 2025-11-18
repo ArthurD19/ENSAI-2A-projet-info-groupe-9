@@ -1,17 +1,18 @@
 import random
 
-from business_object.cartes import Carte
-from business_object.joueurs import Joueur
-from business_object.distrib import Distrib
-from business_object.comptage import Comptage
-from business_object.evaluateur import EvaluateurMain
+from src.business_object.cartes import Carte
+from src.business_object.joueurs import Joueur
+from src.business_object.distrib import Distrib
+from src.business_object.comptage import Comptage
+from src.business_object.evaluateur import EvaluateurMain
 
-from dao.statistique_dao import StatistiqueDao
+from src.dao.statistique_dao import StatistiqueDao
+from src.dao.joueur_dao import JoueurDao
 
 
 class EtatPartie:
     def __init__(self):
-        self.id_partie: int
+        self.id_partie: int = -1
         self.tour_actuel: str = "preflop"
         self.joueurs: list[dict] = []           # contient : pseudo, solde, mise, actif
         self.board: list[str] = []
@@ -42,8 +43,14 @@ class Partie:
         self.etat = EtatPartie()
         self.etat.id_partie = id
         self.joueurs_ayant_joue: dict[str, bool] = {}
+        # suppression du champ redondant index_joueur_courant
 
+    # ---------------------------
+    # Synchronisation état -> vue
+    # ---------------------------
     def _mettre_a_jour_etat(self):
+        # synchronise l'objet métier vers l'objet d'état exposé
+        self.etat.id_partie = getattr(self, "id", None)
         self.etat.tour_actuel = self.tour_actuel
         self.etat.joueurs = [
             {"pseudo": j.pseudo, "solde": j.solde, "mise": j.mise, "actif": j.actif}
@@ -51,13 +58,33 @@ class Partie:
         ]
         self.etat.board = [str(c) for c in self.table.board]
         self.etat.pot = self.comptage.pot
-        self.etat.pots_secondaires = {j.pseudo: montant for j, montant in self.comptage.pots_perso.items()}
-        self.etat.mise_max = self.mise_max
-        if self.table.joueurs and 0 <= self.indice_joueur_courant < len(self.table.joueurs):
-            self.etat.joueur_courant = self.table.joueurs[self.indice_joueur_courant].pseudo
-        else:
-            self.etat.joueur_courant = None
+        # pots secondaires (clé pseudo -> montant)
+        try:
+            # comptage.pots_perso est un dict mapping joueur->montant
+            self.etat.pots_secondaires = {j.pseudo: montant for j, montant in self.comptage.pots_perso.items()}
+        except Exception:
+            # fallback si structure différente
+            self.etat.pots_secondaires = getattr(self.comptage, "pots_secondaires", {})
 
+        self.etat.mise_max = self.mise_max
+
+        # Propager resultats/rejouer/liste_attente s'ils existent
+        self.etat.resultats = getattr(self.etat, "resultats", [])
+        self.etat.rejouer = getattr(self.etat, "rejouer", {})
+        self.etat.liste_attente = getattr(self.etat, "liste_attente", [])
+
+        # Si la partie est finie, il ne doit pas y avoir de joueur courant
+        if getattr(self.etat, "finie", False):
+            self.etat.joueur_courant = None
+        else:
+            if self.table.joueurs and 0 <= self.indice_joueur_courant < len(self.table.joueurs):
+                self.etat.joueur_courant = self.table.joueurs[self.indice_joueur_courant].pseudo
+            else:
+                self.etat.joueur_courant = None
+
+    # ---------------------------
+    # Initialisation des blinds
+    # ---------------------------
     def initialiser_blinds(self):
         nb_joueurs = len(self.table.joueurs)
         if nb_joueurs < 2:
@@ -77,11 +104,20 @@ class Partie:
 
         self.mise_max = grosse_blind
         self.indice_joueur_courant = (gb_idx + 1) % nb_joueurs
+        # Avancer le dealer pour la main suivante (comportement conservé)
         self.table.indice_dealer = (self.table.indice_dealer + 1) % nb_joueurs
 
+        # Initialiser le tracking des joueurs ayant joué (actifs non all-in)
+        self.joueurs_ayant_joue = {j.pseudo: False for j in self.table.joueurs if j.actif and j.solde > 0}
+
+        self.etat.finie = False
         self._mettre_a_jour_etat()
 
+    # ---------------------------
+    # Passer au tour suivant
+    # ---------------------------
     def passer_tour(self):
+        # Consolider mises personnelles dans le comptage
         for j in self.table.joueurs:
             if j.mise > 0:
                 self.comptage.ajouter_pot_perso(j, j.mise)
@@ -89,9 +125,11 @@ class Partie:
         self.comptage.ajouter_pot()
         self.mise_max = 0
 
+        # Avancer d'un tour
         if self.tour_actuel == "preflop":
             self.distrib.distribuer_flop()
-            self.table.board = self.distrib.flop
+            # copier la liste pour ne pas partager la référence interne
+            self.table.board = list(self.distrib.flop)
             self.tour_actuel = "flop"
         elif self.tour_actuel == "flop":
             self.distrib.distribuer_turn()
@@ -103,19 +141,76 @@ class Partie:
             self.tour_actuel = "river"
         elif self.tour_actuel == "river":
             self.tour_actuel = "fin"
+            # annoncer_resultats appellera _mettre_a_jour_etat
             self.annoncer_resultats()
+            return  # annoncer_resultats mettra l'état à jour
 
-        self.joueurs_ayant_joue = {j.pseudo: False for j in self.table.joueurs if j.actif}
-        
+        # Réinitialiser les flags de qui a joué : seuls les joueurs actifs non all-in devront jouer
+        self.joueurs_ayant_joue = {j.pseudo: False for j in self.table.joueurs if j.actif and j.solde > 0}
+
+        # Considérer que les joueurs all-in ont déjà "joué"
+        for j in self.table.joueurs:
+            if j.actif and j.solde == 0:
+                self.joueurs_ayant_joue[j.pseudo] = True
+
+        # Si après avoir avancé, tous les joueurs actifs sont all-in, avancer automatiquement
+        # jusqu'à showdown (flop->turn->river->showdown)
+        while self.tour_actuel != "fin":
+            actifs = [j for j in self.table.joueurs if j.actif]
+            if not actifs:
+                break
+
+            if all(j.solde == 0 for j in actifs):
+                # consolider encore avant d'avancer (sécurité)
+                for j in self.table.joueurs:
+                    if j.mise > 0:
+                        self.comptage.ajouter_pot_perso(j, j.mise)
+                        j.mise = 0
+                self.comptage.ajouter_pot()
+
+                if self.tour_actuel == "flop":
+                    self.distrib.distribuer_turn()
+                    self.table.board.append(self.distrib.turn)
+                    self.tour_actuel = "turn"
+                    # reset flags (toujours all-in => pas besoin)
+                    continue
+                elif self.tour_actuel == "turn":
+                    self.distrib.distribuer_river()
+                    self.table.board.append(self.distrib.river)
+                    self.tour_actuel = "river"
+                    continue
+                elif self.tour_actuel == "river":
+                    self.tour_actuel = "fin"
+                    self.annoncer_resultats()
+                    return
+                else:
+                    # si preflop, on a déjà transformé en flop en haut de boucle
+                    pass
+            else:
+                # au moins un joueur peut encore agir → on s'arrête ici
+                break
+
+        # Mettre à jour l'état pour que l'API/UI voie la nouvelle situation (tour, board, etc.)
         self._mettre_a_jour_etat()
 
+    # ---------------------------
+    # Actions d'un joueur (miser / suivre / all-in / se coucher)
+    # ---------------------------
     def actions_joueur(self, pseudo: str, action: str, montant: int | None = None):
+        # PROTECTION : ne rien faire si la main est terminée
+        if getattr(self.etat, "finie", False):
+            return self.etat
+
         joueur = next((j for j in self.table.joueurs if j.pseudo == pseudo), None)
         if not joueur or not joueur.actif:
             return self.etat
 
+        # Marquer que le joueur a joué ce tour (sera ajusté si raise)
         self.joueurs_ayant_joue[joueur.pseudo] = True
 
+        mise_max_avant = self.mise_max
+
+        # Effectuer l'action demandée
         if action == "miser" and montant is not None:
             joueur.miser(montant)
             self.mise_max = joueur.mise
@@ -126,63 +221,155 @@ class Partie:
             self.stats_dao.incrementer_statistique(joueur.pseudo, "nombre_suivis")
 
         elif action == "all-in":
+            # mise le reste du solde
             joueur.miser(joueur.solde)
+            # mise_max doit devenir le max entre l'ancienne et la mise du joueur
             self.mise_max = max(self.mise_max, joueur.mise)
-            # suppression de la stat "nombre_allin" pour les tests
 
         elif action == "se_coucher":
+            # conserver la mise actuelle dans le pot (consolidation)
+            self.comptage.ajouter_pot_perso(joueur, joueur.mise)
             joueur.se_coucher()
-            self.comptage.pot += joueur.mise
             joueur.mise = 0
             self.stats_dao.incrementer_statistique(joueur.pseudo, "nombre_folds")
+
+            # Si un seul joueur reste actif, on annonce le résultat directement
             actifs = [j for j in self.table.joueurs if j.actif]
             if len(actifs) == 1:
                 self.indice_joueur_courant = self.table.joueurs.index(actifs[0])
+                # On veut s'assurer que l'état final est propre : marquer fin, invalider joueur courant
+                self.etat.finie = True
+                self.indice_joueur_courant = -1
                 self.annoncer_resultats()
+                # annoncer_resultats appelle _mettre_a_jour_etat et retourne
+                return self.etat
 
-        self._mettre_a_jour_etat()
+        # Si la mise_max a augmenté (raise / all-in qui augmente), 
+        # alors tous les joueurs actifs non all-in doivent rejouer.
+        if self.mise_max > mise_max_avant:
+            self.joueurs_ayant_joue = {
+                j.pseudo: False
+                for j in self.table.joueurs
+                if j.actif and j.solde > 0
+            }
+            # Marquer le raiseur (ou all-in) comme ayant déjà joué
+            self.joueurs_ayant_joue[joueur.pseudo] = True
 
+        # Considérer qu'un joueur qui est all-in a "joué"
+        for j in self.table.joueurs:
+            if j.solde == 0 and j.actif:
+                self.joueurs_ayant_joue[j.pseudo] = True
+
+        # Vérifier si le tour est terminé (all-in ou tous ont joué)
         if self._tour_termine():
             self.passer_tour()
-            self._mettre_a_jour_etat()
+            # passer_tour mettra à jour l'état si nécessaire (et parfois appellera annoncer_resultats)
+            return self.etat
 
+        # Déterminer le prochain joueur actif (skip: non-actif, all-in, ou qui a déjà joué)
+        self._joueur_suivant()
+
+        self._mettre_a_jour_etat()
         return self.etat
-    
+
+    # ---------------------------
+    # Vérifier fin du tour
+    # ---------------------------
     def _tour_termine(self) -> bool:
-        """
-        Vérifie si tous les joueurs actifs ont misé la même somme,
-        ou s'il ne reste qu'un seul joueur actif.
-        """
         actifs = [j for j in self.table.joueurs if j.actif]
         if len(actifs) <= 1:
+            return True
+
+        # Si tous les joueurs actifs sont all-in, le tour est terminé
+        if all(j.solde == 0 for j in actifs):
             return True
 
         mises_actifs = [j.mise for j in actifs]
         mises_equivalentes = len(set(mises_actifs)) == 1
 
-        # Vérifie que tous les joueurs actifs ont joué au moins une fois
-        tous_ont_joue = all(self.joueurs_ayant_joue.get(j.pseudo, False) for j in actifs)
+        # Considérer qu'un joueur qui est all-in a "joué"
+        tous_ont_joue = all(
+            self.joueurs_ayant_joue.get(j.pseudo, False) or j.solde == 0
+            for j in actifs
+        )
 
         return mises_equivalentes and tous_ont_joue
 
+    # ---------------------------
+    # Trouver le prochain joueur qui doit agir
+    # ---------------------------
+    def _joueur_suivant(self):
+        """
+        Met à jour self.indice_joueur_courant pour pointer sur le prochain joueur actif
+        qui doit encore jouer (skip all-in, skip folds).
+        Si la main est finie, met joueur_courant = None.
+        """
+        if getattr(self.etat, "finie", False):
+            self.indice_joueur_courant = -1
+            self.etat.joueur_courant = None
+            return
+
+        nb_joueurs = len(self.table.joueurs)
+        if nb_joueurs == 0:
+            self.indice_joueur_courant = -1
+            self.etat.joueur_courant = None
+            return
+
+        start = self.indice_joueur_courant if self.indice_joueur_courant >= 0 else 0
+        next_idx = (start + 1) % nb_joueurs
+        boucle = 0
+        while boucle < nb_joueurs:
+            cand = self.table.joueurs[next_idx]
+            a_deja_joue = self.joueurs_ayant_joue.get(cand.pseudo, False)
+            # Conditions pour s'arrêter sur ce joueur :
+            # - il est actif
+            # - il n'est pas all-in (solde > 0)
+            # - il n'a pas encore joué ce tour
+            if cand.actif and cand.solde > 0 and not a_deja_joue:
+                self.indice_joueur_courant = next_idx
+                self.etat.joueur_courant = cand.pseudo
+                return
+            next_idx = (next_idx + 1) % nb_joueurs
+            boucle += 1
+
+        # Aucun joueur trouvé : soit tous ont joué, soit tous sont all-in, soit pas d'actifs.
+        # Si le tour est terminé, on le fait avancer automatiquement.
+        if self._tour_termine():
+            # appeler passer_tour pour faire avancer le jeu (flop/turn/river/fin)
+            self.passer_tour()
+            return
+
+        # Si on arrive ici : pas de joueur disponible mais le tour n'est pas marqué terminé
+        # (ex: cas improbable de désynchronisation). On établit joueur_courant à None.
+        self.indice_joueur_courant = -1
+        self.etat.joueur_courant = None
+
+    # ---------------------------
+    # Annoncer résultats / showdown
+    # ---------------------------
     def annoncer_resultats(self) -> EtatPartie:
+        self.etat.resultats = []
         joueurs_en_jeu = [j for j in self.table.joueurs if j.actif or j.mise > 0]
-        
+
+        # Mettre à jour le portefeuille de TOUS les joueurs en base
+        for j in joueurs_en_jeu:
+            JoueurDao().mettre_a_jour_solde(j.pseudo, j.solde)
+
+        # Cas : un seul joueur en jeu => gagne immédiatement
         if len(joueurs_en_jeu) <= 1:
             if joueurs_en_jeu:
                 gagnant = joueurs_en_jeu[0]
                 gagnant.solde += self.comptage.pot
-                self.etat.resultats = [{
-                    "pseudo": gagnant.pseudo,
-                    "main": [str(c) for c in gagnant.main],
-                    "description": "Gagne car les autres se sont couchés"
-                }]
+                JoueurDao().mettre_a_jour_solde(gagnant.pseudo, gagnant.solde)
+                self.etat.resultats = [...]
             self.comptage.pot = 0
             self.etat.finie = True
+            self.indice_joueur_courant = -1
             self._mettre_a_jour_etat()
             self.etat.rejouer = {j.pseudo: None for j in self.table.joueurs}
             return self.etat
 
+        # Cas normal : showdown
         scores = {}
         for j in joueurs_en_jeu:
             cartes_totales = j.main + self.table.board
@@ -203,40 +390,47 @@ class Partie:
             part = self.comptage.pot // len(gagnants)
             for j in gagnants:
                 j.solde += part
-                self.etat.resultats.append({
-                    "pseudo": j.pseudo,
-                    "main": [str(c) for c in j.main],
-                    "description": f"Gagne {part} jetons avec {scores[j].combinaison} et kickers {scores[j].tiebreaker_cards}"
-                })
+                JoueurDao().mettre_a_jour_solde(j.pseudo, j.solde)
+                self.etat.resultats.append(...)
             self.comptage.pot = 0
 
+        # Marquer fin et préparer rejouer
         self.etat.finie = True
+        self.indice_joueur_courant = -1
         self.etat.rejouer = {j.pseudo: None for j in self.table.joueurs}
         self._mettre_a_jour_etat()
         return self.etat
 
+    # ---------------------------
+    # Gestion du relancement / nouvelle main
+    # ---------------------------
     def gestion_rejouer(self) -> bool:
-        """
-        Prépare la partie pour une nouvelle main, réinitialise tout l'état.
-        Intègre automatiquement les joueurs de la liste d'attente.
-        Retourne True si la partie pourrait être relancée (>=2 joueurs), sinon False.
-        """
-        # Supprimer les joueurs hors-solde
-        self.table.joueurs = [j for j in self.table.joueurs if j.solde >= Partie.GROSSE_BLIND]
+        """Prépare la partie pour une nouvelle main, réinitialise tout l'état."""
+        # Filtrer les joueurs sans solde suffisant
+        joueurs_valides = [j for j in self.table.joueurs if j.solde >= Partie.GROSSE_BLIND]
 
-        # Réinitialiser tous les joueurs restants
+        # Intégrer les joueurs en attente (sans doublon et avec solde suffisant)
+        pseudos_deja_presents = {j.pseudo for j in joueurs_valides}
+        for j in list(self.etat.liste_attente):
+            if j['solde'] >= Partie.GROSSE_BLIND and j['pseudo'] not in pseudos_deja_presents:
+                joueur = Joueur(pseudo=j['pseudo'], solde=j['solde'])
+                joueurs_valides.append(joueur)
+                pseudos_deja_presents.add(j['pseudo'])
+
+        self.etat.liste_attente.clear()
+        self.table.joueurs = joueurs_valides
+
+        # Si pas assez de joueurs, marquer comme finie
+        if len(self.table.joueurs) < 2:
+            self.etat.finie = True
+            self._mettre_a_jour_etat()
+            return False
+
+        # Réinitialiser les joueurs restants
         for j in self.table.joueurs:
             j.mise = 0
             j.actif = True
             j.main = []
-
-        # Intégrer les joueurs de la liste d'attente
-        for j in self.etat.liste_attente:
-            joueur = Joueur(pseudo=j['pseudo'], solde=j['solde'])
-            self.table.ajouter_joueur(joueur)
-            joueur.actif = True
-        # Vider la liste d'attente
-        self.etat.liste_attente.clear()
 
         # Réinitialiser pot, board et comptage
         self.table.board = []
@@ -245,34 +439,24 @@ class Partie:
         self.tour_actuel = "preflop"
         self.mise_max = 0
         self.indice_joueur_courant = 0
-        self.etat.finie = True
-        self._mettre_a_jour_etat()
 
-        for pseudo in self.etat.rejouer:
-            self.etat.rejouer[pseudo] = None
-        self.etat.finie = True  # avant la relance
-        self._mettre_a_jour_etat()
+        # Relancer la partie
+        self.initialiser_blinds()
+        return True
 
 
-        if len(self.table.joueurs) >= 2:
-
-            self.initialiser_blinds()
-            self.etat.finie = False  # La partie repart
-            self._mettre_a_jour_etat()
-            return True  # Partie relancée
-
-        return False  # Pas assez de joueurs, partie reste en pause
-
-
+    # ---------------------------
+    # Liste d'attente / intégration
+    # ---------------------------
     def integrer_attente(self):
         """
         Intègre automatiquement tous les joueurs en liste d'attente.
         """
-        for j in self.partie.etat.liste_attente:
+        for j in list(self.etat.liste_attente):
             joueur = Joueur(pseudo=j['pseudo'], solde=j['solde'])
-            self.partie.table.ajouter_joueur(joueur)
+            self.table.ajouter_joueur(joueur)
             joueur.actif = True
-        self.partie.etat.liste_attente.clear()
+        self.etat.liste_attente.clear()
 
     def ajouter_a_liste_attente(self, joueur: Joueur):
         self.etat.liste_attente.append({
@@ -281,32 +465,92 @@ class Partie:
             "jeton": joueur.jeton if hasattr(joueur, "jeton") else None
         })
 
+    # ---------------------------
+    # Reponse après la main : rejouer or not
+    # ---------------------------
     def reponse_rejouer(self, pseudo: str, veut_rejouer: bool) -> EtatPartie:
         """Un joueur répond s’il veut rejouer ou non."""
+        joueur = next((j for j in self.table.joueurs if j.pseudo == pseudo), None)
+        if not joueur:
+            return self.etat
+
+        # Si le joueur n'a pas assez de jetons, forcer "Non"
+        if joueur.solde < Partie.GROSSE_BLIND:
+            veut_rejouer = False
+
         self.etat.rejouer[pseudo] = veut_rejouer
 
         # Si tous les joueurs ont répondu, on tente de relancer
-
         if all(v is not None for v in self.etat.rejouer.values()):
-
             self._relancer_si_possible()
-
         self._mettre_a_jour_etat()
         return self.etat
 
     def _relancer_si_possible(self):
         """Vérifie qui veut rejouer et relance une nouvelle main si possible."""
-        # Retirer les joueurs qui ne veulent pas rejouer
-        self.table.joueurs = [j for j in self.table.joueurs if self.etat.rejouer.get(j.pseudo)]
+        # Vérifier que tous les joueurs ont répondu
+        if not all(v is not None for v in self.etat.rejouer.values()):
+            return
 
-        # Intégrer les nouveaux joueurs en attente
-        for j in self.etat.liste_attente:
-            joueur = Joueur(pseudo=j["pseudo"], solde=j["solde"])
-            self.table.ajouter_joueur(joueur)
+        # Filtrer les joueurs sans solde suffisant
+        joueurs_valides = [j for j in self.table.joueurs if j.solde >= Partie.GROSSE_BLIND]
+
+        # Si aucun joueur valide, marquer la partie comme finie
+        if not joueurs_valides:
+            self.etat.finie = True
+            self._mettre_a_jour_etat()
+            return
+
+        # Si tous les joueurs valides veulent rejouer
+        if all(self.etat.rejouer.get(j.pseudo, False) for j in joueurs_valides):
+            # Réinitialiser la table avec les joueurs valides
+            pseudos_deja_presents = set()
+            joueurs_rejouent = []
+            for j in joueurs_valides:
+                if j.pseudo not in pseudos_deja_presents:
+                    joueurs_rejouent.append(j)
+                    pseudos_deja_presents.add(j.pseudo)
+
+            # Intégrer les joueurs en attente (sans doublon et avec solde suffisant)
+            for j in list(self.etat.liste_attente):
+                if j["solde"] >= Partie.GROSSE_BLIND and j["pseudo"] not in pseudos_deja_presents:
+                    joueur = Joueur(pseudo=j["pseudo"], solde=j["solde"])
+                    joueurs_rejouent.append(joueur)
+                    pseudos_deja_presents.add(j["pseudo"])
+
+            self.etat.liste_attente.clear()
+            self.table.joueurs = joueurs_rejouent
+            self.etat.rejouer = {}
+
+            if len(self.table.joueurs) >= 2:
+                self.gestion_rejouer()
+            return
+
+        # Sinon, appliquer la logique normale (filtrer ceux qui veulent rejouer)
+        pseudos_deja_presents = set()
+        joueurs_rejouent = []
+        for j in joueurs_valides:
+            if self.etat.rejouer.get(j.pseudo, False) and j.pseudo not in pseudos_deja_presents:
+                joueurs_rejouent.append(j)
+                pseudos_deja_presents.add(j.pseudo)
+
+        # Intégrer les joueurs en attente (sans doublon et avec solde suffisant)
+        for j in list(self.etat.liste_attente):
+            if j["solde"] >= Partie.GROSSE_BLIND and j["pseudo"] not in pseudos_deja_presents:
+                joueur = Joueur(pseudo=j["pseudo"], solde=j["solde"])
+                joueurs_rejouent.append(joueur)
+                pseudos_deja_presents.add(j["pseudo"])
+
         self.etat.liste_attente.clear()
+        self.table.joueurs = joueurs_rejouent
+        self.etat.rejouer = {}
 
-
-        # Si au moins 2 joueurs, on relance la partie
         if len(self.table.joueurs) >= 2:
-
             self.gestion_rejouer()
+        else:
+            self.etat.finie = True
+            self._mettre_a_jour_etat()
+
+
+
+

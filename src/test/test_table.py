@@ -1,6 +1,6 @@
 import pytest
-from business_object.joueurs import Joueur
-from business_object.table import Table
+from src.business_object.joueurs import Joueur
+from src.business_object.table import Table
 
 
 @pytest.fixture

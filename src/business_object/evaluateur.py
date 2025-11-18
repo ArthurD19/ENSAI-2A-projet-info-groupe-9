@@ -1,4 +1,4 @@
-from business_object.cartes import Carte, combinaisons, valeurs
+from src.business_object.cartes import Carte, combinaisons, valeurs
 from collections import Counter
 from typing import List, Optional, Dict, Tuple
 

@@ -1,6 +1,6 @@
 import pytest
-from business_object.joueurs import Joueur
-from business_object.distrib import Distrib
+from src.business_object.joueurs import Joueur
+from src.business_object.distrib import Distrib
 
 @pytest.fixture
 def joueurs():

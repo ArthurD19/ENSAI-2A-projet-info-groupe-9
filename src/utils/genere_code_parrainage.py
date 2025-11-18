@@ -1,7 +1,7 @@
 import random
 import string
 
-from dao.joueur_dao import JoueurDao
+from src.dao.joueur_dao import JoueurDao
 # existe_code_parrainage à coder dans DAO joueur
 
 class GenerateurDeCode:

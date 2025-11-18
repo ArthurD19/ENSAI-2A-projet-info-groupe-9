@@ -1,9 +1,9 @@
 import logging
 
-from utils.singleton import Singleton
-from utils.log_decorator import log
+from src.utils.singleton import Singleton
+from src.utils.log_decorator import log
 
-from dao.db_connection import DBConnection
+from src.dao.db_connection import DBConnection
 
 
 class StatistiqueDao(metaclass=Singleton):

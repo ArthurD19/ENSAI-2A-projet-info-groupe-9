@@ -1,7 +1,7 @@
 # src/view/accueil/accueil_vue.py
 from InquirerPy import inquirer
-from view.vue_abstraite import VueAbstraite
-from view.session import Session
+from src.view.vue_abstraite import VueAbstraite
+from src.view.session import Session
 
 
 class AccueilVue(VueAbstraite):
@@ -38,9 +38,9 @@ class AccueilVue(VueAbstraite):
                 raise SystemExit(0)
 
             case "Se connecter":
-                from view.accueil.connexion_vue import ConnexionVue
+                from src.view.accueil.connexion_vue import ConnexionVue
                 return ConnexionVue("Connexion à l'application", self.tables)
 
             case "Créer un compte":
-                from view.accueil.inscription_vue import InscriptionVue
+                from src.view.accueil.inscription_vue import InscriptionVue
                 return InscriptionVue("Création de compte joueur", self.tables)

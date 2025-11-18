@@ -1,13 +1,13 @@
-from business_object.table import Table
-from business_object.joueurs import Joueur
-from business_object.partie import  Partie
+from src.business_object.table import Table
+from src.business_object.joueurs import Joueur
+from src.business_object.partie import  Partie
 
-from service.partie_service import PartieService
+from src.service.partie_service import PartieService
 
-from utils.singleton import Singleton
-from utils.log_decorator import log
+from src.utils.singleton import Singleton
+from src.utils.log_decorator import log
 
-from dao.joueur_dao import JoueurDao
+from src.dao.joueur_dao import JoueurDao
 
 class TableService(metaclass=Singleton):
 
@@ -111,28 +111,30 @@ class TableService(metaclass=Singleton):
         ]
 
     @log
-    def quitter_table(self, pseudo, id_table):
+    def quitter_table(self, pseudo: str, id_table: int):
         """
-        Supprime un joueur de la table demandée à partir de son pseudo
-        
-        Parameters
-        ----------
-        pseudo: str
-            pseudo du joueur que l'on veut supprimer
-        id_table: int
-            identifiant de la table où l'on veut supprimer le joueur
-            
-        Returns
-        -------
-        int: 1 si le joueur est supprimé et 2 sinon"""
-        table = self.tables[id_table]
-        joueurs = table.joueurs
-        for j in joueurs:
+        Supprime un joueur de la table et de la partie associée.
+        """
+        table = self.tables.get(id_table)
+        if not table:
+            return 2  # Table non trouvée
+
+        # Supprimer le joueur de la table
+        for j in table.joueurs:
             if j.pseudo == pseudo:
                 table.supprimer_joueur(j)
-                self.tables[id_table] = table
-                return 1
-        return 2
+                break
+
+        # Mettre à jour la partie associée
+        partie = self.parties.get(id_table)
+        if partie:
+            # Supprimer le joueur de la liste des joueurs de la partie
+            partie.table.joueurs = [j for j in partie.table.joueurs if j.pseudo != pseudo]
+            # Mettre à jour l'état de la partie
+            partie._mettre_a_jour_etat()
+
+        return 1  # Succès
+
 
     @log
     def reset_table(self, id_table):

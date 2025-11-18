@@ -2,10 +2,10 @@ import os
 import pytest
 from unittest.mock import patch
 
-from utils.reset_database import ResetDatabase
-from utils.securite import hash_password
-from dao.joueur_dao import JoueurDao
-from dao.db_connection import DBConnection
+from src.utils.reset_database import ResetDatabase
+from src.utils.securite import hash_password
+from src.dao.joueur_dao import JoueurDao
+from src.dao.db_connection import DBConnection
 
 
 
@@ -189,7 +189,7 @@ def test_se_connecter_ok():
     # GIVEN
     pseudo = "arthur"
     mdp = "5e5273fdb85dc5d8ed9b10759ffcde9c82936ef8333b67ccc2a3aa0be58e7b7c"
-    from dao.db_connection import DBConnection
+    from src.dao.db_connection import DBConnection
     with DBConnection().connection as conn:
         with conn.cursor() as cur:
             cur.execute("SELECT pseudo, mdp FROM joueurs;")

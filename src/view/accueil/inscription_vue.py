@@ -1,10 +1,10 @@
 # src/view/accueil/inscription_vue.py
 from InquirerPy import inquirer
 from InquirerPy.validator import PasswordValidator
-from view.vue_abstraite import VueAbstraite
-from view.session import Session
-from client.api_client import post, APIError
-from service.joueur_service import JoueurService
+from src.view.vue_abstraite import VueAbstraite
+from src.view.session import Session
+from src.client.api_client import post, APIError
+from src.service.joueur_service import JoueurService
 import os
 
 class InscriptionVue(VueAbstraite):
@@ -54,7 +54,7 @@ class InscriptionVue(VueAbstraite):
             message = f"Compte créé et connecté sous le pseudo {res['pseudo']}"
 
             # Passage au menu joueur
-            from view.menu_joueur_vue import MenuJoueurVue
+            from src.view.menu_joueur_vue import MenuJoueurVue
             return MenuJoueurVue(message, self.tables)
 
         except APIError as e:
@@ -66,5 +66,5 @@ class InscriptionVue(VueAbstraite):
             else:
                 message = f"Erreur réseau/API : {msg}"
 
-            from view.accueil.accueil_vue import AccueilVue
+            from src.view.accueil.accueil_vue import AccueilVue
             return AccueilVue(message, self.tables)

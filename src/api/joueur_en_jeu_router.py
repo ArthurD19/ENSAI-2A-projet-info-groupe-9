@@ -2,17 +2,17 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from pydantic import BaseModel
 
-from dao.joueur_dao import JoueurDao 
-from dao.statistique_dao import StatistiqueDao
+from src.dao.joueur_dao import JoueurDao 
+from src.dao.statistique_dao import StatistiqueDao
 
-from service.joueur_service import JoueurService
-from service.partie_service import PartieService
-from service.table_service import TableService
+from src.service.joueur_service import JoueurService
+from src.service.partie_service import PartieService
+from src.service.table_service import TableService
 
-from business_object.partie import EtatPartie
-from business_object.cartes import Carte
+from src.business_object.partie import EtatPartie
+from src.business_object.cartes import Carte
 
-from api.var_utiles import tables_service
+from src.api.var_utiles import tables_service
 
 router = APIRouter(prefix="/joueur_en_jeu", tags=["joueur_en_jeu"])
 
@@ -196,6 +196,9 @@ def all_in_joueur(payload: JoueurEnJeu, partie: int):
     partie_jouee = tables_service.parties[partie]
     partie_jouee_service = PartieService(partie_jouee)
     fait, etat_partie, message = partie_jouee_service.all_in(joueur)
+    # S'assurer que resultats est une liste de dictionnaires valide
+    if etat_partie.resultats is None:
+        etat_partie.resultats = []
     partie_jouee.etat = etat_partie
     if fait : 
         message = "Action effectuée"
@@ -307,3 +310,48 @@ def quitter_table_joueur(pseudo: str, id_table: int):
         return "Table quittée"
     else:
         return "Joueur non supprimé (non présent certainement)"
+
+# Endpoint POST /joueur_en_jeu/decision_rejouer
+@router.post("/decision_rejouer", response_model=RetourPartie)
+def decision_rejouer(pseudo: str, veut_rejouer: bool, partie: int):
+    """
+    Endpoint pour qu'un joueur indique s'il veut rejouer ou quitter après une main.
+    """
+    partie_jouee = tables_service.parties[partie]
+    partie_jouee_service = PartieService(partie_jouee)
+    fait, etat_partie, message = partie_jouee_service.decision_rejouer(pseudo, veut_rejouer)
+    if fait:
+        message = "Réponse enregistrée"
+        partie_retour = RetourPartie(
+            id_partie=etat_partie.id_partie,
+            tour_actuel=etat_partie.tour_actuel,
+            joueurs=etat_partie.joueurs,
+            board=etat_partie.board,
+            pot=etat_partie.pot,
+            pots_secondaires=etat_partie.pots_secondaires,
+            mise_max=etat_partie.mise_max,
+            joueur_courant=etat_partie.joueur_courant,
+            finie=etat_partie.finie,
+            resultats=etat_partie.resultats,
+            rejouer=etat_partie.rejouer,
+            liste_attente=etat_partie.liste_attente,
+            message_retour=message
+        )
+        return partie_retour
+    else:
+        partie_retour = RetourPartie(
+            id_partie=etat_partie.id_partie,
+            tour_actuel=etat_partie.tour_actuel,
+            joueurs=etat_partie.joueurs,
+            board=etat_partie.board,
+            pot=etat_partie.pot,
+            pots_secondaires=etat_partie.pots_secondaires,
+            mise_max=etat_partie.mise_max,
+            joueur_courant=etat_partie.joueur_courant,
+            finie=etat_partie.finie,
+            resultats=etat_partie.resultats,
+            rejouer=etat_partie.rejouer,
+            liste_attente=etat_partie.liste_attente,
+            message_retour=message
+        )
+        return partie_retour

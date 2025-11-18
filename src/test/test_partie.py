@@ -1,8 +1,8 @@
 import pytest
-from business_object.partie import Partie
-from business_object.joueurs import Joueur
-from business_object.table import Table
-from business_object.cartes import Carte, couleurs, valeurs
+from src.business_object.partie import Partie
+from src.business_object.joueurs import Joueur
+from src.business_object.table import Table
+from src.business_object.cartes import Carte, couleurs, valeurs
 
 
 @pytest.fixture

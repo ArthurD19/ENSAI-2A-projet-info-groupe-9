@@ -1,9 +1,9 @@
 from InquirerPy import inquirer
-from view.vue_abstraite import VueAbstraite
-from view.session import Session
-from view.menu_joueur_vue import MenuJoueurVue
-from view.menu_table_vue import MenuTableVue
-from client.api_client import get, post, APIError
+from src.view.vue_abstraite import VueAbstraite
+from src.view.session import Session
+from src.view.menu_joueur_vue import MenuJoueurVue
+from src.view.menu_table_vue import MenuTableVue
+from src.client.api_client import get, post, APIError
 
 
 class MenuRejoindreTableVue(VueAbstraite):

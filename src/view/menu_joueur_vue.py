@@ -1,8 +1,8 @@
 from InquirerPy import inquirer
-from view.vue_abstraite import VueAbstraite
-from view.session import Session
-from client.api_client import get, post, APIError
-from service.joueur_service import JoueurService
+from src.view.vue_abstraite import VueAbstraite
+from src.view.session import Session
+from src.client.api_client import get, post, APIError
+from src.service.joueur_service import JoueurService
 
 class MenuJoueurVue(VueAbstraite):
     """Vue du menu du joueur via API"""
@@ -33,7 +33,7 @@ class MenuJoueurVue(VueAbstraite):
             case "Se déconnecter":
                 pseudo = Session().joueur
                 success = JoueurService().se_deconnecter(pseudo)
-                from view.accueil.accueil_vue import AccueilVue
+                from src.view.accueil.accueil_vue import AccueilVue
                 message = "Vous êtes maintenant déconnecté." if success else "Erreur lors de la déconnexion."
                 return AccueilVue(message, self.tables)
 
@@ -90,5 +90,5 @@ class MenuJoueurVue(VueAbstraite):
                 return MenuJoueurVue("", self.tables)
 
             case "Rejoindre une table":
-                from view.menu_rejoindre_table_vue import MenuRejoindreTableVue
+                from src.view.menu_rejoindre_table_vue import MenuRejoindreTableVue
                 return MenuRejoindreTableVue(self.tables)

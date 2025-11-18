@@ -3,11 +3,11 @@ import pytest
 
 from unittest.mock import patch
 
-from utils.reset_database import ResetDatabase
-from utils.securite import hash_password
+from src.utils.reset_database import ResetDatabase
+from src.utils.securite import hash_password
 
-from dao.statistique_dao import StatistiqueDao
-from dao.joueur_dao import JoueurDao
+from src.dao.statistique_dao import StatistiqueDao
+from src.dao.joueur_dao import JoueurDao
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -47,7 +47,7 @@ def test_trouver_statistiques_par_id_inexistant():
     assert stats == {}
 
 
-from dao.joueur_dao import JoueurDao
+from src.dao.joueur_dao import JoueurDao
 
 
 def test_creer_statistiques_pour_joueur_ok():

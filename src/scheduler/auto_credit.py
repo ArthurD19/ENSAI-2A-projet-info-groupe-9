@@ -1,6 +1,6 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from service.joueur_service import JoueurService
+from src.service.joueur_service import JoueurService
 
 def lancer_auto_credit():
     """

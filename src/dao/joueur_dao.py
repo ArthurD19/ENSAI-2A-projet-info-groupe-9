@@ -2,11 +2,11 @@ import logging
 import psycopg2
 import psycopg2.extras
 
-from utils.singleton import Singleton
-from utils.log_decorator import log
+from src.utils.singleton import Singleton
+from src.utils.log_decorator import log
 
-from dao.db_connection import DBConnection
-from dao.statistique_dao import StatistiqueDao
+from src.dao.db_connection import DBConnection
+from src.dao.statistique_dao import StatistiqueDao
 
 
 class JoueurDao(metaclass=Singleton):
@@ -399,3 +399,36 @@ class JoueurDao(metaclass=Singleton):
         except Exception as e:
             logging.info(e)
             raise    
+
+    @log
+    def mettre_a_jour_solde(self, pseudo: str, nouveau_solde: int) -> bool:
+        """
+        Met à jour le solde (portefeuille) d'un joueur dans la base de données.
+
+        Parameters
+        ----------
+        pseudo : str
+            Pseudo du joueur dont le solde doit être mis à jour.
+        nouveau_solde : int
+            Nouveau solde à enregistrer.
+
+       Returns
+       -------
+        bool
+            True si la mise à jour a réussi, False sinon.
+        """
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        """
+                        UPDATE joueurs
+                        SET portefeuille = %(nouveau_solde)s
+                        WHERE pseudo = %(pseudo)s;
+                        """,
+                        {"pseudo": pseudo, "nouveau_solde": nouveau_solde},
+                    )
+                    return cursor.rowcount == 1
+        except Exception as e:
+            logging.exception(e)
+            return False

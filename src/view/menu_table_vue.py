@@ -1,8 +1,8 @@
 from InquirerPy import inquirer
-from view.vue_abstraite import VueAbstraite
-from view.session import Session
-from view.menu_joueur_vue import MenuJoueurVue
-from client.api_client import get, post, APIError
+from src.view.vue_abstraite import VueAbstraite
+from src.view.session import Session
+from src.view.menu_joueur_vue import MenuJoueurVue
+from src.client.api_client import get, post, APIError
 
 
 class MenuTableVue(VueAbstraite):
@@ -48,6 +48,49 @@ class MenuTableVue(VueAbstraite):
         """Affichage du menu joueur en table"""
         self.afficher()
         etat = self.afficher_etat_partie()
+        if etat.get("finie", False):
+            print("\nLa main est terminée !\n")
+            solde = next((j['solde'] for j in etat['joueurs'] if j['pseudo'] == self.pseudo), 0)
+            peut_rejouer = solde >= Partie.GROSSE_BLIND  # 20 jetons minimum
+
+            if self.pseudo in etat.get("rejouer", {}):
+                if etat["rejouer"][self.pseudo] is None and peut_rejouer:
+                    veut_rejouer = inquirer.confirm(
+                        message="Voulez-vous rejouer la prochaine main ?"
+                    ).execute()
+                    try:
+                        res = post(
+                            "/joueur_en_jeu/decision_rejouer",
+                            params={
+                                "pseudo": self.pseudo,
+                                "partie": self.id_table,
+                                "veut_rejouer": veut_rejouer
+                            }
+                        )
+                        print(f"\n{res.get('message_retour', 'Réponse enregistrée')}\n")
+                    except APIError as e:
+                        print(f"\nErreur API : {e}\n")
+                else:
+                    reponse = "Oui" if etat["rejouer"].get(self.pseudo, False) else "Non"
+                    print(f"Vous avez déjà répondu : {reponse}")
+
+                    if not peut_rejouer:
+                        print("Vous n'avez pas assez de jetons pour rejouer.")
+                        # Supprimer le joueur de la table
+                        try:
+                            post(
+                                "/joueur_en_jeu/quitter_table",
+                                params={"pseudo": self.pseudo, "id_table": self.id_table}
+                            )
+                            print("Vous avez été retiré de la table.")
+                        except APIError as e:
+                            print(f"Erreur lors de la suppression de la table : {e}")
+                        return MenuJoueurVue()
+            else:
+                print("Attente des autres joueurs pour relancer la partie...")
+            input("Appuyez sur Entrée pour rafraîchir...")
+            return self
+
         if etat is None:
             input("Appuyez sur Entrée pour continuer...")
             return self

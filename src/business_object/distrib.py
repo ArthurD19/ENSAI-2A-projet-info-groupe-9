@@ -1,5 +1,5 @@
-from business_object.cartes import Carte, Deck
-from business_object.joueurs import Joueur
+from src.business_object.cartes import Carte, Deck
+from src.business_object.joueurs import Joueur
 
 class Distrib:
     """Distribue les cartes pour Texas Hold'em"""

@@ -1,13 +1,13 @@
 from tabulate import tabulate
 
-from utils.log_decorator import log
-from utils.securite import hash_password
+from src.utils.log_decorator import log
+from src.utils.securite import hash_password
 
-from business_object.joueurs import Joueur
-from dao.joueur_dao import JoueurDao
-from utils.genere_code_parrainage import GenerateurDeCode
+from src.business_object.joueurs import Joueur
+from src.dao.joueur_dao import JoueurDao
+from src.utils.genere_code_parrainage import GenerateurDeCode
 
-from view.session import Session
+from src.view.session import Session
 
 import logging
 
@@ -255,6 +255,6 @@ class JoueurService:
             logging.info("Aucun joueur à créditer")
         if joueurs is not None:
             for pseudo in joueurs:
-                JoueurDao.crediter(pseudo, JoueurService().MONTANT_RECHARGEMENT_AUTO)
-                JoueurDao.maj_date_credit_auto(pseudo)
+                JoueurDao().crediter(pseudo, JoueurService().MONTANT_RECHARGEMENT_AUTO)
+                JoueurDao().maj_date_credit_auto(pseudo)
                 logging.info(f"Auto-crédut hebdo : {pseudo}, montant {JoueurService().MONTANT_RECHARGEMENT_AUTO}")

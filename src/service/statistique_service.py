@@ -1,6 +1,6 @@
-from dao.statistique_dao import StatistiqueDao
+from src.dao.statistique_dao import StatistiqueDao
 
-from utils.log_decorator import log
+from src.utils.log_decorator import log
 
 
 class StatistiqueService:

@@ -1,4 +1,4 @@
-from business_object.joueurs import Joueur
+from src.business_object.joueurs import Joueur
 
 class Comptage:
     def __init__(self)->None:

@@ -1,10 +1,10 @@
 # test_partie_service_pytest.py
 import pytest
-from business_object.table import Table
-from business_object.partie import Partie, EtatPartie
-from business_object.joueurs import Joueur
-from service.partie_service import PartieService
-from service.table_service import TableService
+from src.business_object.table import Table
+from src.business_object.partie import Partie, EtatPartie
+from src.business_object.joueurs import Joueur
+from src.service.partie_service import PartieService
+from src.service.table_service import TableService
 
 @pytest.fixture
 def table_exemple():
@@ -67,7 +67,7 @@ class FakeJoueurDao:
 
 @pytest.fixture(autouse=True)
 def patch_joueur_dao(monkeypatch):
-    monkeypatch.setattr("dao.joueur_dao.JoueurDao", FakeJoueurDao)
+    monkeypatch.setattr("src.dao.joueur_dao.JoueurDao", FakeJoueurDao)
     return FakeJoueurDao()
 
 @pytest.fixture

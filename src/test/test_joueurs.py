@@ -1,6 +1,6 @@
 import pytest
-from business_object.cartes import Carte, Deck, couleurs, valeurs
-from business_object.joueurs import Joueur
+from src.business_object.cartes import Carte, Deck, couleurs, valeurs
+from src.business_object.joueurs import Joueur
 
 def test_initialisation_joueur():
     j = Joueur("Alice", 1000)
