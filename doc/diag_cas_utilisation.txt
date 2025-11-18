@@ -4,38 +4,36 @@
 @startuml
 left to right direction
 
-actor "Administrateur"   as admin
+actor "Modérateur"   as modo
+actor "Gestionnaire"   as gestio
 actor "Joueur"           as joueur
 
 node "Serveur Poker" as Titre {
    
   package "Fonctions Joueur" {
-    usecase "Rejoindre une table"         as rejoindre_table
     usecase "Jouer"                       as actions_poker
-    usecase "Consulter son solde"         as consultation_solde
+    usecase "Consulter ses statistiques"         as consultation_solde
   }
 
-  package "Fonctions Admin" {
+  package "Fonctions Modérateur" {
     usecase "Superviser parties"          as supervision
     usecase "Bannir joueur"               as bannissement
-    usecase "Créer table"                 as creation_table
-    usecase "Fermer table"                as fermeture_table
+  }
+
+  package "Fonction Gestionnaire" {
     usecase "Créditer compte"             as creditation
-    usecase "Retirer crédit"              as penalites
   }
   
 }
 
 joueur --> consultation_solde
-joueur --> rejoindre_table
 joueur --> actions_poker
 
-admin --> supervision
-admin --> bannissement
-admin --> creation_table
-admin --> fermeture_table
-admin --> creditation
-admin --> penalites
+modo --> supervision
+modo --> bannissement
+
+gestio --> creditation
+
 
 
 @enduml
