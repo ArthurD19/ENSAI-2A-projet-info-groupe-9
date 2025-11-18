@@ -12,6 +12,7 @@ class Table:
         self.board = []
 
     def ajouter_joueur(self, joueur: Joueur)->int:
+        """ajoute un joueur a la table"""
         if joueur in self.joueurs:
             return 2
         if len(self.joueurs) >= 5:
@@ -21,6 +22,7 @@ class Table:
         return 1
 
     def supprimer_joueur(self, joueur: Joueur)->None:
+        """enleve un joueur de la table"""
         if joueur not in self.joueurs:
             raise ValueError("Ce joueur n'est pas à la table.")
         self.joueurs.remove(joueur)
