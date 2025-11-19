@@ -201,3 +201,59 @@ def test_all_in_limite_max(monkeypatch):
     success, etat, msg = service.all_in("pauvre")
     assert success is True, "All-in inférieur à la limite max devrait réussir"
     assert msg == ""
+
+# ---------------------------
+# TEST voir_etat_partie
+# ---------------------------
+def test_voir_etat_partie_retourne_etat(partie_service, joueur_lucas):
+    partie_service.partie.table.ajouter_joueur(joueur_lucas)
+    success, etat, msg = partie_service.voir_etat_partie()
+    assert success is True
+    assert isinstance(etat, EtatPartie)
+    assert msg == ""
+
+# ---------------------------
+# TEST suivre
+# ---------------------------
+def test_suivre_partie(partie_service):
+    joueur = Joueur("lucas", solde=100)
+    partie_service.partie.table.ajouter_joueur(joueur)
+    partie_service.partie.mise_max = 20
+    joueur.mise = 0
+
+    success, etat, msg = partie_service.suivre("lucas")
+    assert success is True
+    assert msg == ""
+
+def test_suivre_solde_insuffisant(partie_service):
+    joueur = Joueur("lucas", solde=10)
+    partie_service.partie.table.ajouter_joueur(joueur)
+    partie_service.partie.mise_max = 20
+    joueur.mise = 0
+
+    success, etat, msg = partie_service.suivre("lucas")
+    assert success is False
+    assert "dépasse ton solde" in msg.lower()
+
+# ---------------------------
+# TEST decision_rejouer 
+# ---------------------------
+def test_decision_rejouer_oui(partie_service):
+    partie_service.partie.etat.rejouer = {"lucas": None}
+
+    success, etat, msg = partie_service.decision_rejouer("lucas", True)
+    assert success is True
+    assert "veut rejouer" in msg.lower()
+
+def test_decision_rejouer_non(partie_service):
+    partie_service.partie.etat.rejouer = {"lucas": None}
+
+    success, etat, msg = partie_service.decision_rejouer("lucas", False)
+    assert success is True
+    assert "quitte la table" in msg.lower()
+
+def test_decision_rejouer_joueur_pas_present(partie_service):
+    joueur = "lucas"
+    success, etat, msg = partie_service.decision_rejouer(joueur, True)
+    assert success is False
+    assert "n'était pas dans la main précédente" in msg.lower()
