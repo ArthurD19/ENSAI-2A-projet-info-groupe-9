@@ -52,14 +52,34 @@ def code_parrainage_joueur(pseudo: str):
 def stats_joueur(pseudo: str):
     """
     Endpoint de récupération de ses statistiques par un joueur.
+    Met à jour le meilleur classement si le joueur a une meilleure place dans le classement des portefeuilles.
     """
 
-    statistiques = StatistiqueDao().trouver_statistiques_par_id(pseudo)
-    
-    if statistiques == {}:
+    dao_stat = StatistiqueDao()
+    dao_joueur = JoueurDao()
+
+    # Récupérer les statistiques existantes
+    statistiques = dao_stat.trouver_statistiques_par_id(pseudo)
+    if not statistiques:
         raise HTTPException(status_code=401, detail="Joueur inconnu ou n'ayant pas de statistiques")
+
+    # Calculer le classement actuel par portefeuille
+    classement = dao_joueur.classement_par_portefeuille()  
+    for i, joueur in enumerate(classement, start=1):
+        if joueur["pseudo"] == pseudo:
+            classement_actuel = i
+            break
     else:
-        return statistiques
+        classement_actuel = None
+
+    # Mettre à jour le meilleur classement si nécessaire
+    if classement_actuel is not None:
+        meilleur = statistiques.get("meilleur_classement")
+        if meilleur is None or classement_actuel < meilleur:
+            dao_stat.mettre_a_jour_statistique(pseudo, "meilleur_classement", classement_actuel)
+            statistiques["meilleur_classement"] = classement_actuel
+
+    return statistiques
 
 
 # Endpoint GET /joueur_connecte/valeur_portefeuille
