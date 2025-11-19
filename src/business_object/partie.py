@@ -229,7 +229,7 @@ class Partie:
 
         elif action == "se_coucher":
             # conserver la mise actuelle dans le pot (consolidation)
-            self.comptage.ajouter_pot_perso(joueur, joueur.mise)
+            self.comptage.pot += joueur.mise
             joueur.se_coucher()
             joueur.mise = 0
             self.stats_dao.incrementer_statistique(joueur.pseudo, "nombre_folds")
