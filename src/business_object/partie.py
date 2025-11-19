@@ -248,7 +248,6 @@ class Partie:
                 self.etat.finie = True
                 self.indice_joueur_courant = -1
                 self.annoncer_resultats()
-                self._joueur_suivant()
                 # annoncer_resultats appelle _mettre_a_jour_etat et retourne
                 return self.etat
 
@@ -288,8 +287,9 @@ class Partie:
         if len(actifs) <= 1:
             return True
 
+        limite_max = self.mise_max_autorisee()
         # Si tous les joueurs actifs sont all-in, le tour est terminé
-        if all(j.solde == 0 or j.mise == self.mise_max for j in actifs):
+        if all(j.solde == 0 or j.mise == limite_max for j in actifs):
             return True
 
         mises_actifs = [j.mise for j in actifs]
@@ -347,7 +347,7 @@ class Partie:
             self.passer_tour()
             return
 
-        # Si on arrive ici : pas de joueur disponible mais le tour n'est pas marqué terminé
+        # Si on arrive ici : pas de joueur disponible mais l    e tour n'est pas marqué terminé
         # (ex: cas improbable de désynchronisation). On établit joueur_courant à None.
         self.indice_joueur_courant = -1
         self.etat.joueur_courant = None
