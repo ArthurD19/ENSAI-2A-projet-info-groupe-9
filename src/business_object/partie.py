@@ -373,7 +373,6 @@ class Partie:
             if joueurs_en_jeu:
                 gagnant = joueurs_en_jeu[0]
                 gagnant.solde += self.comptage.pot
-                JoueurDao().mettre_a_jour_solde(gagnant.pseudo, gagnant.solde)
 
                 # Incrémenter stats de victoire pour ce joueur
                 self.stats_dao.incrementer_statistique(gagnant.pseudo, "nombre_victoire_abattage")
@@ -389,6 +388,8 @@ class Partie:
             self.indice_joueur_courant = -1
             self._mettre_a_jour_etat()
             self.etat.rejouer = {j.pseudo: None for j in self.table.joueurs}
+            for j in self.table.joueurs:
+                JoueurDao().mettre_a_jour_solde(j.pseudo, j.solde)
             return self.etat
 
         # Cas normal : showdown
@@ -411,7 +412,6 @@ class Partie:
             part = self.comptage.pot // len(gagnants)
             for j in gagnants:
                 j.solde += part
-                JoueurDao().mettre_a_jour_solde(j.pseudo, j.solde)
 
                 # Incrémenter stats de victoire pour le gagnant
                 self.stats_dao.incrementer_statistique(j.pseudo, "nombre_victoire_abattage")
@@ -428,6 +428,8 @@ class Partie:
         self.indice_joueur_courant = -1
         self.etat.rejouer = {j.pseudo: None for j in self.table.joueurs}
         self._mettre_a_jour_etat()
+        for j in self.table.joueurs:
+            JoueurDao().mettre_a_jour_solde(j.pseudo, j.solde)
         return self.etat
     
 
