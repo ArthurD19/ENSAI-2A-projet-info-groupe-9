@@ -574,6 +574,14 @@ class Partie:
             self.etat.finie = True
             self._mettre_a_jour_etat()
 
-
+    # ---------------------------
+    # our ne pas gerer les pots secondaire
+    # ---------------------------
+    def mise_max_autorisee(self)->int:
+        return min(
+            j.solde + j.mise
+            for j in self.table.joueurs
+            if j.actif
+        )
 
 

@@ -39,6 +39,17 @@ class PartieService:
             return False, self.partie.etat, (
                 f"Montant {montant} supérieur au solde ({joueur.solde}), tu peux all-in."
             )
+        if montant + joueur.mise < (2*self.partie.GROSSE_BLIND) and montant + joueur.mise != self.partie.GROSSE_BLIND:
+            return False, self.partie.etat, (
+                f"Tu peux miser la grosse blinde, deux fois celle-ci ou plus"
+            )
+        
+        limite_max = self.partie.mise_max_autorisee()
+        if montant + joueur.mise > limite_max:
+            return False, self.partie.etat, (
+                f"Tu ne peux pas miser plus que {limite_max}, "
+                "car un joueur ne peut pas suivre davantage."
+            )
 
         # Action
         self.partie.actions_joueur(pseudo, "miser", montant)
@@ -64,7 +75,7 @@ class PartieService:
 
         if montant_a_payer > joueur.solde:
             return False, self.partie.etat, (
-                f"La mise max ({self.partie.mise_max}) dépasse ton solde ({joueur.solde})."
+                f"La mise max ({self.partie.mise_max}) dépasse ton solde ({joueur.solde}), tu peux all-in."
             )
 
         # Action
@@ -106,7 +117,12 @@ class PartieService:
             return False, self.partie.etat, f"Le joueur '{pseudo}' n'existe pas."
         if not joueur.actif:
             return False, self.partie.etat, f"Le joueur '{pseudo}' n'est pas actif."
-
+        limite_max = self.partie.mise_max_autorisee()
+        if joueur.solde + joueur.mise > limite_max:
+            return False, self.partie.etat, (
+                f"Tu ne peux pas all-in car tu as plus que {limite_max}, "
+                f"à la place tu peux miser {limite_max-joueur.mise}."
+            )
         # Action
         self.partie.actions_joueur(pseudo, "all-in")
 

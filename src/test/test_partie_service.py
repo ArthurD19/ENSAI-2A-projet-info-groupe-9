@@ -121,3 +121,83 @@ def test_rejoindre_table_interdit_deux_fois(service):
     assert success2 is False, "Le même joueur ne doit pas pouvoir rejoindre la table deux fois."
     assert "déjà" in msg2.lower() or "existe" in msg2.lower(), \
     f"Le message devrait indiquer que le joueur est déjà présent. Reçu : {msg2}"
+
+def test_miser_mise_interdite_si_inferieure_au_minimum(monkeypatch):
+    # Fake DAO qui dit que le joueur existe et a de l'argent
+    class FakeJoueurDao:
+        def valeur_portefeuille(self, pseudo):
+            return 200
+
+        def existe_joueur(self, pseudo):
+            return True
+
+    monkeypatch.setattr(
+        "src.dao.joueur_dao.JoueurDao",
+        FakeJoueurDao
+    )
+
+    # --- Préparation de la partie ---
+    table = Table(id=1, blind=20)
+    partie = Partie(id=1, table=table)
+
+    partie.GROSSE_BLIND = 20
+
+    service = PartieService(partie)
+
+    # --- Ajouter un joueur ---
+    joueur = Joueur("lucas", solde=200)
+    table.ajouter_joueur(joueur)
+    joueur.mise = 0
+
+    # Mise trop faible : 10 < 40 et != 20
+    success, etat, msg = service.miser("lucas", 30)
+
+    # --- Vérifications ---
+    assert success is False
+    assert "grosse blinde" in msg.lower(), f"Message incorrect : {msg}"
+
+def test_miser_limite_max(monkeypatch):
+    # --- Setup partie et service ---
+    table = Table(id=1, blind=20)
+    partie = Partie(id=1, table=table)
+    service = PartieService(partie)
+
+    # Ajouter joueurs
+    joueur_pauvre = Joueur("pauvre", solde=50)
+    joueur_riche = Joueur("riche", solde=200)
+    table.ajouter_joueur(joueur_pauvre)
+    table.ajouter_joueur(joueur_riche)
+
+    # --- Test mise dépassant la limite ---
+    success, etat, msg = service.miser("riche", 60)
+    assert success is False, "La mise dépasse la limite max, devrait échouer"
+    assert "tu ne peux pas miser plus que" in msg.lower()
+    assert "50" in msg
+
+    # --- Test mise égale à la limite (doit réussir) ---
+    success, etat, msg = service.miser("riche", 50)
+    assert success is True, "La mise égale à la limite max devrait réussir"
+    assert msg == ""
+
+def test_all_in_limite_max(monkeypatch):
+    # --- Setup partie et service ---
+    table = Table(id=1, blind=20)
+    partie = Partie(id=1, table=table)
+    service = PartieService(partie)
+
+    # Ajouter joueurs
+    joueur_pauvre = Joueur("pauvre", solde=50)
+    joueur_riche = Joueur("riche", solde=200)
+    table.ajouter_joueur(joueur_pauvre)
+    table.ajouter_joueur(joueur_riche)
+
+    # --- Test all-in du joueur riche (doit échouer) ---
+    success, etat, msg = service.all_in("riche")
+    assert success is False, "All-in dépasse la limite max, devrait échouer"
+    assert "tu ne peux pas all-in" in msg.lower()
+    assert "50" in msg
+
+    # --- Test all-in du joueur pauvre (doit réussir) ---
+    success, etat, msg = service.all_in("pauvre")
+    assert success is True, "All-in inférieur à la limite max devrait réussir"
+    assert msg == ""
