@@ -147,3 +147,33 @@ def test_se_coucher_apres_distribution_minimal(setup_partie):
     # - Bob reste actif
     assert next(j for j in partie.etat.joueurs if j["pseudo"] == "Alice")["actif"] is False and \
            next(j for j in partie.etat.joueurs if j["pseudo"] == "Bob")["actif"] is True
+
+def test_relancer_si_possible_minimum_2(setup_partie):
+    partie, j1, j2 = setup_partie
+    partie.initialiser_blinds()
+
+    # Simuler fin de main : Alice et Bob ont joué
+    partie.actions_joueur("Alice", "se_coucher")
+    partie.actions_joueur("Bob", "suivre")
+
+    # Vérifier que la partie est finie
+    assert partie.etat.finie is True
+
+    # Alice veut rejouer, Bob ne veut pas
+    partie.reponse_rejouer("Alice", True)
+    partie.reponse_rejouer("Bob", False)
+
+    # Comme un seul joueur veut rejouer, la partie ne doit pas se relancer
+    # ✅ On vérifie l'état "finie" plutôt que la longueur de table.joueurs
+    assert partie.etat.finie is True
+
+    # Maintenant on met Bob en liste d'attente avec solde suffisant
+    partie.ajouter_a_liste_attente(j2)
+
+    # Réévaluer la relance : maintenant il y a 2 joueurs combinés (Alice + Bob en attente)
+    partie._relancer_si_possible()
+
+    # La partie doit se relancer
+    assert partie.etat.finie is False
+    assert len(partie.table.joueurs) >= 2
+    assert all(len(j.main) == 2 for j in partie.table.joueurs)

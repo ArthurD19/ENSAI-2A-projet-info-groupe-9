@@ -518,38 +518,17 @@ class Partie:
         # Filtrer les joueurs sans solde suffisant
         joueurs_valides = [j for j in self.table.joueurs if j.solde >= Partie.GROSSE_BLIND]
 
-        # Si aucun joueur valide, marquer la partie comme finie
-        if not joueurs_valides:
+        # Ajouter les joueurs en liste d'attente avec solde suffisant
+        pseudos_en_attente = {j['pseudo'] for j in self.etat.liste_attente if j['solde'] >= Partie.GROSSE_BLIND}
+        pseudos_rejouent = {pseudo for pseudo, rejoue in self.etat.rejouer.items() if rejoue}
+
+        # Si moins de 2 joueurs combinés veulent rejouer / sont en attente, on ne relance pas
+        if len(pseudos_rejouent | pseudos_en_attente) < 2:
             self.etat.finie = True
             self._mettre_a_jour_etat()
             return
 
-        # Si tous les joueurs valides veulent rejouer
-        if all(self.etat.rejouer.get(j.pseudo, False) for j in joueurs_valides):
-            # Réinitialiser la table avec les joueurs valides
-            pseudos_deja_presents = set()
-            joueurs_rejouent = []
-            for j in joueurs_valides:
-                if j.pseudo not in pseudos_deja_presents:
-                    joueurs_rejouent.append(j)
-                    pseudos_deja_presents.add(j.pseudo)
-
-            # Intégrer les joueurs en attente (sans doublon et avec solde suffisant)
-            for j in list(self.etat.liste_attente):
-                if j["solde"] >= Partie.GROSSE_BLIND and j["pseudo"] not in pseudos_deja_presents:
-                    joueur = Joueur(pseudo=j["pseudo"], solde=j["solde"])
-                    joueurs_rejouent.append(joueur)
-                    pseudos_deja_presents.add(j["pseudo"])
-
-            self.etat.liste_attente.clear()
-            self.table.joueurs = joueurs_rejouent
-            self.etat.rejouer = {}
-
-            if len(self.table.joueurs) >= 2:
-                self.gestion_rejouer()
-            return
-
-        # Sinon, appliquer la logique normale (filtrer ceux qui veulent rejouer)
+        # Sinon, construire la nouvelle table avec ceux qui veulent rejouer
         pseudos_deja_presents = set()
         joueurs_rejouent = []
         for j in joueurs_valides:
@@ -557,7 +536,7 @@ class Partie:
                 joueurs_rejouent.append(j)
                 pseudos_deja_presents.add(j.pseudo)
 
-        # Intégrer les joueurs en attente (sans doublon et avec solde suffisant)
+        # Intégrer les joueurs en attente
         for j in list(self.etat.liste_attente):
             if j["solde"] >= Partie.GROSSE_BLIND and j["pseudo"] not in pseudos_deja_presents:
                 joueur = Joueur(pseudo=j["pseudo"], solde=j["solde"])
@@ -568,11 +547,13 @@ class Partie:
         self.table.joueurs = joueurs_rejouent
         self.etat.rejouer = {}
 
+        # Relancer la partie si encore au moins 2 joueurs
         if len(self.table.joueurs) >= 2:
             self.gestion_rejouer()
         else:
             self.etat.finie = True
             self._mettre_a_jour_etat()
+
 
     # ---------------------------
     # our ne pas gerer les pots secondaire
