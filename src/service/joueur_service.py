@@ -5,6 +5,7 @@ from src.utils.securite import hash_password
 
 from src.business_object.joueurs import Joueur
 from src.dao.joueur_dao import JoueurDao
+from src.dao.statistique_dao import StatistiqueDao
 from src.utils.genere_code_parrainage import GenerateurDeCode
 
 from src.view.session import Session
@@ -20,6 +21,9 @@ class JoueurService:
     @log
     def creer(self, pseudo_joueur, mdp, code_parrain) -> Joueur:
         """Création d'un joueur à partir de ses attributs"""
+
+        if not pseudo_joueur or len(pseudo_joueur.strip()) < 3:
+            return None
 
         nouveau_joueur = {
             "pseudo": pseudo_joueur,
@@ -46,6 +50,9 @@ class JoueurService:
     @log
     def creer_sans_code_parrainage(self, pseudo_joueur, mdp) -> Joueur:
         """Création d'un joueur à partir de ses attributs"""
+
+        if not pseudo_joueur or len(pseudo_joueur.strip()) < 3:
+            return None
 
         if self.pseudo_deja_utilise(pseudo_joueur):
             return None  
@@ -201,6 +208,29 @@ class JoueurService:
             pseudo du joueur donc on cherche la valeur du portefeuille.
         """
         return JoueurDao().valeur_portefeuille(pseudo)
+
+    @log
+    def mettre_a_jour_meilleur_classement_portefeuille(self):
+        """
+        Met à jour le meilleur classement pour tous les joueurs en fonction
+        de la valeur actuelle de leur portefeuille.
+        """
+        dao_joueur = JoueurDao()
+        dao_stat = StatistiqueDao()
+
+        # Récupérer le classement actuel de tous les joueurs par portefeuille
+        classement_actuel = dao_joueur.classement_par_portefeuille()  # [{pseudo, portefeuille}, ...]
+
+        for i, joueur in enumerate(classement_actuel, start=1):
+            pseudo = joueur["pseudo"]
+
+            # Récupérer le meilleur classement enregistré
+            stats = dao_stat.trouver_statistiques_par_id(pseudo)
+            meilleur = stats.get("meilleur_classement")
+
+            # Mettre à jour si le classement actuel est meilleur (plus petit)
+            if meilleur is None or i < meilleur:
+                dao_stat.mettre_a_jour_statistique(pseudo, "meilleur_classement", i)
 
     @log
     def afficher_classement_joueur(self):
