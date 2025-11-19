@@ -282,7 +282,7 @@ class Partie:
             return True
 
         # Si tous les joueurs actifs sont all-in, le tour est terminé
-        if all(j.solde == 0 for j in actifs):
+        if all(j.solde == 0 or j.mise == self.mise_max for j in actifs):
             return True
 
         mises_actifs = [j.mise for j in actifs]
