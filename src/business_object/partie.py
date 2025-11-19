@@ -228,22 +228,29 @@ class Partie:
             self.mise_max = max(self.mise_max, joueur.mise)
 
         elif action == "se_coucher":
-            # conserver la mise actuelle dans le pot (consolidation)
+            # Ajouter la mise du joueur qui se couche au pot personnel
             self.comptage.ajouter_pot_perso(joueur, joueur.mise)
             joueur.se_coucher()
             joueur.mise = 0
             self.stats_dao.incrementer_statistique(joueur.pseudo, "nombre_folds")
 
-            # Si un seul joueur reste actif, on annonce le résultat directement
+            # Vérifier s'il reste un seul joueur actif
             actifs = [j for j in self.table.joueurs if j.actif]
             if len(actifs) == 1:
-                self.indice_joueur_courant = self.table.joueurs.index(actifs[0])
-                # On veut s'assurer que l'état final est propre : marquer fin, invalider joueur courant
+                gagnant = actifs[0]
+
+                # Ajouter la mise du joueur actif restant au pot
+                if gagnant.mise > 0:
+                    self.comptage.ajouter_pot_perso(gagnant, gagnant.mise)
+                    gagnant.mise = 0
+
+                # Consolider le pot et annoncer le résultat
+                self.comptage.ajouter_pot()
                 self.etat.finie = True
                 self.indice_joueur_courant = -1
                 self.annoncer_resultats()
-                # annoncer_resultats appelle _mettre_a_jour_etat et retourne
                 return self.etat
+
 
         # Si la mise_max a augmenté (raise / all-in qui augmente), 
         # alors tous les joueurs actifs non all-in doivent rejouer.
