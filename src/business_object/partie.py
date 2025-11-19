@@ -248,6 +248,7 @@ class Partie:
                 self.etat.finie = True
                 self.indice_joueur_courant = -1
                 self.annoncer_resultats()
+                self._joueur_suivant()
                 # annoncer_resultats appelle _mettre_a_jour_etat et retourne
                 return self.etat
 
