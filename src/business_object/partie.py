@@ -229,7 +229,7 @@ class Partie:
 
         elif action == "se_coucher":
             # Ajouter la mise du joueur qui se couche au pot personnel
-            self.comptage.ajouter_pot_perso(joueur, joueur.mise)
+            self.comptage.ajouter_pot(joueur, joueur.mise)
             joueur.se_coucher()
             joueur.mise = 0
             self.stats_dao.incrementer_statistique(joueur.pseudo, "nombre_folds")
