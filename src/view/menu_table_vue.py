@@ -60,7 +60,9 @@ class MenuTableVue(VueAbstraite):
         """Affichage du menu joueur en table"""
         self.afficher()
         etat = self.afficher_etat_partie()
-        if self.joueur_courant is None:
+        resultats = etat.get("resultats")
+        print(type(resultats))
+        if self.joueur_courant is None and etat.get("resultats") == []:
             print("Attente des autres joueurs pour relancer la partie ...")
 
             choix = inquirer.select(
@@ -143,6 +145,28 @@ class MenuTableVue(VueAbstraite):
                     else:
                         print("Attente des autres joueurs pour relancer la partie...")
                         input("Appuyez sur Entrée pour rafraîchir...")
+                        choix = inquirer.select(
+                        message="Que voulez-vous faire ?",
+                        choices=[
+                            "Quitter la table",
+                            "Continuer à attendre"
+                        ]).execute()
+                        try:
+                            if choix == "Quitter la table":
+                                try:
+                                    post(
+                                        "/joueur_en_jeu/quitter_table",
+                                        params={"pseudo": self.pseudo, "id_table": self.id_table}
+                                        )
+                                    print("Vous avez été retiré de la table.")
+                                except APIError as e:
+                                    print(f"Erreur lors de la suppression de la table : {e}")
+                                return MenuJoueurVue("", None)
+                            elif choix == "Continuer à attendre":
+                                input("Appuyez sur Entrée pour rafraîchir...")
+                                return self
+                        except APIError as e:
+                            print(f"\nErreur API lors de '{choix}' : {e}\n")
             else:
                 print("Attente des autres joueurs pour relancer la partie...")
                 input("Appuyez sur Entrée pour rafraîchir...")
