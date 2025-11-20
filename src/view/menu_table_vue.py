@@ -23,7 +23,6 @@ class MenuTableVue(VueAbstraite):
         """Affiche l'état actuel de la partie et met à jour le joueur courant"""
         try:
             etat = get("/joueur_en_jeu/voir_etat_partie", params={"partie": self.id_table})
-            print(type(etat))
         except APIError as e:
             print(f"\nErreur API lors de la récupération de l'état : {e}\n")
             return None
@@ -61,7 +60,6 @@ class MenuTableVue(VueAbstraite):
         """Affichage du menu joueur en table"""
         self.afficher()
         etat = self.afficher_etat_partie()
-
         if self.joueur_courant is None:
             print("Attente des autres joueurs pour relancer la partie ...")
 
