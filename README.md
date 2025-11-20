@@ -130,11 +130,7 @@ If you just want to execute some tests.
 python -m unittest <test_file>.py
 ```
 
-## :arrow_forward: Launch the TUI application
 
-This command launches a simple menu-based interface for interacting with the server:
-
-- [ ] In Git Bash: `python -m src.main`
 
 ## :arrow_forward: Launch the server
 
@@ -142,16 +138,20 @@ Start the FastAPI server:
 ```bash
 uvicorn src.api.api_main:app --host 0.0.0.0 --port 8000 --reload
 ```
-Or
-
-```bash
-python src/api/api_main.py
-```
 
 Documentation :
 
 - /docs
 - /redoc
+
+## :arrow_forward: Launch the TUI application
+
+In order to play with others, you must open as many terminals as there are players wishing to play.
+This command launches a simple menu-based interface for interacting with the server :
+```bash
+python -m src.main
+```
+Run it in each terminal to open the interface for interacting with the server.
 
 ## :arrow_forward: Notes
 
