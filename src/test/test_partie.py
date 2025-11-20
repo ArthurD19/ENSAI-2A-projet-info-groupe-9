@@ -177,3 +177,88 @@ def test_relancer_si_possible_minimum_2(setup_partie):
     assert partie.etat.finie is False
     assert len(partie.table.joueurs) >= 2
     assert all(len(j.main) == 2 for j in partie.table.joueurs)
+
+def test_definir_joueur_premier_postflop(setup_partie):
+    partie, j1, j2 = setup_partie
+
+    partie.initialiser_blinds()
+
+    partie._set_first_player_postflop()
+
+    # Dans une table à 2 joueurs :
+    # - Bob est bouton / big blind
+    # - Alice parle en premier postflop → index 0
+    assert partie.indice_joueur_courant == 0
+
+
+def test_definir_joueur_postflop_ignore_inactif(setup_partie):
+    partie, j1, j2 = setup_partie
+    partie.initialiser_blinds()
+
+    # Alice est censée parler mais elle est inactive
+    j1.actif = False
+
+    partie._set_first_player_postflop()
+
+    # Bob devient le joueur courant
+    assert partie.indice_joueur_courant == 1
+
+def test_tour_par_tour_flop_turn_river(setup_partie):
+    partie, alice, bob = setup_partie
+
+    # Initialisation : mains + blinds
+    partie.initialiser_blinds()
+
+    # Vérifie que les blinds ont bien été prises en compte
+    assert alice.solde < 100
+    assert bob.solde < 100
+
+    # ---------- Préflop ----------
+    # Alice suit la big blind
+    partie.actions_joueur("Alice", "suivre")
+    # Bob suit (il était BB)
+    partie.actions_joueur("Bob", "suivre")
+
+    # Le préflop devrait être terminé, mais comme les actions sont tour par tour,
+    # il passe au flop et on peut vérifier
+    partie._mettre_a_jour_etat()
+    assert partie.tour_actuel == "flop"
+    assert len(partie.table.board) == 3
+    assert partie.indice_joueur_courant is not None
+    joueur_courant_flop = partie.table.joueurs[partie.indice_joueur_courant]
+    assert joueur_courant_flop.actif
+
+    # ---------- Flop ----------
+    # Chaque joueur joue un tour minimal
+    partie.actions_joueur(joueur_courant_flop.pseudo, "suivre")
+    autre_joueur = [j for j in partie.table.joueurs if j != joueur_courant_flop][0]
+    partie.actions_joueur(autre_joueur.pseudo, "suivre")
+
+    partie._mettre_a_jour_etat()
+    assert partie.tour_actuel == "turn"
+    assert len(partie.table.board) == 4
+    assert partie.indice_joueur_courant is not None
+
+    # ---------- Turn ----------
+    joueur_courant_turn = partie.table.joueurs[partie.indice_joueur_courant]
+    partie.actions_joueur(joueur_courant_turn.pseudo, "suivre")
+    autre_joueur = [j for j in partie.table.joueurs if j != joueur_courant_turn][0]
+    partie.actions_joueur(autre_joueur.pseudo, "suivre")
+
+    partie._mettre_a_jour_etat()
+    assert partie.tour_actuel == "river"
+    assert len(partie.table.board) == 5
+    assert partie.indice_joueur_courant is not None
+
+    # ---------- River ----------
+    joueur_courant_river = partie.table.joueurs[partie.indice_joueur_courant]
+    partie.actions_joueur(joueur_courant_river.pseudo, "suivre")
+    autre_joueur = [j for j in partie.table.joueurs if j != joueur_courant_river][0]
+    partie.actions_joueur(autre_joueur.pseudo, "suivre")
+
+    partie._mettre_a_jour_etat()
+    # Après le river et toutes les actions, la main doit être finie
+    assert partie.tour_actuel == "fin"
+    assert partie.etat.finie is True
+    # Pot doit avoir été distribué
+    assert partie.etat.pot == 0

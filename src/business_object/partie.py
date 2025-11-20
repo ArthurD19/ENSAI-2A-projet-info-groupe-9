@@ -130,14 +130,17 @@ class Partie:
             # copier la liste pour ne pas partager la référence interne
             self.table.board = list(self.distrib.flop)
             self.tour_actuel = "flop"
+            self._set_first_player_postflop()
         elif self.tour_actuel == "flop":
             self.distrib.distribuer_turn()
             self.table.board.append(self.distrib.turn)
             self.tour_actuel = "turn"
+            self._set_first_player_postflop()
         elif self.tour_actuel == "turn":
             self.distrib.distribuer_river()
             self.table.board.append(self.distrib.river)
             self.tour_actuel = "river"
+            self._set_first_player_postflop()
         elif self.tour_actuel == "river":
             self.tour_actuel = "fin"
             # annoncer_resultats appellera _mettre_a_jour_etat
@@ -570,3 +573,20 @@ class Partie:
             for j in self.table.joueurs
             if j.actif
         )
+
+    def _set_first_player_postflop(self) -> None:
+        """
+        Positionne le joueur devant parler en début de tour postflop,
+        en prenant le premier joueur actif à gauche du bouton.
+        """
+        nb = len(self.table.joueurs)
+        start = (self.table.indice_dealer + 1) % nb
+
+        for k in range(nb):
+            i = (start + k) % nb
+            j = self.table.joueurs[i]
+            if j.actif and j.solde > 0:
+                self.indice_joueur_courant = i
+                return
+
+        self.indice_joueur_courant = -1

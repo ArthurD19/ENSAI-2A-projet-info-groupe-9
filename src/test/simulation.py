@@ -1,4 +1,4 @@
-"""
+
 from business_object.joueurs import Joueur
 from business_object.table import Table
 from business_object.partie import Partie
@@ -122,3 +122,4 @@ for pseudo in pseudos:
     print(f" - Pot actuel : {etat.pot}")
     print(f" - Joueurs actifs dans la partie : {[j.pseudo for j in partie.table.joueurs if j.actif]}")
     print(f" - Liste d'attente : {[j['pseudo'] for j in etat.liste_attente]}")
+"""
