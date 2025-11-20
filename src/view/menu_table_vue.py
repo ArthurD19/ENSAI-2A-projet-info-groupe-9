@@ -60,8 +60,6 @@ class MenuTableVue(VueAbstraite):
         """Affichage du menu joueur en table"""
         self.afficher()
         etat = self.afficher_etat_partie()
-        resultats = etat.get("resultats")
-        print(type(resultats))
         if self.joueur_courant is None and etat.get("resultats") == []:
             print("Attente des autres joueurs pour relancer la partie ...")
 
