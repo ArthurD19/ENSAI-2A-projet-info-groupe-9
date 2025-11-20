@@ -12,3 +12,5 @@ requests
 tabulate
 uvicorn
 apscheduler
+httpx
+pytz
