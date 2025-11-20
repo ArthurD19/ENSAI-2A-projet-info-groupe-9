@@ -108,10 +108,10 @@ At the root of the project :
 
 ```default
 POSTGRES_PASSWORD=xxxxxxxxxxxx
-POSTGRES_HOST=postgresql-93096.user-idxxxx
-POSTGRES_PORT=5432
-POSTGRES_DATABASE=defaultdb
-POSTGRES_USER=user-idxxxx
+POSTGRES_HOST=xxxxxxxxxxxx
+POSTGRES_PORT=xxxxxxxxx
+POSTGRES_DATABASE=xxxxxxxxxx
+POSTGRES_USER=xxxxxxxxxx
 POSTGRES_SCHEMA=public
 
 PASSWORD_LENGTH="8"

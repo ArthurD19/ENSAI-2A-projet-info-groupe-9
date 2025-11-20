@@ -5,6 +5,7 @@ from src.view.menu_joueur_vue import MenuJoueurVue
 from src.client.api_client import get, post, APIError
 from src.business_object.partie import Partie
 from src.utils.log_decorator import log
+import requests
 
 
 class MenuTableVue(VueAbstraite):
@@ -22,29 +23,28 @@ class MenuTableVue(VueAbstraite):
         """Affiche l'état actuel de la partie et met à jour le joueur courant"""
         try:
             etat = get("/joueur_en_jeu/voir_etat_partie", params={"partie": self.id_table})
+            print(type(etat))
         except APIError as e:
             print(f"\nErreur API lors de la récupération de l'état : {e}\n")
             return None
 
         self.joueur_courant = etat.get("joueur_courant")
+        if self.joueur_courant is not None:
+            print("\n" + "-" * 50)
+            print(f"Table {self.id_table} | Tour actuel : {etat['tour_actuel']}")
+            print(f"Pot principal : {etat['pot']} | Mise max : {etat['mise_max']}")
+            print(f"Joueur courant : {self.joueur_courant}\n")
+            for j in etat["joueurs"]:
+                actif = "(actif)" if j["actif"] else "(couché)"
+                print(f" - {j['pseudo']:10} | Solde : {j['solde']:5} | Mise : {j['mise']:5} {actif}")
 
-        print("\n" + "-" * 50)
-        print(f"Table {self.id_table} | Tour actuel : {etat['tour_actuel']}")
-        print(f"Pot principal : {etat['pot']} | Mise max : {etat['mise_max']}")
-        print(f"Joueur courant : {self.joueur_courant}\n")
+                # --- SÉPARATEUR DU BOARD ---
+                print("-" * 50)
 
-        print("Joueurs :")
-        for j in etat["joueurs"]:
-            actif = "(actif)" if j["actif"] else "(couché)"
-            print(f" - {j['pseudo']:10} | Solde : {j['solde']:5} | Mise : {j['mise']:5} {actif}")
+                # Board
+                print("Board :", " | ".join(etat["board"]) if etat["board"] else "vide")
 
-        # --- SÉPARATEUR DU BOARD ---
-        print("-" * 50)
-
-        # Board
-        print("Board :", " | ".join(etat["board"]) if etat["board"] else "vide")
-
-        print("-" * 50)
+                print("-" * 50)
         return etat
 
     @log
@@ -61,6 +61,32 @@ class MenuTableVue(VueAbstraite):
         """Affichage du menu joueur en table"""
         self.afficher()
         etat = self.afficher_etat_partie()
+
+        if self.joueur_courant is None:
+            print("Attente des autres joueurs pour relancer la partie ...")
+
+            choix = inquirer.select(
+                message="Que voulez-vous faire ?",
+                choices=[
+                    "Quitter la table",
+                    "Continuer à attendre"
+                ]).execute()
+            try:
+                if choix == "Quitter la table":
+                    try:
+                        post(
+                            "/joueur_en_jeu/quitter_table",
+                            params={"pseudo": self.pseudo, "id_table": self.id_table}
+                            )
+                        print("Vous avez été retiré de la table.")
+                    except APIError as e:
+                        print(f"Erreur lors de la suppression de la table : {e}")
+                    return MenuJoueurVue("", None)
+                elif choix == "Continuer à attendre":
+                    input("Appuyez sur Entrée pour rafraîchir...")
+                    return self
+            except APIError as e:
+                print(f"\nErreur API lors de '{choix}' : {e}\n")
         if etat.get("finie", False):
             resultats = etat.get("resultats")
             gagnant = resultats[0]
@@ -123,12 +149,12 @@ class MenuTableVue(VueAbstraite):
                 print("Attente des autres joueurs pour relancer la partie...")
                 input("Appuyez sur Entrée pour rafraîchir...")
             return self
-
         if etat is None:
             input("Appuyez sur Entrée pour continuer...")
             return self
 
         if self.joueur_courant != self.pseudo:
+            
             print(f"\nCe n'est pas votre tour, veuillez patienter...\n")
             input("Appuyez sur Entrée pour rafraîchir...")
             return self

@@ -256,7 +256,7 @@ def voir_etat_partie(partie: int):
             liste_attente=etat_partie.liste_attente,
             message_retour=message,
         )
-        return partie_retour
+        return partie_retour.dict()
     else:
         partie_retour = RetourPartie(
             id_partie=etat_partie.id_partie,
