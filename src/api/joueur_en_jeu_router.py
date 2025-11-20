@@ -1,20 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
-
+from fastapi import APIRouter
 from pydantic import BaseModel
-
-from src.dao.joueur_dao import JoueurDao 
-from src.dao.statistique_dao import StatistiqueDao
-
-from src.service.joueur_service import JoueurService
 from src.service.partie_service import PartieService
-from src.service.table_service import TableService
-
-from src.business_object.partie import EtatPartie
-from src.business_object.cartes import Carte
-
 from src.api.var_utiles import tables_service
 
 router = APIRouter(prefix="/joueur_en_jeu", tags=["joueur_en_jeu"])
+
 
 # Modèle d'entrée pour le joueur ayant rejoint une partie (réponse renvoyée)
 class JoueurEnJeu(BaseModel):
@@ -22,20 +12,21 @@ class JoueurEnJeu(BaseModel):
     portefeuille: int
     partie: int
 
+
 # Modèle de sortie pour la partie
 class RetourPartie(BaseModel):
     id_partie: int
     tour_actuel: str
-    joueurs: list[dict]          # contient : pseudo, solde, mise, actif
+    joueurs: list[dict]  # contient : pseudo, solde, mise, actif
     board: list[str]
     pot: int
     pots_secondaires: dict
     mise_max: int
-    joueur_courant: str | None 
-    finie: bool                # True si la partie est terminée
-    resultats: list[dict]       # liste des gagnants avec info sur leur main et kickers
+    joueur_courant: str | None
+    finie: bool  # True si la partie est terminée
+    resultats: list[dict]  # liste des gagnants avec info sur leur main et kickers
     rejouer: dict[str, bool | None]
-    liste_attente: list[dict] 
+    liste_attente: list[dict]
     message_retour: str
 
 
@@ -51,39 +42,39 @@ def miser_joueur(payload: JoueurEnJeu, montant: int, partie: int):
     partie_jouee = tables_service.parties[partie]
     partie_jouee_service = PartieService(partie_jouee)
     fait, etat_partie, message = partie_jouee_service.miser(joueur, montant)
-    if fait : 
+    if fait:
         message = "Action effectuée"
         partie_retour = RetourPartie(
-            id_partie = etat_partie.id_partie,
-            tour_actuel = etat_partie.tour_actuel,
-            joueurs = etat_partie.joueurs,       
-            board = etat_partie.board,
-            pot = etat_partie.pot,
-            pots_secondaires = etat_partie.pots_secondaires,
-            mise_max = etat_partie.mise_max,
-            joueur_courant = etat_partie.joueur_courant,
-            finie = etat_partie.finie,             
-            resultats = etat_partie.resultats,     
-            rejouer = etat_partie.rejouer,
-            liste_attente = etat_partie.liste_attente, 
-            message_retour = message
+            id_partie=etat_partie.id_partie,
+            tour_actuel=etat_partie.tour_actuel,
+            joueurs=etat_partie.joueurs,
+            board=etat_partie.board,
+            pot=etat_partie.pot,
+            pots_secondaires=etat_partie.pots_secondaires,
+            mise_max=etat_partie.mise_max,
+            joueur_courant=etat_partie.joueur_courant,
+            finie=etat_partie.finie,
+            resultats=etat_partie.resultats,
+            rejouer=etat_partie.rejouer,
+            liste_attente=etat_partie.liste_attente,
+            message_retour=message,
         )
         return partie_retour
     else:
         partie_retour = RetourPartie(
-            id_partie = etat_partie.id_partie,
-            tour_actuel = etat_partie.tour_actuel,
-            joueurs = etat_partie.joueurs,        # contient : pseudo, solde, mise, actif
-            board = etat_partie.board,
-            pot = etat_partie.pot,
-            pots_secondaires = etat_partie.pots_secondaires,
-            mise_max = etat_partie.mise_max,
-            joueur_courant = etat_partie.joueur_courant,
-            finie = etat_partie.finie,             # True si la partie est terminée
-            resultats = etat_partie.resultats,      # liste des gagnants avec info sur leur main et kickers
-            rejouer = etat_partie.rejouer,
-            liste_attente = etat_partie.liste_attente, 
-            message_retour = message
+            id_partie=etat_partie.id_partie,
+            tour_actuel=etat_partie.tour_actuel,
+            joueurs=etat_partie.joueurs,  # contient : pseudo, solde, mise, actif
+            board=etat_partie.board,
+            pot=etat_partie.pot,
+            pots_secondaires=etat_partie.pots_secondaires,
+            mise_max=etat_partie.mise_max,
+            joueur_courant=etat_partie.joueur_courant,
+            finie=etat_partie.finie,  # True si la partie est terminée
+            resultats=etat_partie.resultats,  # liste gagnants avec info sur leur main et kickers
+            rejouer=etat_partie.rejouer,
+            liste_attente=etat_partie.liste_attente,
+            message_retour=message,
         )
         return partie_retour
 
@@ -99,41 +90,42 @@ def se_coucher_joueur(payload: JoueurEnJeu, partie: int):
     partie_jouee = tables_service.parties[partie]
     partie_jouee_service = PartieService(partie_jouee)
     fait, etat_partie, message = partie_jouee_service.se_coucher(joueur)
-    if fait : 
+    if fait:
         message = "Action effectuée"
         partie_retour = RetourPartie(
-            id_partie = etat_partie.id_partie,
-            tour_actuel = etat_partie.tour_actuel,
-            joueurs = etat_partie.joueurs,       
-            board = etat_partie.board,
-            pot = etat_partie.pot,
-            pots_secondaires = etat_partie.pots_secondaires,
-            mise_max = etat_partie.mise_max,
-            joueur_courant = etat_partie.joueur_courant,
-            finie = etat_partie.finie,             
-            resultats = etat_partie.resultats,     
-            rejouer = etat_partie.rejouer,
-            liste_attente = etat_partie.liste_attente, 
-            message_retour = message
+            id_partie=etat_partie.id_partie,
+            tour_actuel=etat_partie.tour_actuel,
+            joueurs=etat_partie.joueurs,
+            board=etat_partie.board,
+            pot=etat_partie.pot,
+            pots_secondaires=etat_partie.pots_secondaires,
+            mise_max=etat_partie.mise_max,
+            joueur_courant=etat_partie.joueur_courant,
+            finie=etat_partie.finie,
+            resultats=etat_partie.resultats,
+            rejouer=etat_partie.rejouer,
+            liste_attente=etat_partie.liste_attente,
+            message_retour=message,
         )
         return partie_retour
     else:
         partie_retour = RetourPartie(
-            id_partie = etat_partie.id_partie,
-            tour_actuel = etat_partie.tour_actuel,
-            joueurs = etat_partie.joueurs,        # contient : pseudo, solde, mise, actif
-            board = etat_partie.board,
-            pot = etat_partie.pot,
-            pots_secondaires = etat_partie.pots_secondaires,
-            mise_max = etat_partie.mise_max,
-            joueur_courant = etat_partie.joueur_courant,
-            finie = etat_partie.finie,             # True si la partie est terminée
-            resultats = etat_partie.resultats,      # liste des gagnants avec info sur leur main et kickers
-            rejouer = etat_partie.rejouer,
-            liste_attente = etat_partie.liste_attente, 
-            message_retour = message
+            id_partie=etat_partie.id_partie,
+            tour_actuel=etat_partie.tour_actuel,
+            joueurs=etat_partie.joueurs,  # contient : pseudo, solde, mise, actif
+            board=etat_partie.board,
+            pot=etat_partie.pot,
+            pots_secondaires=etat_partie.pots_secondaires,
+            mise_max=etat_partie.mise_max,
+            joueur_courant=etat_partie.joueur_courant,
+            finie=etat_partie.finie,  # True si la partie est terminée
+            resultats=etat_partie.resultats,  # liste gagnants avec info sur leur main et kickers
+            rejouer=etat_partie.rejouer,
+            liste_attente=etat_partie.liste_attente,
+            message_retour=message,
         )
         return partie_retour
+
 
 # Endpoint POST /joueur_en_jeu/suivre
 @router.post("/suivre", response_model=RetourPartie)
@@ -147,39 +139,39 @@ def suivre_joueur(payload: JoueurEnJeu, partie: int):
     partie_jouee = tables_service.parties[partie]
     partie_jouee_service = PartieService(partie_jouee)
     fait, etat_partie, message = partie_jouee_service.suivre(joueur)
-    if fait : 
+    if fait:
         message = "Action effectuée"
         partie_retour = RetourPartie(
-            id_partie = etat_partie.id_partie,
-            tour_actuel = etat_partie.tour_actuel,
-            joueurs = etat_partie.joueurs,       
-            board = etat_partie.board,
-            pot = etat_partie.pot,
-            pots_secondaires = etat_partie.pots_secondaires,
-            mise_max = etat_partie.mise_max,
-            joueur_courant = etat_partie.joueur_courant,
-            finie = etat_partie.finie,             
-            resultats = etat_partie.resultats,     
-            rejouer = etat_partie.rejouer,
-            liste_attente = etat_partie.liste_attente, 
-            message_retour = message
+            id_partie=etat_partie.id_partie,
+            tour_actuel=etat_partie.tour_actuel,
+            joueurs=etat_partie.joueurs,
+            board=etat_partie.board,
+            pot=etat_partie.pot,
+            pots_secondaires=etat_partie.pots_secondaires,
+            mise_max=etat_partie.mise_max,
+            joueur_courant=etat_partie.joueur_courant,
+            finie=etat_partie.finie,
+            resultats=etat_partie.resultats,
+            rejouer=etat_partie.rejouer,
+            liste_attente=etat_partie.liste_attente,
+            message_retour=message,
         )
         return partie_retour
     else:
         partie_retour = RetourPartie(
-            id_partie = etat_partie.id_partie,
-            tour_actuel = etat_partie.tour_actuel,
-            joueurs = etat_partie.joueurs,        # contient : pseudo, solde, mise, actif
-            board = etat_partie.board,
-            pot = etat_partie.pot,
-            pots_secondaires = etat_partie.pots_secondaires,
-            mise_max = etat_partie.mise_max,
-            joueur_courant = etat_partie.joueur_courant,
-            finie = etat_partie.finie,             # True si la partie est terminée
-            resultats = etat_partie.resultats,      # liste des gagnants avec info sur leur main et kickers
-            rejouer = etat_partie.rejouer,
-            liste_attente = etat_partie.liste_attente, 
-            message_retour = message
+            id_partie=etat_partie.id_partie,
+            tour_actuel=etat_partie.tour_actuel,
+            joueurs=etat_partie.joueurs,  # contient : pseudo, solde, mise, actif
+            board=etat_partie.board,
+            pot=etat_partie.pot,
+            pots_secondaires=etat_partie.pots_secondaires,
+            mise_max=etat_partie.mise_max,
+            joueur_courant=etat_partie.joueur_courant,
+            finie=etat_partie.finie,  # True si la partie est terminée
+            resultats=etat_partie.resultats,  # liste gagnants avec info sur leur main et kickers
+            rejouer=etat_partie.rejouer,
+            liste_attente=etat_partie.liste_attente,
+            message_retour=message,
         )
         return partie_retour
 
@@ -200,39 +192,39 @@ def all_in_joueur(payload: JoueurEnJeu, partie: int):
     if etat_partie.resultats is None:
         etat_partie.resultats = []
     partie_jouee.etat = etat_partie
-    if fait : 
+    if fait:
         message = "Action effectuée"
         partie_retour = RetourPartie(
-            id_partie = etat_partie.id_partie,
-            tour_actuel = etat_partie.tour_actuel,
-            joueurs = etat_partie.joueurs,       
-            board = etat_partie.board,
-            pot = etat_partie.pot,
-            pots_secondaires = etat_partie.pots_secondaires,
-            mise_max = etat_partie.mise_max,
-            joueur_courant = etat_partie.joueur_courant,
-            finie = etat_partie.finie,             
-            resultats = etat_partie.resultats,     
-            rejouer = etat_partie.rejouer,
-            liste_attente = etat_partie.liste_attente, 
-            message_retour = message
+            id_partie=etat_partie.id_partie,
+            tour_actuel=etat_partie.tour_actuel,
+            joueurs=etat_partie.joueurs,
+            board=etat_partie.board,
+            pot=etat_partie.pot,
+            pots_secondaires=etat_partie.pots_secondaires,
+            mise_max=etat_partie.mise_max,
+            joueur_courant=etat_partie.joueur_courant,
+            finie=etat_partie.finie,
+            resultats=etat_partie.resultats,
+            rejouer=etat_partie.rejouer,
+            liste_attente=etat_partie.liste_attente,
+            message_retour=message,
         )
         return partie_retour
     else:
         partie_retour = RetourPartie(
-            id_partie = etat_partie.id_partie,
-            tour_actuel = etat_partie.tour_actuel,
-            joueurs = etat_partie.joueurs,        # contient : pseudo, solde, mise, actif
-            board = etat_partie.board,
-            pot = etat_partie.pot,
-            pots_secondaires = etat_partie.pots_secondaires,
-            mise_max = etat_partie.mise_max,
-            joueur_courant = etat_partie.joueur_courant,
-            finie = etat_partie.finie,             # True si la partie est terminée
-            resultats = etat_partie.resultats,      # liste des gagnants avec info sur leur main et kickers
-            rejouer = etat_partie.rejouer,
-            liste_attente = etat_partie.liste_attente, 
-            message_retour = message
+            id_partie=etat_partie.id_partie,
+            tour_actuel=etat_partie.tour_actuel,
+            joueurs=etat_partie.joueurs,  # contient : pseudo, solde, mise, actif
+            board=etat_partie.board,
+            pot=etat_partie.pot,
+            pots_secondaires=etat_partie.pots_secondaires,
+            mise_max=etat_partie.mise_max,
+            joueur_courant=etat_partie.joueur_courant,
+            finie=etat_partie.finie,  # True si la partie est terminée
+            resultats=etat_partie.resultats,  # liste gagnants avec info sur leur main et kickers
+            rejouer=etat_partie.rejouer,
+            liste_attente=etat_partie.liste_attente,
+            message_retour=message,
         )
         return partie_retour
 
@@ -247,41 +239,42 @@ def voir_etat_partie(partie: int):
     partie_jouee = tables_service.parties[partie]
     partie_jouee_service = PartieService(partie_jouee)
     fait, etat_partie, message = partie_jouee_service.voir_etat_partie()
-    if fait : 
+    if fait:
         message = "Action effectuée"
         partie_retour = RetourPartie(
-            id_partie = etat_partie.id_partie,
-            tour_actuel = etat_partie.tour_actuel,
-            joueurs = etat_partie.joueurs,       
-            board = etat_partie.board,
-            pot = etat_partie.pot,
-            pots_secondaires = etat_partie.pots_secondaires,
-            mise_max = etat_partie.mise_max,
-            joueur_courant = etat_partie.joueur_courant,
-            finie = etat_partie.finie,             
-            resultats = etat_partie.resultats,     
-            rejouer = etat_partie.rejouer,
-            liste_attente = etat_partie.liste_attente, 
-            message_retour = message
+            id_partie=etat_partie.id_partie,
+            tour_actuel=etat_partie.tour_actuel,
+            joueurs=etat_partie.joueurs,
+            board=etat_partie.board,
+            pot=etat_partie.pot,
+            pots_secondaires=etat_partie.pots_secondaires,
+            mise_max=etat_partie.mise_max,
+            joueur_courant=etat_partie.joueur_courant,
+            finie=etat_partie.finie,
+            resultats=etat_partie.resultats,
+            rejouer=etat_partie.rejouer,
+            liste_attente=etat_partie.liste_attente,
+            message_retour=message,
         )
         return partie_retour
     else:
         partie_retour = RetourPartie(
-            id_partie = etat_partie.id_partie,
-            tour_actuel = etat_partie.tour_actuel,
-            joueurs = etat_partie.joueurs,        # contient : pseudo, solde, mise, actif
-            board = etat_partie.board,
-            pot = etat_partie.pot,
-            pots_secondaires = etat_partie.pots_secondaires,
-            mise_max = etat_partie.mise_max,
-            joueur_courant = etat_partie.joueur_courant,
-            finie = etat_partie.finie,             # True si la partie est terminée
-            resultats = etat_partie.resultats,      # liste des gagnants avec info sur leur main et kickers
-            rejouer = etat_partie.rejouer,
-            liste_attente = etat_partie.liste_attente, 
-            message_retour = message
+            id_partie=etat_partie.id_partie,
+            tour_actuel=etat_partie.tour_actuel,
+            joueurs=etat_partie.joueurs,  # contient : pseudo, solde, mise, actif
+            board=etat_partie.board,
+            pot=etat_partie.pot,
+            pots_secondaires=etat_partie.pots_secondaires,
+            mise_max=etat_partie.mise_max,
+            joueur_courant=etat_partie.joueur_courant,
+            finie=etat_partie.finie,  # True si la partie est terminée
+            resultats=etat_partie.resultats,  # liste gagnants avec info sur leur main et kickers
+            rejouer=etat_partie.rejouer,
+            liste_attente=etat_partie.liste_attente,
+            message_retour=message,
         )
         return partie_retour
+
 
 # Endpoint GET /joueur_en_jeu/voir_mes_cartes
 @router.get("/voir_mes_cartes", response_model=str)
@@ -306,10 +299,11 @@ def quitter_table_joueur(pseudo: str, id_table: int):
     Endpoint permettant à un joueur de quitter une table.
     """
     quitter = tables_service.quitter_table(pseudo, id_table)
-    if quitter == 1: 
+    if quitter == 1:
         return "Table quittée"
     else:
         return "Joueur non supprimé (non présent certainement)"
+
 
 # Endpoint POST /joueur_en_jeu/decision_rejouer
 @router.post("/decision_rejouer", response_model=RetourPartie)
@@ -335,7 +329,7 @@ def decision_rejouer(pseudo: str, veut_rejouer: bool, partie: int):
             resultats=etat_partie.resultats,
             rejouer=etat_partie.rejouer,
             liste_attente=etat_partie.liste_attente,
-            message_retour=message
+            message_retour=message,
         )
         return partie_retour
     else:
@@ -352,6 +346,6 @@ def decision_rejouer(pseudo: str, veut_rejouer: bool, partie: int):
             resultats=etat_partie.resultats,
             rejouer=etat_partie.rejouer,
             liste_attente=etat_partie.liste_attente,
-            message_retour=message
+            message_retour=message,
         )
         return partie_retour

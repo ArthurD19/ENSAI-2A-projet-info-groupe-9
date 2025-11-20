@@ -4,6 +4,7 @@ from src.view.vue_abstraite import VueAbstraite
 from src.view.session import Session
 from src.client.api_client import post, APIError
 from src.service.joueur_service import JoueurService
+from src.utils.log_decorator import log
 import os
 
 
@@ -12,6 +13,7 @@ class InscriptionVue(VueAbstraite):
         super().__init__(titre)
         self.tables = tables
 
+    @log
     def choisir_menu(self):
         """Demande pseudo, mot de passe et code de parrainage, puis crée le joueur via API"""
 
@@ -23,7 +25,7 @@ class InscriptionVue(VueAbstraite):
         if len(pseudo) < 3:
             print("Le pseudo doit contenir au moins 3 caractères.")
             input("Appuyez sur Entrée pour réessayer...")
-            return self 
+            return self
 
         # Demande du mot de passe avec validation
         mdp = inquirer.secret(
@@ -51,7 +53,7 @@ class InscriptionVue(VueAbstraite):
         try:
             # Appel HTTP POST à l'API
             res = post("/joueurs/inscription", json=payload)
-            
+
             # Connexion automatique après création
             Session().connexion(res["pseudo"])
             JoueurService().se_connecter(res["pseudo"], mdp)

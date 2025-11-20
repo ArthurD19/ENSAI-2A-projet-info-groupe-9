@@ -43,7 +43,7 @@ class PartieService:
             return False, self.partie.etat, (
                 f"Tu peux miser la grosse blinde, deux fois celle-ci ou plus"
             )
-        
+
         limite_max = self.partie.mise_max_autorisee()
         if montant + joueur.mise > limite_max:
             return False, self.partie.etat, (

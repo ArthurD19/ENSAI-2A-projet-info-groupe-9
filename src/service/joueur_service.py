@@ -55,7 +55,7 @@ class JoueurService:
             return None
 
         if self.pseudo_deja_utilise(pseudo_joueur):
-            return None  
+            return None
 
         nouveau_joueur = {
             "pseudo": pseudo_joueur,
@@ -158,14 +158,14 @@ class JoueurService:
     @log
     def se_connecter(self, pseudo, mdp) -> tuple[bool, str | dict]:
         """
-        Connexion d'un joueur à notre serveur par vérification des informations de connexion 
+        Connexion d'un joueur à notre serveur par vérification des informations de connexion
         dans la base de données à l'aide de la dao.
 
         Parameters
         ----------
         pseudo: str
             pseudo du joueur qui veut se connecter
-        mdp: str 
+        mdp: str
             mot de passe saisi par le joueur voulant se connecter
         """
         hashed = hash_password(mdp, pseudo)
@@ -178,7 +178,6 @@ class JoueurService:
         else:
             return False, "Pseudo ou mot de passe invalide."
 
-
     @log
     def se_deconnecter(self, pseudo) -> bool:
         """
@@ -186,10 +185,8 @@ class JoueurService:
         Retourne True si la déconnexion a bien été appliquée en base.
         """
         result = JoueurDao().deconnecter(pseudo)
-        Session().deconnexion()  # ← Toujours nettoyer la session locale
+        Session().deconnexion()
         return result
-
-
 
     @log
     def pseudo_deja_utilise(self, pseudo) -> bool:
@@ -242,7 +239,7 @@ class JoueurService:
     @log
     def generer_code_parrainage(self, pseudo):
         """
-        Vérifie si un joueur à déjà générer un code de parrainage et en génère un si le joueur n'en 
+        Vérifie si un joueur à déjà générer un code de parrainage et en génère un si le joueur n'en
         possède pas déjà un et renvoie le code de parrainage créé ou le code déjà existant.
 
         Parameters

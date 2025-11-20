@@ -1,8 +1,9 @@
-from src.business_object.cartes import Carte, Deck
+from src.business_object.cartes import Deck
 from src.business_object.joueurs import Joueur
 
+
 class Table:
-    def __init__(self, id, blind=10)->None:
+    def __init__(self, id, blind=10) -> None:
         self.id = id
         self.joueurs = []
         self.blind = blind
@@ -11,7 +12,7 @@ class Table:
         self.deck = Deck()
         self.board = []
 
-    def ajouter_joueur(self, joueur: Joueur)->int:
+    def ajouter_joueur(self, joueur: Joueur) -> int:
         """ajoute un joueur a la table"""
         if joueur in self.joueurs:
             return 2
@@ -21,13 +22,13 @@ class Table:
         self.joueurs.append(joueur)
         return 1
 
-    def supprimer_joueur(self, joueur: Joueur)->None:
+    def supprimer_joueur(self, joueur: Joueur) -> None:
         """enleve un joueur de la table"""
         if joueur not in self.joueurs:
             raise ValueError("Ce joueur n'est pas à la table.")
         self.joueurs.remove(joueur)
 
-    def reset_table(self)->None:
+    def reset_table(self) -> None:
         """Prépare la table pour une nouvelle main."""
         self.pot = 0
         self.board = []
@@ -35,5 +36,5 @@ class Table:
         self.deck.remplir()
         self.deck.melanger()
 
-    def __repr__(self)->str:
+    def __repr__(self) -> str:
         return f"Table {self.id} - Joueurs: {[j.pseudo for j in self.joueurs]}"

@@ -1,6 +1,3 @@
-import random
-
-from src.business_object.cartes import Carte
 from src.business_object.joueurs import Joueur
 from src.business_object.distrib import Distrib
 from src.business_object.comptage import Comptage
@@ -14,14 +11,14 @@ class EtatPartie:
     def __init__(self):
         self.id_partie: int = -1
         self.tour_actuel: str = "preflop"
-        self.joueurs: list[dict] = []           # contient : pseudo, solde, mise, actif
+        self.joueurs: list[dict] = []  # contient : pseudo, solde, mise, actif
         self.board: list[str] = []
         self.pot: int = 0
         self.pots_secondaires: dict = {}
         self.mise_max: int = 0
         self.joueur_courant: str | None = None
-        self.finie: bool = True                # True si la partie est terminée
-        self.resultats: list[dict] = []        # liste des gagnants avec info sur leur main et kickers
+        self.finie: bool = True   # True si la partie est terminée
+        self.resultats: list[dict] = []  # liste des gagnants avec info sur leur main et kickers
         self.rejouer: dict[str, bool | None] = {}
         self.liste_attente: list[dict] = []
 
@@ -61,7 +58,8 @@ class Partie:
         # pots secondaires (clé pseudo -> montant)
         try:
             # comptage.pots_perso est un dict mapping joueur->montant
-            self.etat.pots_secondaires = {j.pseudo: montant for j, montant in self.comptage.pots_perso.items()}
+            self.etat.pots_secondaires = {
+                j.pseudo: montant for j, montant in self.comptage.pots_perso.items()}
         except Exception:
             # fallback si structure différente
             self.etat.pots_secondaires = getattr(self.comptage, "pots_secondaires", {})
@@ -108,7 +106,8 @@ class Partie:
         self.table.indice_dealer = (self.table.indice_dealer + 1) % nb_joueurs
 
         # Initialiser le tracking des joueurs ayant joué (actifs non all-in)
-        self.joueurs_ayant_joue = {j.pseudo: False for j in self.table.joueurs if j.actif and j.solde > 0}
+        self.joueurs_ayant_joue = {
+            j.pseudo: False for j in self.table.joueurs if j.actif and j.solde > 0}
 
         self.etat.finie = False
         self._mettre_a_jour_etat()
@@ -146,7 +145,8 @@ class Partie:
             return  # annoncer_resultats mettra l'état à jour
 
         # Réinitialiser les flags de qui a joué : seuls les joueurs actifs non all-in devront jouer
-        self.joueurs_ayant_joue = {j.pseudo: False for j in self.table.joueurs if j.actif and j.solde > 0}
+        self.joueurs_ayant_joue = {
+            j.pseudo: False for j in self.table.joueurs if j.actif and j.solde > 0}
 
         # Considérer que les joueurs all-in ont déjà "joué"
         for j in self.table.joueurs:
@@ -244,14 +244,14 @@ class Partie:
                     self.comptage.pot += gagnant.mise
                     gagnant.mise = 0
 
-                # On veut s'assurer que l'état final est propre : marquer fin, invalider joueur courant
+                # S'assurer que l'état final est propre : marquer fin, invalider joueur courant
                 self.etat.finie = True
                 self.indice_joueur_courant = -1
                 self.annoncer_resultats()
                 # annoncer_resultats appelle _mettre_a_jour_etat et retourne
                 return self.etat
 
-        # Si la mise_max a augmenté (raise / all-in qui augmente), 
+        # Si la mise_max a augmenté (raise / all-in qui augmente),
         # alors tous les joueurs actifs non all-in doivent rejouer.
         if self.mise_max > mise_max_avant:
             self.joueurs_ayant_joue = {
@@ -270,7 +270,6 @@ class Partie:
         # Vérifier si le tour est terminé (all-in ou tous ont joué)
         if self._tour_termine():
             self.passer_tour()
-            # passer_tour mettra à jour l'état si nécessaire (et parfois appellera annoncer_resultats)
             return self.etat
 
         # Déterminer le prochain joueur actif (skip: non-actif, all-in, ou qui a déjà joué)
@@ -431,7 +430,6 @@ class Partie:
         for j in self.table.joueurs:
             JoueurDao().mettre_a_jour_solde(j.pseudo, j.solde)
         return self.etat
-    
 
     # ---------------------------
     # Gestion du relancement / nouvelle main
@@ -475,7 +473,6 @@ class Partie:
         # Relancer la partie
         self.initialiser_blinds()
         return True
-
 
     # ---------------------------
     # Liste d'attente / intégration
@@ -528,7 +525,8 @@ class Partie:
         joueurs_valides = [j for j in self.table.joueurs if j.solde >= Partie.GROSSE_BLIND]
 
         # Ajouter les joueurs en liste d'attente avec solde suffisant
-        pseudos_en_attente = {j['pseudo'] for j in self.etat.liste_attente if j['solde'] >= Partie.GROSSE_BLIND}
+        pseudos_en_attente = {
+            j['pseudo'] for j in self.etat.liste_attente if j['solde'] >= Partie.GROSSE_BLIND}
         pseudos_rejouent = {pseudo for pseudo, rejoue in self.etat.rejouer.items() if rejoue}
 
         # Si moins de 2 joueurs combinés veulent rejouer / sont en attente, on ne relance pas
@@ -563,15 +561,12 @@ class Partie:
             self.etat.finie = True
             self._mettre_a_jour_etat()
 
-
     # ---------------------------
     # our ne pas gerer les pots secondaire
     # ---------------------------
-    def mise_max_autorisee(self)->int:
+    def mise_max_autorisee(self) -> int:
         return min(
             j.solde + j.mise
             for j in self.table.joueurs
             if j.actif
         )
-
-

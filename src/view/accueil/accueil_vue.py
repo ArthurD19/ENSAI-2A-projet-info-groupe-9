@@ -1,17 +1,18 @@
-# src/view/accueil/accueil_vue.py
 from InquirerPy import inquirer
 from src.view.vue_abstraite import VueAbstraite
-from src.view.session import Session
+from src.utils.log_decorator import log
 
 
 class AccueilVue(VueAbstraite):
     """Vue d'accueil de l'application"""
 
+    @log
     def __init__(self, titre: str = "", tables=None):
         self.titre = titre
         super().__init__(titre)
         self.tables = tables
 
+    @log
     def choisir_menu(self):
         """Affiche le menu d'accueil et oriente vers la vue suivante"""
 

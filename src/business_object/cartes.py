@@ -39,40 +39,40 @@ class combinaisons(Enum):
 
 
 class Carte:
-    def __init__(self, couleur: str, valeur: str)-> None:
+    def __init__(self, couleur: str, valeur: str) -> None:
         self.couleur = couleur
         self.valeur = valeur
 
-    def __str__(self)->str:
+    def __str__(self) -> str:
         return f"{self.valeur.value} de {self.couleur.value}"
 
-    def __repr__(self)->str:
+    def __repr__(self) -> str:
         return f"Carte({self.valeur.value}, {self.couleur.value})"
 
 
 class Deck:
-    def __init__(self)->None:
+    def __init__(self) -> None:
         self.cartes = []
 
-    def remplir(self)->None:
+    def remplir(self) -> None:
         """ rempli un deck avec toutes les cartes"""
         self.cartes = [
             Carte(couleur, valeur) for couleur in couleurs for valeur in valeurs
             ]
 
-    def melanger(self)->None:
+    def melanger(self) -> None:
         """ mélange le deck"""
         random.shuffle(self.cartes)
 
-    def tirer(self)->Carte:
+    def tirer(self) -> Carte:
         """tire une carte du deck"""
         if len(self.cartes) < 1:
             raise ValueError("Pas assez de cartes dans le deck.")
         return self.cartes.pop()
 
-    def ajouter(self, carte: Carte)->None:
+    def ajouter(self, carte: Carte) -> None:
         "ajoute une carte dans le deck"
         self.cartes.append(carte)
 
-    def __len__(self)->int:
+    def __len__(self) -> int:
         return len(self.cartes)

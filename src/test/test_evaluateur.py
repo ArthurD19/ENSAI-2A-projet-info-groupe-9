@@ -2,6 +2,7 @@ import pytest
 from src.business_object.cartes import Carte, valeurs, couleurs, combinaisons
 from src.business_object.evaluateur import EvaluateurMain
 
+
 def carte(valeur, couleur):
     """Créer une carte."""
     return Carte(valeur=valeur, couleur=couleur)
@@ -170,6 +171,7 @@ def test_comparer_egalite():
     eval2 = EvaluateurMain(cartes2).evalue_main()
     assert EvaluateurMain.comparer_mains(eval1, eval2) == 0
 
+
 def test_valeurs_numeriques_et_compter_occurrences():
     cartes = [
         carte(valeurs.AS, couleurs.COEUR),
@@ -187,6 +189,7 @@ def test_valeurs_numeriques_et_compter_occurrences():
     assert counts[14] == 2
     assert counts[2] == 2
     assert counts[3] == 1
+
 
 def test_is_flush_true_et_false():
     cartes_flush = [
@@ -208,6 +211,7 @@ def test_is_flush_true_et_false():
     assert evaluateur_flush._is_flush()[0] is True
     assert evaluateur_non_flush._is_flush()[0] is False
 
+
 def test_is_straight_true_et_false():
     cartes_straight = [
         carte(valeurs.DEUX, couleurs.COEUR),
@@ -225,8 +229,9 @@ def test_is_straight_true_et_false():
     ]
     evaluateur_straight = EvaluateurMain(cartes_straight)
     evaluateur_non_straight = EvaluateurMain(cartes_non_straight)
-    assert evaluateur_straight._is_straight([2,3,4,5,6])[0] is True
-    assert evaluateur_non_straight._is_straight([2,3,5,6,8])[0] is False
+    assert evaluateur_straight._is_straight([2, 3, 4, 5, 6])[0] is True
+    assert evaluateur_non_straight._is_straight([2, 3, 5, 6, 8])[0] is False
+
 
 def test_numerique_to_enum():
     cartes = [
@@ -267,6 +272,7 @@ def test_quinte_flush_simple():
     # les valeurs triées doivent être de la quinte
     assert [v for v in resultat.tiebreaker_cards] == [valeurs.ROI, valeurs.DAME, valeurs.VALET, valeurs.DIX, valeurs.NEUF]
 
+
 def test_comparer_mains_retour_159_161():
     # main1: paire d'As
     cartes1 = [
@@ -286,11 +292,12 @@ def test_comparer_mains_retour_159_161():
     ]
     main1 = EvaluateurMain(cartes1).evalue_main()
     main2 = EvaluateurMain(cartes2).evalue_main()
-    
+
     # main1 > main2 → return 1 (ligne 159)
     assert EvaluateurMain.comparer_mains(main1, main2) == 1
     # main2 < main1 → return -1 (ligne 161)
     assert EvaluateurMain.comparer_mains(main2, main1) == -1
+
 
 def test_quinte_basse_as():
     cartes = [

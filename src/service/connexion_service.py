@@ -5,6 +5,7 @@ from dao.joueur_dao import JoueurDao
 
 from view.session import Session
 
+
 class ConnexionService:
     """Service dédié à la connexion et déconnexion des joueurs"""
 

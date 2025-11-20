@@ -2,6 +2,7 @@ from InquirerPy import inquirer
 from src.view.vue_abstraite import VueAbstraite
 from src.view.session import Session
 from src.client.api_client import post, APIError
+from src.utils.log_decorator import log
 
 
 class ConnexionVue(VueAbstraite):
@@ -9,6 +10,7 @@ class ConnexionVue(VueAbstraite):
         super().__init__(titre)
         self.tables = tables
 
+    @log
     def choisir_menu(self):
         pseudo = inquirer.text(message="Entrez votre pseudo : ").execute()
         mdp = inquirer.secret(message="Entrez votre mot de passe :").execute()

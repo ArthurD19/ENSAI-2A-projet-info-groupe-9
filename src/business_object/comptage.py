@@ -1,21 +1,22 @@
 from src.business_object.joueurs import Joueur
 
-class Comptage:
-    def __init__(self)->None:
-        self.pot = 0
-        self.pots_perso = {}  
 
-    def ajouter_pot_perso(self, joueur: Joueur, montant: int)->None:
+class Comptage:
+    def __init__(self) -> None:
+        self.pot = 0
+        self.pots_perso = {}
+
+    def ajouter_pot_perso(self, joueur: Joueur, montant: int) -> None:
         "ajoute la mise au pot secondaire"""
         self.pots_perso[joueur] = self.pots_perso.get(joueur, 0) + montant
 
-    def ajouter_pot(self)->None:
+    def ajouter_pot(self) -> None:
         """Ajoute toutes les mises perso au pot principal et reset les mises perso"""
         for montant in self.pots_perso.values():
             self.pot += montant
         self.pots_perso = {}
 
-    def distrib_pots(self, gagnants: list[Joueur])->None:
+    def distrib_pots(self, gagnants: list[Joueur]) -> None:
         """Distribue le pot principal aux gagnants"""
         if not gagnants:
             return

@@ -1,17 +1,12 @@
 from fastapi import APIRouter, HTTPException, status
-
 from pydantic import BaseModel
-
-from src.dao.joueur_dao import JoueurDao 
+from src.dao.joueur_dao import JoueurDao
 from src.dao.statistique_dao import StatistiqueDao
-
 from src.service.joueur_service import JoueurService
-from src.service.partie_service import PartieService
-from src.service.table_service import TableService
-
-from src.api.var_utiles import tables_service, scheduler
+from src.api.var_utiles import tables_service
 
 router = APIRouter(prefix="/joueur_connecte", tags=["joueur_connecte"])
+
 
 # Modèle de sortie pour voir une table
 class TableSortie(BaseModel):
@@ -20,6 +15,7 @@ class TableSortie(BaseModel):
     blind: int
     pot: int
     indice_dealer: int
+
 
 # Modèle de sortie pour rejoindre une table
 class TableRejointe(BaseModel):
@@ -37,7 +33,6 @@ def code_parrainage_joueur(pseudo: str):
     """
 
     joueur = JoueurDao().trouver_par_pseudo(pseudo)
-    
     if not joueur:
         raise HTTPException(status_code=401, detail="Pseudo inconnu")
     if joueur["code_parrainage"] is None:
@@ -52,7 +47,8 @@ def code_parrainage_joueur(pseudo: str):
 def stats_joueur(pseudo: str):
     """
     Endpoint de récupération de ses statistiques par un joueur.
-    Met à jour le meilleur classement si le joueur a une meilleure place dans le classement des portefeuilles.
+    Met à jour le meilleur classement si le joueur a une meilleure place dans le classement des
+    portefeuilles.
     """
 
     dao_stat = StatistiqueDao()
@@ -64,7 +60,7 @@ def stats_joueur(pseudo: str):
         raise HTTPException(status_code=401, detail="Joueur inconnu ou n'ayant pas de statistiques")
 
     # Calculer le classement actuel par portefeuille
-    classement = dao_joueur.classement_par_portefeuille()  
+    classement = dao_joueur.classement_par_portefeuille()
     for i, joueur in enumerate(classement, start=1):
         if joueur["pseudo"] == pseudo:
             classement_actuel = i
@@ -90,7 +86,6 @@ def portefeuille_joueur(pseudo: str):
     """
 
     valeur = JoueurDao().valeur_portefeuille(pseudo)
-    
     if valeur is not None:
         return valeur
     else:
@@ -107,6 +102,7 @@ def voir_classement_joueur():
     classement = [dict(row) for row in classement_raw]
     return classement
 
+
 # Endpoint POST /joueur_connecte/rejoindre_table
 @router.post("/rejoindre_table", response_model=TableRejointe)
 def rejoindre_table_joueur(pseudo: str, id_table: int):
@@ -120,6 +116,7 @@ def rejoindre_table_joueur(pseudo: str, id_table: int):
     )
     return reponse
 
+
 # Endpoint GET /joueur_connecte/voir_table
 @router.get("/voir_table", response_model=TableSortie)
 def voir_table(id_table: int):
@@ -128,13 +125,14 @@ def voir_table(id_table: int):
     """
     table = tables_service.get_table(id_table)
     table_sortie = TableSortie(
-        id = table.id,
-        nombre_joueurs = len(table.joueurs),
-        blind = table.blind,
-        pot = table.pot,
-        indice_dealer = table.indice_dealer,
+        id=table.id,
+        nombre_joueurs=len(table.joueurs),
+        blind=table.blind,
+        pot=table.pot,
+        indice_dealer=table.indice_dealer,
     )
     return table_sortie
+
 
 # Endpoint GET /joueur_connecte/voir_tables
 @router.get("/voir_tables", response_model=list[dict])
@@ -150,6 +148,7 @@ def voir_tables():
             "blind": table["blind"]
         })
     return etat
+
 
 # Endpoint POST /joueur_connecte/deconnexion
 @router.post("/deconnexion", status_code=status.HTTP_204_NO_CONTENT)

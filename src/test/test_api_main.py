@@ -1,4 +1,3 @@
-import pytest
 from fastapi.testclient import TestClient
 from src.api.api_main import app
 
@@ -17,4 +16,3 @@ def test_routes_exist():
     assert "/" in paths
     # Vérifie au moins un endpoint lié aux joueurs
     assert any("joueur" in p for p in paths)
-

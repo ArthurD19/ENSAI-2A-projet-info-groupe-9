@@ -4,6 +4,7 @@ from src.view.session import Session
 from src.view.menu_joueur_vue import MenuJoueurVue
 from src.view.menu_table_vue import MenuTableVue
 from src.client.api_client import get, post, APIError
+from src.utils.log_decorator import log
 
 
 class MenuRejoindreTableVue(VueAbstraite):
@@ -13,6 +14,7 @@ class MenuRejoindreTableVue(VueAbstraite):
         super().__init__(message)
         self.pseudo = Session().joueur
 
+    @log
     def choisir_menu(self):
         self.afficher()
 
@@ -52,7 +54,7 @@ class MenuRejoindreTableVue(VueAbstraite):
                 print("")
                 input("Appuyez sur Entrée pour continuer...")
                 return MenuTableVue(id_table=id_table)
-            else: 
+            else:
                 print("")
                 print(f"{res["message"]}")
                 print("")
@@ -62,6 +64,3 @@ class MenuRejoindreTableVue(VueAbstraite):
             print(f"\nErreur API : {e}\n")
             input("Appuyez sur Entrée pour revenir au menu précédent...")
             return self
-
-        
-        

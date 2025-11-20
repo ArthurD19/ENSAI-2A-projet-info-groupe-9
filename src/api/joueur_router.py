@@ -1,8 +1,7 @@
 from fastapi import APIRouter, HTTPException
-
 from pydantic import BaseModel
-
 from src.service.joueur_service import JoueurService
+
 
 router = APIRouter(prefix="/joueurs", tags=["joueurs"])
 
@@ -65,7 +64,8 @@ def inscription_joueur(payload: JoueurInscription):
     # Vérifie si pseudo déjà utilisé
     service = JoueurService()
     if service.pseudo_deja_utilise(payload.pseudo):
-        raise HTTPException(status_code=409, detail=f"Le pseudo '{payload.pseudo}' est déjà utilisé.")
+        raise HTTPException(
+            status_code=409, detail=f"Le pseudo '{payload.pseudo}' est déjà utilisé.")
 
     if not code_parrainage:
         joueur = service.creer_sans_code_parrainage(payload.pseudo, payload.mdp)
@@ -82,6 +82,3 @@ def inscription_joueur(payload: JoueurInscription):
         code_parrainage=joueur.get("code_parrainage"),
         portefeuille=int(joueur["portefeuille"]),
     )
-
-
-

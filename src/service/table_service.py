@@ -26,12 +26,12 @@ class TableService(metaclass=Singleton):
     def get_table(self, id_table: int):
         """
         Fonction qui renvoie la table correspondant à l'identifiant si elle existe, None sinon.
-        
+
         Parameters
         ----------
         id_table: int
             Identifiant de la table que l'on veut récupérer.
-            
+
         Returns
         -------
         Table ou None
@@ -60,7 +60,7 @@ class TableService(metaclass=Singleton):
         """
         # Récupérer le solde depuis la DAO
         solde = JoueurDao().valeur_portefeuille(pseudo)
-        if solde == None:
+        if solde is None:
             solde = 1000
         joueur = Joueur(pseudo, solde)
         # Récupérer la table
@@ -69,7 +69,7 @@ class TableService(metaclass=Singleton):
         if not table:
             return False, None, f"La table {id_table} n'existe pas."
         print("good")
-        
+
         if any(j.pseudo == pseudo for j in table.joueurs):
             partie = self.parties.get(id_table)
             return False, partie.etat, f"{pseudo} est déjà à la table {id_table}."
@@ -95,12 +95,11 @@ class TableService(metaclass=Singleton):
         self.parties[id_table] = partie
         return success, etat, msg
 
-
     @log
     def lister_tables(self):
         """
         Renvoie la liste de toutes les tables
-        
+
         Returns
         -------
         List[dict]: liste de dictionnaire où chaque élément de la liste est un dictionnaire correspondant à la table"""
@@ -138,18 +137,17 @@ class TableService(metaclass=Singleton):
 
         return 1  # Succès
 
-
     @log
     def reset_table(self, id_table):
         table = self.tables[id_table]
         table.reset_table()
         self.tables[id_table] = table
-    
+
     @log
     def etat_tables(self):
         """
         Renvoie la liste de toutes les tables avec les joueurs présents.
-        
+
         Returns
         -------
         List[dict]: une liste où chaque élément contient :

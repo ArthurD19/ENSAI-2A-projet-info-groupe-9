@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from src.utils.singleton import Singleton
+from src.utils.log_decorator import log
 
 
 class Session(metaclass=Singleton):
@@ -15,16 +16,19 @@ class Session(metaclass=Singleton):
         self.joueur = None
         self.debut_connexion = None
 
+    @log
     def connexion(self, joueur):
         """Enregistement des données en session"""
         self.joueur = joueur
         self.debut_connexion = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
+    @log
     def deconnexion(self):
         """Suppression des données de la session"""
         self.joueur = None
         self.debut_connexion = None
 
+    @log
     def afficher(self) -> str:
         """Afficher les informations de connexion"""
         res = "Actuellement en session :\n"

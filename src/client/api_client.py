@@ -5,12 +5,15 @@ import requests
 BASE_URL = os.environ.get("API_BASE_URL", "http://localhost:8000")
 TIMEOUT = 5  # secondes
 
+
 class APIError(Exception):
     pass
+
 
 def _url(path: str) -> str:
     # path doit commencer par '/'
     return BASE_URL.rstrip("/") + path
+
 
 def post(path: str, params=None, json=None):
     try:
@@ -26,6 +29,7 @@ def post(path: str, params=None, json=None):
         raise APIError(f"HTTP {r.status_code}: {r.text}") from e
     except Exception as e:
         raise APIError(str(e)) from e
+
 
 def get(path: str, params=None):
     try:

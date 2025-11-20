@@ -4,17 +4,20 @@ from src.view.session import Session
 from src.view.menu_joueur_vue import MenuJoueurVue
 from src.client.api_client import get, post, APIError
 from src.business_object.partie import Partie
+from src.utils.log_decorator import log
 
 
 class MenuTableVue(VueAbstraite):
     """Vue du menu du joueur pendant une partie de poker via API"""
 
+    @log
     def __init__(self, message="", id_table=None):
         super().__init__(message)
         self.id_table = id_table
         self.pseudo = Session().joueur
         self.joueur_courant = None  # sera mis à jour à chaque affichage
 
+    @log
     def afficher_etat_partie(self):
         """Affiche l'état actuel de la partie et met à jour le joueur courant"""
         try:
@@ -44,6 +47,7 @@ class MenuTableVue(VueAbstraite):
         print("-" * 50)
         return etat
 
+    @log
     def voir_mes_cartes(self):
         """Affiche les cartes du joueur"""
         try:
@@ -52,6 +56,7 @@ class MenuTableVue(VueAbstraite):
         except APIError as e:
             print(f"\nErreur API : {e}\n")
 
+    @log
     def choisir_menu(self):
         """Affichage du menu joueur en table"""
         self.afficher()
@@ -66,7 +71,7 @@ class MenuTableVue(VueAbstraite):
             print(f"\n {gagnant["description"]}\n")
 
             solde = next((j['solde'] for j in etat['joueurs'] if j['pseudo'] == self.pseudo), 0)
-            peut_rejouer = solde >= Partie.GROSSE_BLIND # 20 jetons minimum
+            peut_rejouer = solde >= Partie.GROSSE_BLIND  # 20 jetons minimum
 
             if self.pseudo in etat.get("rejouer", {}):
                 if etat["rejouer"][self.pseudo] is None and peut_rejouer:

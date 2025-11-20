@@ -160,7 +160,6 @@ class JoueurDao(metaclass=Singleton):
             logging.exception(e)
             return None
 
-
     @log
     def deconnecter(self, pseudo: str) -> bool:
         """Met connecte = FALSE pour le joueur et commit immédiatement."""
@@ -176,11 +175,6 @@ class JoueurDao(metaclass=Singleton):
         except Exception as e:
             logging.exception(e)
             return False
-
-
-
-
-    # --------------------------------------------------------------------------
 
     @log
     def valeur_portefeuille(self, pseudo: str) -> int | None:
@@ -278,9 +272,6 @@ class JoueurDao(metaclass=Singleton):
             logging.exception(e)
             return False
 
-    # --------------------------------------------------------------------------
-
-
     @log
     def trouver_par_code_parrainage(self, code: str) -> dict | None:
         """
@@ -339,7 +330,7 @@ class JoueurDao(metaclass=Singleton):
     def joueurs_a_crediter(self):
         """Cherche les joueurs qui ont un portefeuille <= 50 et qui n'ont pas été crédité depuis 7
         jours ou plus.
-        
+
         Returns
         -------
         joueurs: list
@@ -365,12 +356,11 @@ class JoueurDao(metaclass=Singleton):
     @log
     def crediter(self, pseudo: str, montant: int):
         """Crédite portefeuille d'un joueur en lui ajoutant un montant.
-        
         Parameters
         ----------
         pseudo: str
             pseudo du joueur que l'on veut créditer
-        montant: int 
+        montant: int
             valeur dont on veut augmenter la valeur du portefeuille du joueur"""
         try:
             with DBConnection().connection as connection:
@@ -398,7 +388,7 @@ class JoueurDao(metaclass=Singleton):
                     cursor.execute(query, {"pseudo": pseudo})
         except Exception as e:
             logging.info(e)
-            raise    
+            raise
 
     @log
     def mettre_a_jour_solde(self, pseudo: str, nouveau_solde: int) -> bool:

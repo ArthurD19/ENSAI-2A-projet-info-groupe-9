@@ -6,10 +6,12 @@ from src.business_object.joueurs import Joueur
 from src.service.partie_service import PartieService
 from src.service.table_service import TableService
 
+
 @pytest.fixture
 def table_exemple():
     t = Table(id=1, blind=20)
     return t
+
 
 @pytest.fixture
 def partie_service(table_exemple):
@@ -17,18 +19,21 @@ def partie_service(table_exemple):
     service = PartieService(partie)
     return service
 
+
 @pytest.fixture
 def joueur_lucas():
     return Joueur(pseudo="lucas", solde=100)
+
 
 @pytest.fixture
 def joueur_marie():
     return Joueur(pseudo="marie", solde=50)
 
+
 def test_rejoindre_partie_ok(partie_service, joueur_lucas):
     # Ajouter le joueur à la table comme le ferait rejoindre_table
     partie_service.partie.table.ajouter_joueur(joueur_lucas)
-    
+
     success, etat, msg = partie_service.rejoindre_partie(joueur_lucas)
     assert success is True
 
@@ -38,6 +43,7 @@ def test_rejoindre_partie_solde_insuffisant(partie_service):
     success, etat, msg = partie_service.rejoindre_partie(joueur_pauvre)
     assert success is False
     assert "pas assez de jetons" in msg
+
 
 def test_rejoindre_partie_liste_attente(partie_service):
     # Simuler une partie en cours
@@ -61,18 +67,22 @@ def test_rejoindre_partie_liste_attente(partie_service):
     # Vérifier qu'on ne l'a pas ajouté directement à la table
     assert all(j.pseudo != "Charlie" for j in partie_service.partie.table.joueurs)
 
+
 class FakeJoueurDao:
     def valeur_portefeuille(self, pseudo):
         return 100
+
 
 @pytest.fixture(autouse=True)
 def patch_joueur_dao(monkeypatch):
     monkeypatch.setattr("src.dao.joueur_dao.JoueurDao", FakeJoueurDao)
     return FakeJoueurDao()
 
+
 @pytest.fixture
 def service():
     return TableService(nb_tables=1, blind=20)
+
 
 def test_rejoindre_table_ajoute_bien_le_joueur_dans_la_table(service):
     """Test 1 : vérifier uniquement que le joueur est dans la table."""
@@ -85,10 +95,11 @@ def test_rejoindre_table_ajoute_bien_le_joueur_dans_la_table(service):
     assert success is True
     assert any(j.pseudo == pseudo for j in table.joueurs)
 
+
 def test_rejoindre_table_ajoute_joueur_a_la_partie(service):
     """Test 2 : le joueur doit apparaître soit dans les joueurs de la partie,
     soit dans la liste d’attente selon l’état de la partie."""
-    
+
     pseudo = "lucas"
 
     success, etat, msg = service.rejoindre_table(pseudo, 1)
@@ -99,16 +110,17 @@ def test_rejoindre_table_ajoute_joueur_a_la_partie(service):
 
     # Vérifie si le joueur est en liste d’attente
     est_en_attente = any(
-        (j["pseudo"] if isinstance(j, dict) else j.pseudo) == pseudo 
+        (j["pseudo"] if isinstance(j, dict) else j.pseudo) == pseudo
         for j in partie.etat.liste_attente
     )
 
     assert est_dans_partie or est_en_attente, \
         f"{pseudo} n'est ni dans la partie ni dans la liste d'attente."
 
+
 def test_rejoindre_table_interdit_deux_fois(service):
     """On ne doit pas pouvoir rejoindre deux fois la même table avec le même joueur."""
-    
+
     pseudo = "enzo"
 
     # Premier appel : OK
@@ -120,7 +132,8 @@ def test_rejoindre_table_interdit_deux_fois(service):
 
     assert success2 is False, "Le même joueur ne doit pas pouvoir rejoindre la table deux fois."
     assert "déjà" in msg2.lower() or "existe" in msg2.lower(), \
-    f"Le message devrait indiquer que le joueur est déjà présent. Reçu : {msg2}"
+        f"Le message devrait indiquer que le joueur est déjà présent. Reçu : {msg2}"
+
 
 def test_miser_mise_interdite_si_inferieure_au_minimum(monkeypatch):
     # Fake DAO qui dit que le joueur existe et a de l'argent
@@ -156,6 +169,7 @@ def test_miser_mise_interdite_si_inferieure_au_minimum(monkeypatch):
     assert success is False
     assert "grosse blinde" in msg.lower(), f"Message incorrect : {msg}"
 
+
 def test_miser_limite_max(monkeypatch):
     # --- Setup partie et service ---
     table = Table(id=1, blind=20)
@@ -178,6 +192,7 @@ def test_miser_limite_max(monkeypatch):
     success, etat, msg = service.miser("riche", 50)
     assert success is True, "La mise égale à la limite max devrait réussir"
     assert msg == ""
+
 
 def test_all_in_limite_max(monkeypatch):
     # --- Setup partie et service ---
@@ -205,6 +220,8 @@ def test_all_in_limite_max(monkeypatch):
 # ---------------------------
 # TEST voir_etat_partie
 # ---------------------------
+
+
 def test_voir_etat_partie_retourne_etat(partie_service, joueur_lucas):
     partie_service.partie.table.ajouter_joueur(joueur_lucas)
     success, etat, msg = partie_service.voir_etat_partie()
@@ -215,6 +232,8 @@ def test_voir_etat_partie_retourne_etat(partie_service, joueur_lucas):
 # ---------------------------
 # TEST suivre
 # ---------------------------
+
+
 def test_suivre_partie(partie_service):
     joueur = Joueur("lucas", solde=100)
     partie_service.partie.table.ajouter_joueur(joueur)
@@ -224,6 +243,8 @@ def test_suivre_partie(partie_service):
     success, etat, msg = partie_service.suivre("lucas")
     assert success is True
     assert msg == ""
+
+
 
 def test_suivre_solde_insuffisant(partie_service):
     joueur = Joueur("lucas", solde=10)
@@ -236,8 +257,10 @@ def test_suivre_solde_insuffisant(partie_service):
     assert "dépasse ton solde" in msg.lower()
 
 # ---------------------------
-# TEST decision_rejouer 
+# TEST decision_rejouer
 # ---------------------------
+
+
 def test_decision_rejouer_oui(partie_service):
     partie_service.partie.etat.rejouer = {"lucas": None}
 
@@ -245,12 +268,14 @@ def test_decision_rejouer_oui(partie_service):
     assert success is True
     assert "veut rejouer" in msg.lower()
 
+
 def test_decision_rejouer_non(partie_service):
     partie_service.partie.etat.rejouer = {"lucas": None}
 
     success, etat, msg = partie_service.decision_rejouer("lucas", False)
     assert success is True
     assert "quitte la table" in msg.lower()
+
 
 def test_decision_rejouer_joueur_pas_present(partie_service):
     joueur = "lucas"

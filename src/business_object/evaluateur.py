@@ -1,16 +1,16 @@
 from src.business_object.cartes import Carte, combinaisons, valeurs
 from collections import Counter
-from typing import List, Optional, Dict, Tuple
+from typing import List, Optional, Tuple
 
 
 class ResultatMain:
-    def __init__(self, combinaison, tiebreaker_cards)->None:
+    def __init__(self, combinaison, tiebreaker_cards) -> None:
         self.combinaison = combinaison
         # tiebreaker_cards contient désormais des enums valeurs.* directement
         self.tiebreaker_cards = tiebreaker_cards
 
     @property
-    def value(self)->int:
+    def value(self) -> int:
         return self.combinaison.value
 
 
@@ -23,21 +23,21 @@ class EvaluateurMain:
         valeurs.AS: 14
     }
 
-    def __init__(self, cartes: list[Carte])->None:
+    def __init__(self, cartes: list[Carte]) -> None:
         if len(cartes) < 5 or len(cartes) > 7:
             raise ValueError("Il faut entre 5 et 7 cartes pour évaluer une main.")
         self.cartes = cartes
 
-    def _valeurs_numeriques(self)->List[int]:
+    def _valeurs_numeriques(self) -> List[int]:
         """donne les valeurs numériques de la carte"""
         return sorted([self.valeur_order[c.valeur] for c in self.cartes], reverse=True)
 
-    def _compter_occurrences(self)->Counter[int]:
+    def _compter_occurrences(self) -> Counter[int]:
         """compte le nombre de valeurs de cartes uniques"""
         counts = Counter(self._valeurs_numeriques())
         return counts
 
-    def _is_flush(self)->Tuple[bool, List[valeurs]]:
+    def _is_flush(self) -> Tuple[bool, List[valeurs]]:
         """retourn si la combinaison est une flush"""
         couleurs_count = Counter(c.couleur for c in self.cartes)
         for couleur, count in couleurs_count.items():
@@ -46,7 +46,7 @@ class EvaluateurMain:
                 return True, flush_vals
         return False, []
 
-    def _is_straight(self, valeurs)->Tuple[bool, List[int]]:
+    def _is_straight(self, valeurs) -> Tuple[bool, List[int]]:
         """retourn si la combinaison est une traight"""
         vals = sorted(set(valeurs))
         for i in range(len(vals) - 4):
@@ -61,14 +61,14 @@ class EvaluateurMain:
                     return True, [v if v != 1 else 14 for v in low_vals[i:i + 5]]
         return False, []
 
-    def _numerique_to_enum(self, valeur_num)-> Optional[valeurs]:
+    def _numerique_to_enum(self, valeur_num) -> Optional[valeurs]:
         """Convertit une valeur numérique en enum valeurs."""
         for enum_val, num in self.valeur_order.items():
             if num == valeur_num:
                 return enum_val
-        return None 
+        return None
 
-    def evalue_main(self)->ResultatMain:
+    def evalue_main(self) -> ResultatMain:
         """donne la meilleure combinaison de la main"""
         counts = self._compter_occurrences()
         valeurs_list = self._valeurs_numeriques()
@@ -77,7 +77,8 @@ class EvaluateurMain:
 
         # Quinte flush royale / Quinte flush
         if is_flush and is_straight:
-            flush_straight = [self.valeur_order[v] for v in flush_vals if self.valeur_order[v] in straight_vals]
+            flush_straight = [
+                self.valeur_order[v] for v in flush_vals if self.valeur_order[v] in straight_vals]
             if set([10, 11, 12, 13, 14]).issubset(flush_straight):
                 return ResultatMain(combinaisons.QUINTE_FLUSH_ROYALE, [valeurs.AS])
             top_flush_straight = sorted(flush_straight, reverse=True)
@@ -154,7 +155,7 @@ class EvaluateurMain:
         )
 
     @staticmethod
-    def comparer_mains(main1, main2)->int:
+    def comparer_mains(main1, main2) -> int:
         """donne la meilleure des mains"""
         if main1.value > main2.value:
             return 1

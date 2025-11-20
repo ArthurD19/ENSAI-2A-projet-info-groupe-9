@@ -3,6 +3,7 @@ from src.view.vue_abstraite import VueAbstraite
 from src.view.session import Session
 from src.client.api_client import get, APIError
 from src.service.joueur_service import JoueurService
+from src.utils.log_decorator import log
 
 
 class MenuJoueurVue(VueAbstraite):
@@ -12,6 +13,7 @@ class MenuJoueurVue(VueAbstraite):
         super().__init__(titre)
         self.tables = tables
 
+    @log
     def choisir_menu(self):
         print("\n" + "-" * 50 + "\nMenu Joueur\n" + "-" * 50 + "\n")
 
@@ -21,7 +23,7 @@ class MenuJoueurVue(VueAbstraite):
                 "Rejoindre une table",
                 "Afficher la valeur du portefeuille",
                 "Afficher le classement",
-                "Afficher les statistiques", 
+                "Afficher les statistiques",
                 "Générer ou voir mon code de parrainage",
                 "Se déconnecter",
             ],

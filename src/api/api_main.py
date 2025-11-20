@@ -1,23 +1,10 @@
-import os
-import logging
-
-from src.utils.log_init import initialiser_logs
-
-from fastapi import FastAPI, status, APIRouter
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 from src.api.joueur_router import router as joueur_router
 from src.api.joueur_connecte_router import router as joueur_connecte_router
 from src.api.joueur_en_jeu_router import router as joueur_en_jeu_router
-from src.api.var_utiles import tables_service, scheduler
-
-from src.service.table_service import TableService
-from src.service.partie_service import PartieService
-
-from src.business_object.partie import  Partie
-
+from src.api.var_utiles import tables_service
 from src.scheduler.auto_credit import lancer_auto_credit
-
 
 
 # Création de l'application FastAPI
@@ -27,6 +14,7 @@ app = FastAPI(
     version="1.0.0",
     root_path="/proxy/8000"
 )
+
 
 @app.on_event("startup")
 def init_tables_et_parties():
@@ -39,6 +27,7 @@ def init_tables_et_parties():
     for id_table, partie in tables_service.parties.items():
         print(f"Table {id_table} créée avec partie associée: {partie is not None}")
 
+
 @app.on_event("startup")
 def demarrer_scheduler():
     """
@@ -47,6 +36,7 @@ def demarrer_scheduler():
     global scheduler
     print("[SCHEDULER] Démarrage du créditage automatique")
     scheduler = lancer_auto_credit()
+
 
 @app.on_event("shutdown")
 def arreter_scheduler():
@@ -78,6 +68,7 @@ app.add_middleware(
 app.include_router(joueur_router)
 app.include_router(joueur_connecte_router)
 app.include_router(joueur_en_jeu_router)
+
 
 # Endpoint racine pour tester si le serveur fonctionne
 @app.get("/")
