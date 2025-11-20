@@ -70,7 +70,7 @@ Most configuration files should **not** need modification, except for:
 ## :arrow_forward: Access our server
 
 1. Download the archive file or clone the project repository
-2. Open VSCode
+2. Open VSCode (if you wish to use an open PostgreSQL service on Onyxia, you must open Vs code from Onyxia.)
 
 ### Option 1 : you use the archive file
 1. Go to the files tab.
@@ -86,9 +86,9 @@ unzip <name_file>.zip
 
 ### Option 2 : you clone the project repository
 1. Go to GitHub and copy the HTTP address of the repository.
-2. Open a terminal and execute the following code by replacing HTTP_adress with the adress copied before:
+2. Open a terminal and execute the following code:
 ```bash
-git clone <HTTP_adress>
+git clone https://github.com/ArthurD19/ENSAI-2A-projet-info-groupe-9.git
 ```
 3. Now, open the folder.
 
