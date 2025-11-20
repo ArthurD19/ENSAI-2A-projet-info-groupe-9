@@ -69,12 +69,28 @@ Most configuration files should **not** need modification, except for:
 
 ## :arrow_forward: Access our server
 
-1. Download or clone the project repository
+1. Download the archive file or clone the project repository
 2. Open VSCode
-3. Go to `File > Open Folder`
-4. Select the root folder of the project (*ENSAI-2A-projet-info-groupe-9*)
 
----
+### Option 1 : you use the archive file
+1. Go to the files tab.
+2. Right-click in your workspace.
+3. Select Upload.
+4. Choose the .zip file.
+5. Be sure you are in the folder where you uploaded the .zip file.
+5. Open a terminal and execute the following code by replacing name_file with the name of the .zip file:
+```bash
+unzip <name_file>.zip
+```
+6. Now, open the folder.
+
+### Option 2 : you clone the project repository
+1. Go to GitHub and copy the HTTP address of the repository.
+2. Open a terminal and execute the following code by replacing HTTP_adress with the adress copied before:
+```bash
+git clone <HTTP_adress>
+```
+3. Now, open the folder.
 
 ## :arrow_forward: Install required packages
 
@@ -136,7 +152,7 @@ python -m unittest <test_file>.py
 
 Start the FastAPI server:
 ```bash
-uvicorn src.api.api_main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn src.api.api_main:app --reload
 ```
 
 Documentation :
