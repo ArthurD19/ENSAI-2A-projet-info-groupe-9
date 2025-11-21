@@ -40,7 +40,7 @@ def test_creer_sans_code_parrainage_pseudo_trop_court(service):
     assert joueur is None
 
 def test_pseudo_deja_utilise(service):
-    with patch("service.joueur_service.JoueurDao") as mock_dao:
+    with patch("src.service.joueur_service.JoueurDao") as mock_dao:
         mock_dao.return_value.pseudo_existe.return_value = True
         assert service.pseudo_deja_utilise("existing") is True
 
@@ -73,8 +73,8 @@ def test_se_connecter_mauvais_pseudo(service):
         assert "Pseudo ou mot de passe invalide" in msg
 
 def test_generer_code_parrainage_nouveau(service):
-    with patch("service.joueur_service.JoueurDao") as mock_dao, \
-         patch("service.joueur_service.GenerateurDeCode") as mock_gen:
+    with patch("src.service.joueur_service.JoueurDao") as mock_dao, \
+         patch("src.service.joueur_service.GenerateurDeCode") as mock_gen:
         mock_dao.return_value.trouver_par_pseudo.return_value = {"pseudo": "Bob", "code_parrainage": None}
         mock_gen.return_value.generate_unique_code.return_value = "CODE123"
         mock_dao.return_value.mettre_a_jour_code_de_parrainage.return_value = True
@@ -82,14 +82,14 @@ def test_generer_code_parrainage_nouveau(service):
         assert code == "CODE123"
 
 def test_generer_code_parrainage_existant(service):
-    with patch("service.joueur_service.JoueurDao") as mock_dao:
+    with patch("src.service.joueur_service.JoueurDao") as mock_dao:
         mock_dao.return_value.trouver_par_pseudo.return_value = {"pseudo": "Bob", "code_parrainage": "EXIST123"}
         code = service.generer_code_parrainage("Bob")
         assert code == "EXIST123"
 
 def test_credit_auto(service):
-    with patch("service.joueur_service.JoueurDao") as mock_dao, \
-         patch("service.joueur_service.logging") as mock_logging:
+    with patch("src.service.joueur_service.JoueurDao") as mock_dao, \
+         patch("src.service.joueur_service.logging") as mock_logging:
         mock_dao.return_value.joueurs_a_crediter.return_value = ["Alice"]
         service.credit_auto()
         mock_dao.return_value.crediter.assert_called_with("Alice", service.MONTANT_RECHARGEMENT_AUTO)
@@ -101,15 +101,15 @@ def test_creer_sans_code_parrainage_pseudo_existant(service):
         assert joueur is None
 
 def test_creer_sans_code_parrainage_dao_echec(service):
-    with patch("service.joueur_service.JoueurDao") as mock_dao, \
+    with patch("src.service.joueur_service.JoueurDao") as mock_dao, \
          patch.object(service, "pseudo_deja_utilise", return_value=False):
         mock_dao.return_value.creer.return_value = False
         joueur = service.creer_sans_code_parrainage("NewUser", "password")
         assert joueur is None
 
 def test_credit_auto_plusieurs_joueurs(service):
-    with patch("service.joueur_service.JoueurDao") as mock_dao, \
-         patch("service.joueur_service.logging") as mock_logging:
+    with patch("src.service.joueur_service.JoueurDao") as mock_dao, \
+         patch("src.service.joueur_service.logging") as mock_logging:
         mock_dao.return_value.joueurs_a_crediter.return_value = ["Alice", "Bob"]
         service.credit_auto()
         mock_dao.return_value.crediter.assert_any_call("Alice", service.MONTANT_RECHARGEMENT_AUTO)
@@ -125,8 +125,8 @@ def test_generer_code_parrainage_aucun_joueur(service):
         assert code is None
 
 def test_generer_code_parrainage_echec_update(service):
-    with patch("service.joueur_service.JoueurDao") as mock_dao, \
-         patch("service.joueur_service.GenerateurDeCode") as mock_gen:
+    with patch("src.service.joueur_service.JoueurDao") as mock_dao, \
+         patch("src.service.joueur_service.GenerateurDeCode") as mock_gen:
         # joueur sans code existant
         mock_dao.return_value.trouver_par_pseudo.return_value = {"pseudo": "Bob", "code_parrainage": None}
         mock_gen.return_value.generate_unique_code.return_value = "CODE123"
