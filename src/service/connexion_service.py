@@ -1,9 +1,9 @@
-from utils.log_decorator import log
-from utils.securite import hash_password
+from src.utils.log_decorator import log
+from src.utils.securite import hash_password
 
-from dao.joueur_dao import JoueurDao
+from src.dao.joueur_dao import JoueurDao
 
-from view.session import Session
+from src.view.session import Session
 
 
 class ConnexionService:

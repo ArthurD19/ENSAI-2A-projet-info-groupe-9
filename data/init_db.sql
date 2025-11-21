@@ -19,7 +19,6 @@ CREATE TABLE joueurs_statistiques (
     pseudo VARCHAR(50) PRIMARY KEY,
     meilleur_classement INT,
     nombre_total_mains_jouees INT DEFAULT 0,
-    nombre_mains_jouees_session INT DEFAULT 0,
     nombre_all_in INT DEFAULT 0,
     nombre_folds INT DEFAULT 0,
     nombre_mises INT DEFAULT 0,

@@ -5,7 +5,6 @@ from src.view.menu_joueur_vue import MenuJoueurVue
 from src.client.api_client import get, post, APIError
 from src.business_object.partie import Partie
 from src.utils.log_decorator import log
-import requests
 
 
 class MenuTableVue(VueAbstraite):
@@ -38,13 +37,13 @@ class MenuTableVue(VueAbstraite):
                 actif = "(actif)" if j["actif"] else "(couché)"
                 print(f" - {j['pseudo']:10} | Solde : {j['solde']:5} | Mise : {j['mise']:5} {actif}")
 
-                # --- SÉPARATEUR DU BOARD ---
-                print("-" * 50)
+            # --- SÉPARATEUR DU BOARD ---
+            print("-" * 50)
 
-                # Board
-                print("Board :", " | ".join(etat["board"]) if etat["board"] else "vide")
+            # Board
+            print("Board :", " | ".join(etat["board"]) if etat["board"] else "vide")
 
-                print("-" * 50)
+            print("-" * 50)
         return etat
 
     @log
@@ -91,9 +90,7 @@ class MenuTableVue(VueAbstraite):
 
         if etat.get("finie", False) and not self.resultats_deja_affiche:
             self.resultats_deja_affiche = True
-            print(self.joueur_courant)
             resultats = etat.get("resultats")
-            print(resultats)
             gagnant = resultats[0]
             print("\nLa main est terminée !\n")
             print("\n Résultats :\n")
@@ -151,11 +148,11 @@ class MenuTableVue(VueAbstraite):
                         print("Attente des autres joueurs pour relancer la partie...")
                         input("Appuyez sur Entrée pour rafraîchir...")
                         choix = inquirer.select(
-                        message="Que voulez-vous faire ?",
-                        choices=[
-                            "Quitter la table",
-                            "Continuer à attendre"
-                        ]).execute()
+                            message="Que voulez-vous faire ?",
+                            choices=[
+                                "Quitter la table",
+                                "Continuer à attendre"
+                            ]).execute()
                         try:
                             if choix == "Quitter la table":
                                 try:
@@ -199,7 +196,7 @@ class MenuTableVue(VueAbstraite):
                 try:
                     post(
                         "/joueur_en_jeu/quitter_table",
-                            params={"pseudo": self.pseudo, "id_table": self.id_table}
+                        params={"pseudo": self.pseudo, "id_table": self.id_table}
                     )
                     print("Vous avez été retiré de la table.")
                 except APIError as e:
@@ -209,11 +206,11 @@ class MenuTableVue(VueAbstraite):
                 print("Attente des autres joueurs pour relancer la partie...")
                 input("Appuyez sur Entrée pour rafraîchir...")
                 choix = inquirer.select(
-                message="Que voulez-vous faire ?",
-                choices=[
-                    "Quitter la table",
-                    "Continuer à attendre"
-                ]).execute()
+                    message="Que voulez-vous faire ?",
+                    choices=[
+                        "Quitter la table",
+                        "Continuer à attendre"
+                    ]).execute()
                 try:
                     if choix == "Quitter la table":
                         try:
@@ -231,13 +228,12 @@ class MenuTableVue(VueAbstraite):
                 except APIError as e:
                     print(f"\nErreur API lors de '{choix}' : {e}\n")
 
-
         if etat is None:
             input("Appuyez sur Entrée pour continuer...")
             return self
 
         if self.joueur_courant != self.pseudo:
-            
+           
             print(f"\nCe n'est pas votre tour, veuillez patienter...\n")
             input("Appuyez sur Entrée pour rafraîchir...")
             return self

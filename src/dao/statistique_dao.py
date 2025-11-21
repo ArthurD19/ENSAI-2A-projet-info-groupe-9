@@ -13,7 +13,6 @@ class StatistiqueDao(metaclass=Singleton):
     CHAMPS_AUTORISES = {
         "meilleur_classement",
         "nombre_total_mains_jouees",
-        "nombre_mains_jouees_session",
         "nombre_all_in",
         "nombre_folds",
         "nombre_mises",

@@ -1,11 +1,7 @@
 import os
 import pytest
-
 from unittest.mock import patch
-
 from src.utils.reset_database import ResetDatabase
-from src.utils.securite import hash_password
-
 from src.dao.statistique_dao import StatistiqueDao
 from src.dao.joueur_dao import JoueurDao
 
@@ -47,9 +43,6 @@ def test_trouver_statistiques_par_id_inexistant():
     assert stats == {}
 
 
-from src.dao.joueur_dao import JoueurDao
-
-
 def test_creer_statistiques_pour_joueur_ok():
     """
     Création de statistiques réussie pour un joueur
@@ -69,7 +62,6 @@ def test_creer_statistiques_pour_joueur_ok():
     assert stats is not None
     assert stats["pseudo"] == joueur["pseudo"]
 
-# est ce qu'il faut faire le test dans le cas où ça ne marche pas car le joueur n'existe pas dans la base de données
 
 def test_mettre_a_jour_statistique_ok():
     """
@@ -82,7 +74,7 @@ def test_mettre_a_jour_statistique_ok():
     # WHEN
     StatistiqueDao().mettre_a_jour_statistique(pseudo, stat_a_mettre_a_jour, nouvelle_valeur)
     stats = StatistiqueDao().trouver_statistiques_par_id(pseudo)
-    # THEN 
+    # THEN
     assert stats[stat_a_mettre_a_jour] == nouvelle_valeur
 
 
@@ -96,6 +88,7 @@ def test_mettre_a_jour_statistique_non_autorisee():
     with pytest.raises(ValueError):
         StatistiqueDao().mettre_a_jour_statistique("lucas", "stat_inconnue", 10)
 
+
 def test_incrementer_statistique_valeur_par_defaut_ok():
     """
     Incrémentation d'une statistique puis vérification que l'incrémentation s'est faite correctement
@@ -108,7 +101,7 @@ def test_incrementer_statistique_valeur_par_defaut_ok():
     val_avant = stats_avant[stat_a_incrementer]
     StatistiqueDao().incrementer_statistique(pseudo, stat_a_incrementer)
     stats_apres = StatistiqueDao().trouver_statistiques_par_id(pseudo)
-    # THEN 
+    # THEN
     assert stats_apres[stat_a_incrementer] == val_avant + 1
 
 
@@ -139,6 +132,7 @@ def test_incrementer_statistique_champ_non_autorise():
     with pytest.raises(ValueError):
         StatistiqueDao().incrementer_statistique(pseudo, "stat_inconnue", 1)
 
+
 def test_creer_statistiques_pour_joueur_inexistant():
     """
     Vérifie qu'une exception est levée si on tente de créer des statistiques pour un joueur qui n'existe pas
@@ -155,6 +149,7 @@ def test_recuperer_top_joueurs_limite():
     top_joueurs = StatistiqueDao().recuperer_top_joueurs(limite=5)
     assert isinstance(top_joueurs, list)
     assert len(top_joueurs) <= 5
+
 
 def test_mettre_a_jour_statistique_exception_db(monkeypatch):
     """

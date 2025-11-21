@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from service.joueur_service import JoueurService
+from src.service.joueur_service import JoueurService
 from src.business_object.joueurs import Joueur  
 from src.service.connexion_service import ConnexionService
 from src.service.statistique_service import StatistiqueService

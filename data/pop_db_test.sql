@@ -15,14 +15,13 @@ INSERT INTO joueurs_statistiques (
     pseudo,
     meilleur_classement,
     nombre_total_mains_jouees,
-    nombre_mains_jouees_session,
     nombre_all_in,
     nombre_folds,
     nombre_mises,
     nombre_relances,
     nombre_suivis
 ) VALUES
-('arthur', 2, 100, 15, 10, 20, 30, 10, 20),
-('maxence', 5, 80, 10, 5, 30, 15, 10, 20),
-('lucas', 1, 120, 25, 20, 25, 35, 15, 20),
-('clemence', 4, 90, 10, 15, 15, 20, 10, 15);
+('arthur', 2, 100, 10, 20, 30, 10, 20),
+('maxence', 5, 80, 5, 30, 15, 10, 20),
+('lucas', 1, 120, 20, 25, 35, 15, 20),
+('clemence', 4, 90, 15, 15, 20, 10, 15);
