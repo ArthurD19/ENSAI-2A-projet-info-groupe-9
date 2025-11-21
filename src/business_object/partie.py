@@ -475,6 +475,7 @@ class Partie:
         self.indice_joueur_courant = 0
 
         # Relancer la partie
+        self.etat.finie = False
         self.initialiser_blinds()
         return True
 
