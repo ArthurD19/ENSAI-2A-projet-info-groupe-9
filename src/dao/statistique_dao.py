@@ -88,12 +88,12 @@ class StatistiqueDao(metaclass=Singleton):
             nombre_fois_abattage = statistiques.get("nombre_fois_abattage", 0)
 
             # Ratios sécurisés
-            statistiques["taux_main_all_in"] = nombre_all_in / nombre_total_mains_jouees if nombre_total_mains_jouees > 0 else 0
-            statistiques["taux_main_fold"] = nombre_folds / nombre_total_mains_jouees if nombre_total_mains_jouees > 0 else 0
-            statistiques["agression_factor"] = (nombre_mises + nombre_relances) / nombre_suivis if nombre_suivis > 0 else 0
+            statistiques["taux_main_all_in"] = round((nombre_all_in / nombre_total_mains_jouees), 2) if nombre_total_mains_jouees > 0 else 0
+            statistiques["taux_main_fold"] = round((nombre_folds / nombre_total_mains_jouees), 2) if nombre_total_mains_jouees > 0 else 0
+            statistiques["agression_factor"] = round(((nombre_mises + nombre_relances) / nombre_suivis), 2) if nombre_suivis > 0 else 0
             total_actions = nombre_mises + nombre_relances + nombre_suivis + nombre_folds
-            statistiques["agression_frequency"] = (nombre_mises + nombre_relances) / total_actions if total_actions > 0 else 0
-            statistiques["taux_victoire_abattage"] = nombre_victoire_abattage / nombre_fois_abattage if nombre_fois_abattage > 0 else 0
+            statistiques["agression_frequency"] = round(((nombre_mises + nombre_relances) / total_actions), 2) if total_actions > 0 else 0
+            statistiques["taux_victoire_abattage"] = round((nombre_victoire_abattage / nombre_fois_abattage), 2) if nombre_fois_abattage > 0 else 0
 
             # Calcul du badge
             if statistiques["taux_main_all_in"] > 0.3:
