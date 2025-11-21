@@ -115,6 +115,7 @@ class MenuTableVue(VueAbstraite):
                                 "veut_rejouer": veut_rejouer
                             }
                         )
+                        etat["rejouer"][self.pseudo] = veut_rejouer
                         print(f"\n{res.get('message_retour', 'Réponse enregistrée')}\n")
                     except APIError as e:
                         print(f"\nErreur API : {e}\n")
