@@ -362,7 +362,6 @@ class Partie:
 
         for j in self.table.joueurs:
             self.stats_dao.incrementer_statistique(j.pseudo, "nombre_total_mains_jouees")
-            self.stats_dao.incrementer_statistique(j.pseudo, "nombre_mains_jouees_session")
 
         joueurs_en_jeu = [j for j in self.table.joueurs if j.actif or j.mise > 0]
 
