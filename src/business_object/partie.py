@@ -257,6 +257,8 @@ class Partie:
         # Si la mise_max a augmenté (raise / all-in qui augmente),
         # alors tous les joueurs actifs non all-in doivent rejouer.
         if self.mise_max > mise_max_avant:
+            self.stats_dao.incrementer_statistique(joueur.pseudo, "nombre_relances")
+
             self.joueurs_ayant_joue = {
                 j.pseudo: False
                 for j in self.table.joueurs
@@ -375,9 +377,6 @@ class Partie:
                 gagnant = joueurs_en_jeu[0]
                 gagnant.solde += self.comptage.pot
 
-                # Incrémenter stats de victoire pour ce joueur
-                self.stats_dao.incrementer_statistique(gagnant.pseudo, "nombre_victoire_abattage")
-
                 self.etat.resultats = [{
                     "pseudo": gagnant.pseudo,
                     "main": [str(c) for c in gagnant.main],
@@ -394,6 +393,9 @@ class Partie:
             return self.etat
 
         # Cas normal : showdown
+        for j in joueurs_en_jeu:
+            self.stats_dao.incrementer_statistique(j.pseudo, "nombre_fois_abattage")
+
         scores = {}
         for j in joueurs_en_jeu:
             cartes_totales = j.main + self.table.board

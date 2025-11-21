@@ -18,7 +18,8 @@ class StatistiqueDao(metaclass=Singleton):
         "nombre_mises",
         "nombre_relances",
         "nombre_suivis",
-        "nombre_victoire_abattage"
+        "nombre_victoire_abattage",
+        "nombre_fois_abattage"
     }
 
     @log
