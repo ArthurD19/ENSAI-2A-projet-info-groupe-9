@@ -60,8 +60,14 @@ class MenuTableVue(VueAbstraite):
         """Affichage du menu joueur en table"""
         self.afficher()
         etat = self.afficher_etat_partie()
+        if etat is None:
+            input("Appuyez sur Entrée pour continuer...")
+            return self
+
+        # corrige la typo précédente : on réinitialise bien le flag correct
         if not etat.get("finie", False):
-            self.resultats_affiches = False
+            self.resultats_deja_affiche = False
+
         if self.joueur_courant is None and etat.get("resultats") == []:
             print("Attente des autres joueurs pour relancer la partie ...")
 
@@ -77,7 +83,7 @@ class MenuTableVue(VueAbstraite):
                         post(
                             "/joueur_en_jeu/quitter_table",
                             params={"pseudo": self.pseudo, "id_table": self.id_table}
-                            )
+                        )
                         print("Vous avez été retiré de la table.")
                     except APIError as e:
                         print(f"Erreur lors de la suppression de la table : {e}")
@@ -91,18 +97,26 @@ class MenuTableVue(VueAbstraite):
         if etat.get("finie", False) and not self.resultats_deja_affiche:
             self.resultats_deja_affiche = True
             resultats = etat.get("resultats")
+            if not resultats:
+                # si pas de résultats, éviter crash
+                print("\nAucun résultat disponible.\n")
+                return self
+
             gagnant = resultats[0]
             print("\nLa main est terminée !\n")
             print("\n Résultats :\n")
-            print(f"\n Gagnant : {gagnant["pseudo"]}\n")
-            print(f"\n Main : {gagnant["main"]}\n")
-            print(f"\n {gagnant["description"]}\n")
+            print(f"\n Gagnant : {gagnant['pseudo']}\n")
+            print(f"\n Main : {gagnant['main']}\n")
+            print(f"\n {gagnant.get('description', '')}\n")
 
             solde = next((j['solde'] for j in etat['joueurs'] if j['pseudo'] == self.pseudo), 0)
             peut_rejouer = solde >= Partie.GROSSE_BLIND  # 20 jetons minimum
 
+            # si la clef 'rejouer' existe côté serveur, on collecte la valeur (True/False/None)
             if self.pseudo in etat.get("rejouer", {}):
-                if etat["rejouer"][self.pseudo] is None and peut_rejouer:
+                current_val = etat.get("rejouer", {}).get(self.pseudo, None)
+                # si le server indique None (pas encore répondu) et que le joueur peut rejouer => proposer confirm
+                if current_val is None and peut_rejouer:
                     veut_rejouer = inquirer.confirm(
                         message="Voulez-vous rejouer la prochaine main ?"
                     ).execute()
@@ -115,17 +129,38 @@ class MenuTableVue(VueAbstraite):
                                 "veut_rejouer": veut_rejouer
                             }
                         )
-                        etat["rejouer"][self.pseudo] = veut_rejouer
+                        # ne pas se baser sur une mise à jour locale seulement : forcer un refresh depuis le serveur
+                        etat = self.afficher_etat_partie()
+                        val_apres = etat.get("rejouer", {}).get(self.pseudo, None)
                         print(f"\n{res.get('message_retour', 'Réponse enregistrée')}\n")
+                        print(f"DEBUG — valeur côté serveur après post : {val_apres}")
+                        if val_apres is True:
+                            print("Réponse confirmée côté serveur : Vous avez répondu Oui")
+                        elif val_apres is False:
+                            print("Réponse confirmée côté serveur : Vous avez répondu Non")
+                        else:
+                            print("Le serveur n'a pas encore enregistré la réponse (val=None). Réessayez ou patientez.")
                     except APIError as e:
                         print(f"\nErreur API : {e}\n")
                 else:
-                    reponse = "Oui" if etat["rejouer"].get(self.pseudo, False) else "Non"
-                    print(f"Vous avez déjà répondu : {reponse}")
+                    # gérer les trois états
+                    val = current_val
+                    if val is True:
+                        reponse = "Oui"
+                    elif val is False:
+                        reponse = "Non"
+                    else:
+                        reponse = None
+                    if reponse is None:
+                        print("Vous n'avez pas encore répondu au prompt de rejouer.")
+                        input("Appuyez sur Entrée pour rafraîchir...")
+                        return self
 
+                    print(f"Vous avez déjà répondu : {reponse}")
+                    # actions selon la valeur et le solde
                     if not peut_rejouer:
                         print("Vous n'avez pas assez de jetons pour rejouer.")
-                        # Supprimer le joueur de la table
+                        # Supprimer le joueur de la table (vérifier côté serveur avant)
                         try:
                             post(
                                 "/joueur_en_jeu/quitter_table",
@@ -146,8 +181,10 @@ class MenuTableVue(VueAbstraite):
                             print(f"Erreur lors de la suppression de la table : {e}")
                         return MenuJoueurVue("", None)
                     else:
+                        # reponse == "Oui"
                         print("Attente des autres joueurs pour relancer la partie...")
                         input("Appuyez sur Entrée pour rafraîchir...")
+                        print("tu veux rejouer mais tu dois attendre")
                         choix = inquirer.select(
                             message="Que voulez-vous faire ?",
                             choices=[
@@ -160,7 +197,7 @@ class MenuTableVue(VueAbstraite):
                                     post(
                                         "/joueur_en_jeu/quitter_table",
                                         params={"pseudo": self.pseudo, "id_table": self.id_table}
-                                        )
+                                    )
                                     print("Vous avez été retiré de la table.")
                                 except APIError as e:
                                     print(f"Erreur lors de la suppression de la table : {e}")
@@ -176,24 +213,25 @@ class MenuTableVue(VueAbstraite):
             return self
 
         if self.resultats_deja_affiche:
+            # debug détaillé : montrer la valeur brute côté serveur
+            print("\nDEBUG — état complet rejouer :", etat.get("rejouer"))
+            val = etat.get("rejouer", {}).get(self.pseudo, None)
+            print("DEBUG — valeur pour moi :", val)
+            print("test")
             solde = next((j['solde'] for j in etat['joueurs'] if j['pseudo'] == self.pseudo), 0)
             peut_rejouer = solde >= Partie.GROSSE_BLIND
-            reponse = "Oui" if etat["rejouer"].get(self.pseudo, False) else "Non"
-            print(f"Vous avez déjà répondu : {reponse}")
 
-            if not peut_rejouer:
-                print("Vous n'avez pas assez de jetons pour rejouer.")
-                # Supprimer le joueur de la table
-                try:
-                    post(
-                        "/joueur_en_jeu/quitter_table",
-                        params={"pseudo": self.pseudo, "id_table": self.id_table}
-                    )
-                    print("Vous avez été retiré de la table.")
-                except APIError as e:
-                    print(f"Erreur lors de la suppression de la table : {e}")
-                    return MenuJoueurVue("", None)
-            elif reponse == "Non":
+            # trois états distincts : True / False / None (pas encore répondu)
+            if val is True:
+                reponse = "Oui"
+                print(f"Vous avez déjà répondu : {reponse}")
+                print("Attente des autres joueurs pour relancer la partie...")
+                input("Appuyez sur Entrée pour rafraîchir...")
+                return self
+            elif val is False:
+                reponse = "Non"
+                print(f"Vous avez déjà répondu : {reponse}")
+                # suppression confirmée côté serveur : on peut quitter
                 try:
                     post(
                         "/joueur_en_jeu/quitter_table",
@@ -204,37 +242,13 @@ class MenuTableVue(VueAbstraite):
                     print(f"Erreur lors de la suppression de la table : {e}")
                 return MenuJoueurVue("", None)
             else:
-                print("Attente des autres joueurs pour relancer la partie...")
+                # val is None -> pas encore répondu
+                print("Vous n'avez pas encore répondu au prompt de rejouer.")
                 input("Appuyez sur Entrée pour rafraîchir...")
-                choix = inquirer.select(
-                    message="Que voulez-vous faire ?",
-                    choices=[
-                        "Quitter la table",
-                        "Continuer à attendre"
-                    ]).execute()
-                try:
-                    if choix == "Quitter la table":
-                        try:
-                            post(
-                                "/joueur_en_jeu/quitter_table",
-                                params={"pseudo": self.pseudo, "id_table": self.id_table}
-                            )
-                            print("Vous avez été retiré de la table.")
-                        except APIError as e:
-                            print(f"Erreur lors de la suppression de la table : {e}")
-                        return MenuJoueurVue("", None)
-                    elif choix == "Continuer à attendre":
-                        input("Appuyez sur Entrée pour rafraîchir...")
-                        return self
-                except APIError as e:
-                    print(f"\nErreur API lors de '{choix}' : {e}\n")
-
-        if etat is None:
-            input("Appuyez sur Entrée pour continuer...")
-            return self
+                return self
 
         if self.joueur_courant != self.pseudo:
-           
+
             print(f"\nCe n'est pas votre tour, veuillez patienter...\n")
             input("Appuyez sur Entrée pour rafraîchir...")
             return self
