@@ -262,3 +262,45 @@ def test_tour_par_tour_flop_turn_river(setup_partie):
     assert partie.etat.finie is True
     # Pot doit avoir été distribué
     assert partie.etat.pot == 0
+
+def test_rejouer_redistribue_cartes(setup_partie):
+    partie, j1, j2 = setup_partie
+
+    # --- Lancer une première manche ---
+    partie.initialiser_blinds()
+
+    # Fin rapide : Alice se couche
+    partie.actions_joueur("Alice", "se_coucher")
+
+    # Il doit s'agir de la fin de la manche
+    assert partie.etat.finie is True
+
+    # Les joueurs ont une main avant relance
+    mains_avant = {j.pseudo: list(j.main) for j in partie.table.joueurs}
+
+    # --- Tous les joueurs décident de rejouer ---
+    partie.reponse_rejouer("Alice", True)
+    partie.reponse_rejouer("Bob", True)
+
+    assert partie.etat.finie is False
+
+    # --- Vérifications sur les joueurs ---
+    for j in partie.table.joueurs:
+        # Le joueur doit avoir une nouvelle main
+        assert len(j.main) == 2, f"{j.pseudo} n'a pas reçu 2 cartes après relance."
+        assert j.main != mains_avant[j.pseudo], f"{j.pseudo} a reçu la même main qu'avant."
+
+        # Le joueur doit être actif
+        assert j.actif is True, f"{j.pseudo} n'est pas actif après relance."
+
+    # --- Vérifier que le board a été reset ---
+    assert partie.table.board == [], "Le board n'a pas été vidé après relance."
+
+    # --- Le pot doit être remis à zéro ---
+    assert partie.etat.pot == 0, "Le pot n'a pas été réinitialisé."
+
+    # --- La manche doit être revenue au préflop ---
+    assert partie.tour_actuel == "preflop", "La nouvelle manche n'a pas redémarré au préflop."
+
+    # --- Il doit y avoir un joueur courant défini ---
+    assert partie.indice_joueur_courant is not None, "Le joueur courant n'a pas été défini."
