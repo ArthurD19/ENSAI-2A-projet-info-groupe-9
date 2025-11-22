@@ -133,7 +133,6 @@ class MenuTableVue(VueAbstraite):
                         etat = self.afficher_etat_partie()
                         val_apres = etat.get("rejouer", {}).get(self.pseudo, None)
                         print(f"\n{res.get('message_retour', 'Réponse enregistrée')}\n")
-                        print(f"DEBUG — valeur côté serveur après post : {val_apres}")
                         if val_apres is True:
                             print("Réponse confirmée côté serveur : Vous avez répondu Oui")
                         elif val_apres is False:
@@ -214,10 +213,7 @@ class MenuTableVue(VueAbstraite):
 
         if self.resultats_deja_affiche:
             # debug détaillé : montrer la valeur brute côté serveur
-            print("\nDEBUG — état complet rejouer :", etat.get("rejouer"))
             val = etat.get("rejouer", {}).get(self.pseudo, None)
-            print("DEBUG — valeur pour moi :", val)
-            print("test")
             solde = next((j['solde'] for j in etat['joueurs'] if j['pseudo'] == self.pseudo), 0)
             peut_rejouer = solde >= Partie.GROSSE_BLIND
 
