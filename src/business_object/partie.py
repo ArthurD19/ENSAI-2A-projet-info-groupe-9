@@ -447,8 +447,12 @@ class Partie:
         pseudos_deja_presents = {j.pseudo for j in joueurs_valides}
         for j in list(self.etat.liste_attente):
             if j['solde'] >= Partie.GROSSE_BLIND and j['pseudo'] not in pseudos_deja_presents:
-                joueur = Joueur(pseudo=j['pseudo'], solde=j['solde'])
-                joueurs_valides.append(joueur)
+                existant = next((x for x in self.table.joueurs if x.pseudo == j['pseudo']), None)
+                if existant:
+                    joueurs_valides.append(existant)
+                else:
+                    joueur = Joueur(pseudo=j['pseudo'], solde=j['solde'])
+                    joueurs_valides.append(joueur)
                 pseudos_deja_presents.add(j['pseudo'])
 
         self.etat.liste_attente.clear()
@@ -524,6 +528,8 @@ class Partie:
         """Vérifie qui veut rejouer et relance une nouvelle main si possible."""
         # Vérifier que tous les joueurs ont répondu
         if not all(v is not None for v in self.etat.rejouer.values()):
+            self.etat.attente_rejouer = True 
+            self._mettre_a_jour_etat()
             return
 
         # Filtrer les joueurs sans solde suffisant
