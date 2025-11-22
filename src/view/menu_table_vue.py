@@ -183,7 +183,6 @@ class MenuTableVue(VueAbstraite):
                         # reponse == "Oui"
                         print("Attente des autres joueurs pour relancer la partie...")
                         input("Appuyez sur Entrée pour rafraîchir...")
-                        print("tu veux rejouer mais tu dois attendre")
                         choix = inquirer.select(
                             message="Que voulez-vous faire ?",
                             choices=[
@@ -222,8 +221,39 @@ class MenuTableVue(VueAbstraite):
                 reponse = "Oui"
                 print(f"Vous avez déjà répondu : {reponse}")
                 print("Attente des autres joueurs pour relancer la partie...")
-                input("Appuyez sur Entrée pour rafraîchir...")
-                return self
+
+                # proposer des actions au joueur pour éviter d'être bloqué
+                choix_action = inquirer.select(
+                    message="Que voulez-vous faire ?",
+                    choices=[
+                        "Rafraîchir l'état",
+                        "Quitter la table",
+                        "Continuer à attendre"
+                    ]).execute()
+
+                if choix_action == "Rafraîchir l'état":
+                    # forcer un refresh immédiat et réafficher la table
+                    etat = self.afficher_etat_partie()
+                    # si afficher_etat_partie retourne None, on revient au menu joueur
+                    if etat is None:
+                        return MenuJoueurVue("", None)
+                    return self
+
+                elif choix_action == "Quitter la table":
+                    try:
+                        post(
+                            "/joueur_en_jeu/quitter_table",
+                            params={"pseudo": self.pseudo, "id_table": self.id_table}
+                        )
+                        print("Vous avez été retiré de la table.")
+                    except APIError as e:
+                        print(f"Erreur lors de la suppression de la table : {e}")
+                    return MenuJoueurVue("", None)
+
+                else:  # Continuer à attendre
+                    input("Appuyez sur Entrée pour rafraîchir...")
+                    return self
+
             elif val is False:
                 reponse = "Non"
                 print(f"Vous avez déjà répondu : {reponse}")
@@ -237,11 +267,64 @@ class MenuTableVue(VueAbstraite):
                 except APIError as e:
                     print(f"Erreur lors de la suppression de la table : {e}")
                 return MenuJoueurVue("", None)
+
             else:
-                # val is None -> pas encore répondu
+                # val is None -> pas encore répondu, proposer actions (réessayer / attendre / quitter)
                 print("Vous n'avez pas encore répondu au prompt de rejouer.")
-                input("Appuyez sur Entrée pour rafraîchir...")
-                return self
+                choix = inquirer.select(
+                    message="Que voulez-vous faire ?",
+                    choices=[
+                        "Réessayer d'envoyer ma réponse",
+                        "Continuer à attendre",
+                        "Quitter la table"
+                    ]).execute()
+
+                if choix == "Réessayer d'envoyer ma réponse":
+                    # envoyer à nouveau la réponse (si on a une valeur locale à renvoyer)
+                    # ici on propose de re-confirmer Yes/No au joueur
+                    veut_rejouer = inquirer.confirm(message="Voulez-vous rejouer la prochaine main ?").execute()
+                    try:
+                        res = post(
+                            "/joueur_en_jeu/decision_rejouer",
+                            params={
+                                "pseudo": self.pseudo,
+                                "partie": self.id_table,
+                                "veut_rejouer": veut_rejouer
+                            }
+                        )
+                        # forcer un refresh pour obtenir l'état canonique
+                        etat = self.afficher_etat_partie()
+                        val_apres = etat.get("rejouer", {}).get(self.pseudo, None)
+                        print(f"\nDEBUG — valeur côté serveur après post : {val_apres}\n")
+                        if val_apres is True:
+                            print("Réponse confirmée côté serveur : Vous avez répondu Oui")
+                            return self
+                        elif val_apres is False:
+                            print("Réponse confirmée côté serveur : Vous avez répondu Non")
+                            return MenuJoueurVue("", None)
+                        else:
+                            print("Le serveur n'a toujours pas enregistré la réponse. Vous pouvez réessayer ou attendre.")
+                            input("Appuyez sur Entrée pour rafraîchir...")
+                            return self
+                    except APIError as e:
+                        print(f"\nErreur API lors de l'envoi de la réponse : {e}\n")
+                        input("Appuyez sur Entrée pour rafraîchir...")
+                        return self
+
+                elif choix == "Continuer à attendre":
+                    input("Appuyez sur Entrée pour rafraîchir...")
+                    return self
+
+                else:  # Quitter la table
+                    try:
+                        post(
+                            "/joueur_en_jeu/quitter_table",
+                            params={"pseudo": self.pseudo, "id_table": self.id_table}
+                        )
+                        print("Vous avez été retiré de la table.")
+                    except APIError as e:
+                        print(f"Erreur lors de la suppression de la table : {e}")
+                    return MenuJoueurVue("", None)
 
         if self.joueur_courant != self.pseudo:
 

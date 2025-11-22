@@ -168,8 +168,8 @@ class PartieService:
         self.partie.ajouter_a_liste_attente(joueur)
 
         return True, etat, (
-            f"Partie en cours : {joueur.pseudo} rejoint la liste d'attente "
-            "et jouera la prochaine main."
+            f"Partie en cours : {joueur.pseudo} rejoint la liste d'attente. "
+            "Merci d'attendre que vos collègues de jeu aient terminé leur main."
         )
 
     # -----------------------------------------------------
